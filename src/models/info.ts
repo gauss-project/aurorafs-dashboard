@@ -22,9 +22,9 @@ export default {
   },
   effects: {
     * getAddresses({ payload }, { call, put }) {
-      const { debugApi } = payload;
+      const { url } = payload;
       try {
-        const { data }  = yield call(DebugApi.getAddresses,debugApi);
+        const { data }  = yield call(DebugApi.getAddresses,url);
         yield put({
           type:"setAddresses",
           payload:{

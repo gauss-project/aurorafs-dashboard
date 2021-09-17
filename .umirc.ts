@@ -5,7 +5,7 @@ import theme from "./src/config/theme";
 export default defineConfig({
   routes,
   theme,
-  title:"AuFs",
+  title:"AuFs Dashboard",
   history: {type: "hash"},
   antd: {},
   dva: {
@@ -16,13 +16,6 @@ export default defineConfig({
   fastRefresh: {},
   ignoreMomentLocale: true,
   webpack5: {},
-  locale: {
-    default: "zh-CN",
-    antd: true,
-    title: true,
-    baseNavigator: true,
-    baseSeparator: "-",
-  },
   targets: {
     ie: 11,
   },

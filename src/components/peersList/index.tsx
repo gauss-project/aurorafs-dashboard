@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Peers, Peer } from '@/declare/api';
@@ -15,7 +15,7 @@ const PeersList: React.FC<Props> = (props) => {
       title: <div className={styles.head}>Index</div>,
       key: 'Index',
       render: (text, record, index) => index + 1,
-      width:150
+      width: 150,
     },
     {
       title: <div className={styles.head}>Peer Id</div>,
@@ -30,6 +30,7 @@ const PeersList: React.FC<Props> = (props) => {
       columns={columns}
       rowKey={item => item.address}
       pagination={false}
+      locale={{ emptyText: 'No Data' }}
     />
   </div>;
 };

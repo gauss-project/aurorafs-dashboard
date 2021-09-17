@@ -18,3 +18,5 @@ const ChunkTooltip: React.FC<Props> = props => {
     }
   </ul>;
 };
+
+export default ChunkTooltip;

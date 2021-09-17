@@ -14,7 +14,7 @@ const Main: React.FC = () => {
     dispatch({
       type: 'global/getTopology',
       payload: {
-        debugApi,
+        url:debugApi,
       },
     });
   };
@@ -22,7 +22,7 @@ const Main: React.FC = () => {
     dispatch({
       type: 'info/getAddresses',
       payload: {
-        debugApi,
+        url:debugApi,
       },
     });
     getTopology();

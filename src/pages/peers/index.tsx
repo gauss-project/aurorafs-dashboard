@@ -15,13 +15,13 @@ const Main: React.FC = () => {
     dispatch({
       type: 'global/getTopology',
       payload: {
-        debugApi,
+        url:debugApi,
       },
     });
     dispatch({
       type: 'peers/getPeers',
       payload: {
-        debugApi,
+        url:debugApi,
       },
     });
   };

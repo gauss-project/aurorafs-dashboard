@@ -22,10 +22,9 @@ export default {
   },
   effects: {
     * getPeers({ payload }, { call, put }) {
-      const { debugApi } = payload;
+      const { url } = payload;
       try {
-        const { data }  = yield call(DebugApi.getPeers,debugApi);
-        console.log("peers",data);
+        const { data }  = yield call(DebugApi.getPeers,url);
         yield put({
           type:"setPeers",
           payload:{

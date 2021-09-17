@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useHistory, useSelector, useDispatch } from 'umi';
 import styles from './index.less';
 import classNames from 'classnames';
@@ -12,6 +12,8 @@ import {
 
 import { Models } from '@/declare/modelType';
 import Loading from '@/components/loading';
+import { stringToBinary } from '@/utils/util';
+
 
 type Nav = {
   text: string,
@@ -53,6 +55,8 @@ const Layouts: React.FC = (props) => {
       history.push(newPath);
     }
   };
+
+
   useEffect(() => {
     setActive(path);
   }, [path]);
@@ -69,7 +73,8 @@ const Layouts: React.FC = (props) => {
         api, debugApi,
       },
     });
-  }, [api, debugApi]);
+  }, []);
+
   return (
     <>
       <div className={styles.main}>

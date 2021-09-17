@@ -18,7 +18,7 @@ export declare type Topology = {
     population: number,
   }
 }
-export declare type Peer = { address: string,fullNode:boolean }
+export declare type Peer = { address: string, fullNode: boolean }
 export declare type Peers = Peer[]
 
 export declare type Addresses = {
@@ -28,8 +28,13 @@ export declare type Addresses = {
 }
 
 export declare type FileType = {
-  hash: string,
-  size: string | number,
-  pin: boolean,
+  fileHash: string,
+  fileSize:number,
+  size: number,
+  pinState: boolean,
+  bitVector: {
+    len: number,
+    b: string,
+  }
 }
 

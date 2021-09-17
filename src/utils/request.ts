@@ -3,20 +3,18 @@ import NProgress from 'nprogress';
 
 const request = axios.create({
   baseURL: '',
-  timeout: 1e4,
 });
 
 let requestIndex: number = 0;
 let responseIndex: number = 0;
 
-// 取消请求操作
-const allPendingRequestsRecord: Array<Canceler> = [];
-const pending: Record<string, Canceler> = {};
+let pending: Record<string, Canceler> = {};
+
 const removeAllPendingRequestsRecord = (): void => {
-  allPendingRequestsRecord && allPendingRequestsRecord.forEach((func) => {
+  Object.values(pending).forEach((func) => {
     func();
   });
-  allPendingRequestsRecord.splice(0);
+  pending = {};
 };
 
 const removePending = (key: string, isRequest = false): void => {
@@ -35,7 +33,7 @@ export const getConfirmation = (mes = '', callback = () => {
 request.interceptors.request.use(
   config => {
 
-    let reqData:string = '';
+    let reqData: string = '';
 
     if (config.method === 'get') {
       reqData = config.url + config.method + JSON.stringify(config.params);
@@ -47,7 +45,6 @@ request.interceptors.request.use(
 
     config.cancelToken = new axios.CancelToken((c) => {
       pending[reqData] = c;
-      allPendingRequestsRecord.push(c);
     });
 
     requestIndex++;
@@ -71,10 +68,9 @@ request.interceptors.response.use(
     responseIndex = requestIndex = 0;
     NProgress.done();
     if (axios.isCancel(error)) {
-      return new Promise(() => {
-      });
+      return new Promise(() => {});
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response?.data?.message ? Error(error.response?.data.message) : error);
   },
 );
 
