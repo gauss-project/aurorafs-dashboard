@@ -1,59 +1,85 @@
 @import "../global";
-.main_left{
-  width: @nav_width;
-  height: 100vh;
-  position: fixed;
-  top:0;
-  left: 0;
-  background-color: #fff;
-  .logo{
-    padding-left: 30px;
-    margin: 20px 0;
+
+.app_left {
+  display: flex;
+
+  .menu {
+    box-sizing: border-box;
+    width: @nav_width;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    z-index: 999;
     display: flex;
-    align-items: flex-end;
-    .logoImg {
-      width: 40px;
-      height: 40px;
-    }
-    .logoText {
-      margin-left: 10px;
-      font-size: 28px;
-      font-weight: 600;
-      line-height: 1em;
-    }
-  }
-  .nav{
-    margin-top: 30px;
-    font-size: 18px;
-    > ul{
-      padding-left: 0;
-      list-style: none;
-      >li{
+    overflow-y: auto;
+    flex-direction: column;
+
+    .logo {
+      padding-left: 30px;
+      margin: 20px 0;
+
+      a {
         display: flex;
-        align-items: center;
-        height: 60px;
-        padding-left: 30px;
-        &:hover {
-          background-color: #fafafa;
+        align-items: flex-end;
+
+        .logoImg {
+          width: 40px;
+          height: 40px;
+        }
+
+        .logoText {
+          color: rgb(0, 0, 0, .85);
+          margin-left: 10px;
+          font-size: 28px;
+          font-weight: 600;
+          line-height: 1em;
         }
       }
     }
-    .navText{
-      letter-spacing:1.5px;
-      font-weight: 200;
-    }
-    .navIcon{
-      margin-right: 25px;
-    }
-    .active{
-      border-right: 2px solid skyblue;
-      background-color: #fafafa;
+
+    .nav {
+      margin-top: 30px;
+      font-size: 18px;
+
+      > ul {
+        padding-left: 0;
+        list-style: none;
+
+        > li {
+          display: flex;
+          align-items: center;
+          height: 60px;
+          padding-left: 30px;
+
+          &:hover {
+            background-color: #fafafa;
+          }
+        }
+      }
+
+      .navText {
+        letter-spacing: 1.5px;
+        font-weight: 200;
+      }
+
+      .navIcon {
+        margin-right: 25px;
+      }
+
+      .active {
+        border-right: 2px solid skyblue;
+        background-color: #fafafa;
+      }
     }
   }
 }
-.main_right{
+
+.app_right {
+  width: 1200px;
+  box-sizing: border-box;
   min-height: 100vh;
   margin-left: @nav_width;
   padding: 50px;
-  background-color: #fafafa;
 }

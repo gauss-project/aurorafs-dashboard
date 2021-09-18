@@ -77,35 +77,34 @@ const Layouts: React.FC = (props) => {
 
   return (
     <>
-      <div className={styles.main}>
-        <div className={styles.main_left}>
-          {/*logo*/}
-          <div className={styles.logo} onClick={() => {
-            clickHandle('/');
-          }}>
-            <img src={require('@/assets/img/logo.png')} className={styles.logoImg} />
-            <span className={styles.logoText}>AuFS</span>
+      <div className={styles.app}>
+        <div className={styles.app_left}>
+          <div className={styles.menu}>
+            <div className={styles.logo}>
+              <a href={'/'}>
+                <img src={require('@/assets/img/logo.png')} className={styles.logoImg} />
+                <span className={styles.logoText}>AuFS</span>
+              </a>
+            </div>
+            <div style={{ height: '10px', backgroundColor: '#fafafa' }} />
+            <nav className={styles.nav}>
+              <ul>
+                {
+                  navList.map((item, index) => {
+                    return <li key={index} onClick={() => clickHandle(item.router)}
+                               className={classNames({ [styles.active]: active === item.router })}>
+                      {
+                        item.icon ? <span className={styles.navIcon}> {item.icon}</span> : <></>
+                      }
+                      <span className={styles.navText}>{item.text}</span>
+                    </li>;
+                  })
+                }
+              </ul>
+            </nav>
           </div>
-          {/*null*/}
-          <div style={{ height: '10px', backgroundColor: '#fafafa' }}></div>
-          {/*nav*/}
-          <nav className={styles.nav}>
-            <ul>
-              {
-                navList.map((item, index) => {
-                  return <li key={index} onClick={() => clickHandle(item.router)}
-                             className={classNames({ [styles.active]: active === item.router })}>
-                    {
-                      item.icon ? <span className={styles.navIcon}> {item.icon}</span> : <></>
-                    }
-                    <span className={styles.navText}>{item.text}</span>
-                  </li>;
-                })
-              }
-            </ul>
-          </nav>
         </div>
-        <article className={styles.main_right}>
+        <article className={styles.app_right}>
           {props.children}
         </article>
       </div>

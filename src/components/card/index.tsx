@@ -9,7 +9,7 @@ type Props = {
 const Card: React.FC<Props> = props => {
   const { title,text,style } = props;
   return <>
-    <div style={{boxShadow: ' 0 2px 10px 2px #ccc',padding:'20px',...style}}>
+    <div style={{boxShadow: ' 0 2px 10px 2px #ccc',padding:20,...style}}>
       <div>
         <span>
           {title}

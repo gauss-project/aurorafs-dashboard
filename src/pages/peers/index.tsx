@@ -33,7 +33,7 @@ const Main: React.FC = () => {
     };
   }, []);
   return <>
-    <div style={{ width: '1200px' }}>
+    <div>
       <div>
         <Card title={'Discovered Peers'} text={topology?.population || 0} />
       </div>

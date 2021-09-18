@@ -33,11 +33,11 @@ const FilesList: React.FC = () => {
   // delete
   const confirm = (hash: string): void => {
     dispatch({
-        type: 'files/deleteDLHash',
-        payload: {
-          hash,
-        },
-      });
+      type: 'files/deleteDLHash',
+      payload: {
+        hash,
+      },
+    });
     dispatch({
       type: 'files/deleteFile',
       payload: {
@@ -74,11 +74,17 @@ const FilesList: React.FC = () => {
       title: <div className={styles.head}>Pin/UnPin</div>,
       key: 'pin',
       render: (text, record) =>
-        <Tooltip placement='top' title={record.pinState ? 'unpin the file' : 'pin the file'} arrowPointAtCenter>
-          <img src={record.pinState ? pinSvg : pinOffSvg} width={25} style={{ cursor: 'pointer' }} onClick={() => {
-            pinOrUnPin(record.fileHash, record.pinState);
-          }} />
-        </Tooltip>,
+        <>
+          {
+            /0/.test(record.bitVector.b) ||
+            <Tooltip placement='top' title={record.pinState ? 'unpin the file' : 'pin the file'} arrowPointAtCenter>
+              <img src={record.pinState ? pinSvg : pinOffSvg} width={25} style={{ cursor: 'pointer' }} onClick={() => {
+                pinOrUnPin(record.fileHash, record.pinState);
+              }} />
+            </Tooltip>
+          }
+        </>
+      ,
       align: 'center',
     },
     {

@@ -43,7 +43,7 @@ const Main: React.FC = (props) => {
         dispatch({
           type: 'files/addDLHash',
           payload: {
-            hash:item.fileHash
+            hash: item.fileHash,
           },
         });
       }
@@ -82,17 +82,19 @@ const Main: React.FC = (props) => {
   }, []);
   return <>
     <div>
-      <Download />
+      <div>
+        <Download />
+      </div>
+      <div style={{ marginTop: 50 }}>
+        <FileUpload />
+      </div>
+      <div style={{ marginTop: 50 }}>
+        <FilesList />
+      </div>
+      {
+        uploadStatus && <Loading text={'File uploading'} status={uploadStatus} />
+      }
     </div>
-    <div style={{ marginTop: 50 }}>
-      <FileUpload />
-    </div>
-    <div style={{ marginTop: 50, width: 1200 }}>
-      <FilesList />
-    </div>
-    {
-      uploadStatus && <Loading text={'File uploading'} status={uploadStatus} />
-    }
   </>;
 };
 const Files: React.FC = (props) => {
