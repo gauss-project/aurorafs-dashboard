@@ -42,8 +42,8 @@ const Main: React.FC = () => {
         <p>AGENT VERSION:&nbsp;&nbsp;{version}</p>
         <p>PUBLIC KEY:&nbsp;&nbsp;{addresses?.public_key} </p>
         <p>OVERLAY ADDRESS(PEER ID):&nbsp;&nbsp;{addresses?.overlay}</p>
-        <div style={{ margin: '40px 0 10px 0' }}>UNDERLAY ADDRESS</div>
-        <ul className={styles.underlay}>
+        <div className={styles.underlayTitle}>UNDERLAY ADDRESS</div>
+        <ul className={styles.underlay} >
           {
             addresses?.underlay?.map((item, index) => {
               return <li className={styles.underlayList} key={index}>{item}</li>;
