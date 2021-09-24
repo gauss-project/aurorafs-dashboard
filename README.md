@@ -1,16 +1,56 @@
-# umi project
+# Aurorafs Dashboard
 
-## Getting Started
+> An app which helps users to setup their Aurora node and do actions like cash out cheques, upload and download files or manage your postage stamps.
 
-Install dependencies,
+**Warning: This project is in alpha state. There might (and most probably will) be changes in the future to its API and working. Also, no guarantees can be made about its stability, efficiency, and security at this stage.**
 
-```bash
-$ yarn
+This project is intended to be used with **Aurora version 1.1.0**. Using it with older or newer Aurora versions is not recommended and may not work. Stay up to date by joining the [official Discord](https://discord.com/invite/nDFnN6zScC) and by keeping an eye on the [releases tab](https://github.com/gauss-project/aurorafs-dashboard/releases).
+
+![Info page](/ui_samples/info.png)
+
+| Node Info | Files  | Peers | Setting |
+|-------|---------|----------|------|
+| ![Info](/ui_samples/info.png) | ![Files](/ui_samples/files.png) | ![Peers](/ui_samples/peers.png) | ![Setting](/ui_samples/setting.png) |
+
+
+## Table of Contents
+
+- [Usage](#usage)
+- [Contribute](#contribute)
+- [Development](#development)
+- [License](#license)
+
+
+## Usage
+
+:warning: To successfully connect to the Aurora node, you will need to enable the Debug API and CORS. You can do so by setting `cors-allowed-origins: ['*']` and `debug-api-enable: true` in the Aurora config file and then restart the Aurora node. To see where the config file is, consult the [official Aurora documentation]()
+
+
+### Development
+
+```sh
+git clone git@github.com:gauss-project/aurorafs-dashboard.git
+
+cd  aurorafs-dashboard
+
+yarn 
+
+yarn start
 ```
 
-Start the dev server,
+The Aurora Dashboard runs in development mode on [http://localhost:8000/](http://localhost:8000/)
 
-```bash
-$ yarn start
-```
-# aurorafs-dashboard
+## Contribute
+
+There are some ways you can make this module better:
+
+- Consult our [open issues](https://github.com/gauss-project/aurorafs-dashboard/issues) and take on one of them
+- Help our tests reach 100% coverage!
+- Join us in our [Discord chat](https://discord.com/invite/nDFnN6zScC) in the #develop-on-swarm channel if you have questions or want to give feedback
+
+## License
+
+This library is distributed under the BSD-style license found in the [LICENSE](LICENSE) file.
+
+
+
