@@ -16,8 +16,8 @@ This project is intended to be used with **Aurora version 1.1.0**. Using it with
 ## Table of Contents
 
 - [Usage](#usage)
-- [Contribute](#contribute)
 - [Development](#development)
+- [Contribute](#contribute)
 - [License](#license)
 
 
@@ -46,7 +46,7 @@ There are some ways you can make this module better:
 
 - Consult our [open issues](https://github.com/gauss-project/aurorafs-dashboard/issues) and take on one of them
 - Help our tests reach 100% coverage!
-- Join us in our [Discord chat](https://discord.com/invite/nDFnN6zScC) in the #develop-on-swarm channel if you have questions or want to give feedback
+- Join us in our [Discord chat](https://discord.com/invite/nDFnN6zScC) in the #technology channel if you have questions or want to give feedback
 
 ## License
 
