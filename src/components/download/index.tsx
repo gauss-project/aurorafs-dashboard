@@ -10,7 +10,7 @@ const Download: React.FC = () => {
   let dispatch = useDispatch();
   const [hash, setHash] = useState('');
   const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList } = useSelector((state: Models) => state.files);
+  const { filesList} = useSelector((state: Models) => state.files);
 
   const download = (hashValue: string): void => {
     window.open(api + '/files/' + hashValue);
