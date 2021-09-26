@@ -29,7 +29,7 @@ This project is intended to be used with **Aurora version 1.1.0**. Using it with
 ### Development
 
 ```sh
-git clone git@github.com:gauss-project/aurorafs-dashboard.git
+git clone https://github.com/gauss-project/aurorafs-dashboard.git
 
 cd  aurorafs-dashboard
 
