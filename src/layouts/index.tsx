@@ -12,8 +12,8 @@ import {
 
 import { Models } from '@/declare/modelType';
 import Loading from '@/components/loading';
-import { stringToBinary } from '@/utils/util';
 
+import { version } from '@/config/version';
 
 type Nav = {
   text: string,
@@ -102,6 +102,7 @@ const Layouts: React.FC = (props) => {
                 }
               </ul>
             </nav>
+            <div className={styles.version}>Version:{version}</div>
           </div>
         </div>
         <article className={styles.app_right}>
