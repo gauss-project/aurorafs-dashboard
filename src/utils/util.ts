@@ -35,8 +35,9 @@ export const stringToBinary = (b: string, len: number, size: number): string => 
   for (let i: number = 0; i < uStr.length; i++) {
     value += uStr.charCodeAt(i).toString(2);
   }
+  console.log(value);
   if (len > value.length) {
-    return '1'.repeat(size) + '0'.repeat(Math.abs(len - value.length)) + value;
+    return '1'.repeat(size)  + value + '0'.repeat(Math.abs(len + 1 - value.length));
   }
   return '1'.repeat(size) + value;
 };
