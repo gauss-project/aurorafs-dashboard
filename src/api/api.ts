@@ -14,6 +14,9 @@ export const uploadFile = (url: string, file: File): Promise<AxiosResponse<{ ref
     method: 'post',
     data: file,
     params: { name: file.name },
+    headers: {
+      'Content-Type': file.type || "application/x-www-form-urlencoded",
+    },
   });
 };
 
