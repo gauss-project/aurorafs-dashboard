@@ -75,11 +75,35 @@
       }
     }
 
-    .version {
+    .statusInfo {
       padding: 10px 0 10px 30px;
-      border-top: 1px solid #ccc;
-      font-size: 20px;
       letter-spacing: 1px;
+
+      .connected {
+        color: #4B7902;
+        &:before {
+          content: "";
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          background-color: #4B7902;
+          border-radius: 50%;
+          margin-right: 5px;
+        }
+      }
+
+      .disconnected {
+        color: #D9001B;
+        &:before {
+          content: "";
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          background-color: #D9001B;
+          border-radius: 50%;
+          margin-right: 5px;
+        }
+      }
     }
   }
 }

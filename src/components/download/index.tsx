@@ -3,8 +3,6 @@ import { Input, Button, message } from 'antd';
 import styles from './index.less';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
-import Api from '@/api/api';
-import { stringToBinary } from '@/utils/util';
 
 const Download: React.FC = () => {
   let dispatch = useDispatch();

@@ -1,0 +1,40 @@
+.layer {
+  position: fixed;
+  top:0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  background-color: #eeeeeeaa;
+
+  .frame {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 40vw;
+    height: 60vh;
+    border: 1px solid #00000088;
+    border-radius: 10px;
+    background-color: #fff;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      img {
+        margin-left: 5px;
+        width: 20px;
+      }
+    }
+    .content {
+      padding: 10px;
+    }
+  }
+  .frameFull {
+    width: 100vw;
+    height: 100vh;
+  }
+}

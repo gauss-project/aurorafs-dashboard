@@ -14,6 +14,7 @@ import { Models } from '@/declare/modelType';
 import Loading from '@/components/loading';
 
 import { version } from '@/config/version';
+import { eventEmitter } from '@/utils/request';
 
 type Nav = {
   text: string,
@@ -25,6 +26,7 @@ type ClickHandle = (path: string) => void
 const Layouts: React.FC = (props) => {
   const dispatch = useDispatch();
   const { api, debugApi, refresh } = useSelector((state: Models) => state.global);
+  const { status } = useSelector((state: Models) => state.global);
   const history = useHistory();
   const path = useLocation().pathname;
   const [active, setActive] = useState(path);
@@ -73,6 +75,12 @@ const Layouts: React.FC = (props) => {
         api, debugApi,
       },
     });
+    eventEmitter.on('404', () => {
+      dispatch({
+        type: 'global/setStatus',
+        payload: { status: false },
+      });
+    });
   }, []);
 
   return (
@@ -102,7 +110,11 @@ const Layouts: React.FC = (props) => {
                 }
               </ul>
             </nav>
-            <div className={styles.version}>Version:{version}</div>
+            <div className={styles.statusInfo}>
+              <div
+                className={status ? styles.connected : styles.disconnected}>{status ? 'Connected' : 'Disconnected'}</div>
+              <div>Version:{version}</div>
+            </div>
           </div>
         </div>
         <article className={styles.app_right}>

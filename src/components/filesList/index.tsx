@@ -3,8 +3,6 @@ import { Table, Tooltip, Popconfirm, Progress } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { FileType } from '@/declare/api';
 import styles from './index.less';
-import pinSvg from '@/assets/icon/pin.svg';
-import pinOffSvg from '@/assets/icon/Pin Off.svg';
 import {
   DownloadOutlined,
   DeleteOutlined,
@@ -14,6 +12,9 @@ import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import ChunkTooltip from '@/components/chunkTooltip';
 import { getSize, stringToBinary, getProgress } from '@/utils/util';
+
+import pinSvg from '@/assets/icon/pin.svg';
+import unPinSvg from '@/assets/icon/Pin Off.svg';
 
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
@@ -49,7 +50,7 @@ const FilesList: React.FC = () => {
   // table field
   const columns: ColumnsType<FileType> = [
     {
-      title: <div className={styles.head}>File Hash</div>,
+      title: <div className={styles.head}>File</div>,
       key: 'hash',
       render: (text, record) => <>
         <span style={{ marginRight: 5 }}>{record.fileHash}</span><CopyText text={record.fileHash} />
@@ -78,7 +79,7 @@ const FilesList: React.FC = () => {
           {
             /0/.test(record.bitVector.b) ||
             <Tooltip placement='top' title={record.pinState ? 'unpin the file' : 'pin the file'} arrowPointAtCenter>
-              <img src={record.pinState ? pinSvg : pinOffSvg} width={25} style={{ cursor: 'pointer' }} onClick={() => {
+              <img src={record.pinState ? pinSvg : unPinSvg} width={25} style={{ cursor: 'pointer' }} onClick={() => {
                 pinOrUnPin(record.fileHash, record.pinState);
               }} />
             </Tooltip>
@@ -91,7 +92,9 @@ const FilesList: React.FC = () => {
       title: <div className={styles.head}>Download</div>,
       key: 'local',
       render: (text, record) =>
-        <a href={`${api}/files/${record.fileHash}`} target={'_blank'}>
+        <a href={`${api}/files/${record.fileHash}`}  onClick={(e)=>{
+          e.preventDefault();
+        }}>
           <DownloadOutlined style={{ fontSize: 25 }} />
         </a>
       ,

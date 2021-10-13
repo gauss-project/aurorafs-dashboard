@@ -7,12 +7,18 @@ import { Topology } from '@/declare/api';
 import DebugApi from '@/api/debugApi';
 import { getConfirmation } from '@/utils/request';
 
+
 export interface State {
   status: boolean,
   api: string,
   debugApi: string,
   refresh: boolean,
-  version: string | null,
+  health: {
+    status: string,
+    version: string,
+    fullNode: boolean,
+    bootNodeMode: boolean
+  } | null,
   topology: Topology,
 }
 
@@ -22,7 +28,7 @@ export default {
     status: false,
     api: checkSession(sessionStorageApi) || defaultApi,
     debugApi: checkSession(sessionStorageDebugApi) || defaultDebugApi,
-    version: null,
+    health: null,
     topology: {},
   },
   reducers: {
@@ -48,11 +54,11 @@ export default {
         refresh,
       };
     },
-    setVersion(state, { payload }) {
-      const { version } = payload;
+    setHealth(state, { payload }) {
+      const { health } = payload;
       return {
         ...state,
-        version,
+        health,
       };
     },
     setTopology(state, { payload }) {
@@ -78,9 +84,9 @@ export default {
         if (status) {
           message.success('Connection succeeded');
           yield put({
-            type: 'setVersion',
+            type: 'setHealth',
             payload: {
-              version: data[1].data.version,
+              health: data[1].data,
             },
           });
         }

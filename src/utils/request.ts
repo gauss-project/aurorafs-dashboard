@@ -1,6 +1,10 @@
 import axios, { Canceler } from 'axios';
 import NProgress from 'nprogress';
 
+import EventEmitter from 'eventemitter3';
+
+export const eventEmitter = new EventEmitter();
+
 const request = axios.create({
   baseURL: '',
 });
@@ -68,7 +72,12 @@ request.interceptors.response.use(
     responseIndex = requestIndex = 0;
     NProgress.done();
     if (axios.isCancel(error)) {
-      return new Promise(() => {});
+      return new Promise(() => {
+      });
+    }
+    if (error.message === 'Network Error') {
+      eventEmitter.emit("404")
+      return Promise.reject(new Error('Connection Failed'));
     }
     return Promise.reject(error.response?.data?.message ? Error(error.response?.data.message) : error);
   },

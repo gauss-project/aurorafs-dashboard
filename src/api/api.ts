@@ -9,13 +9,14 @@ export const isConnected = (url: string): Promise<AxiosResponse<string>> => {
 };
 
 export const uploadFile = (url: string, file: File): Promise<AxiosResponse<{ reference: string }>> => {
+  let upload = file.type === 'application/x-tar' ? '/aurora' : '/files';
   return request({
-    url: url + '/files',
+    url: url + upload,
     method: 'post',
     data: file,
     params: { name: file.name },
     headers: {
-      'Content-Type': file.type || "application/x-www-form-urlencoded",
+      'Content-Type': file.type || 'application/x-www-form-urlencoded',
     },
   });
 };

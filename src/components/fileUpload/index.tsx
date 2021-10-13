@@ -27,6 +27,7 @@ const FileUpload: React.FC = () => {
     }
   };
   const upload = async (): Promise<void | boolean> => {
+    console.log(file);
     dispatch({
       type: 'files/upload',
       payload: {

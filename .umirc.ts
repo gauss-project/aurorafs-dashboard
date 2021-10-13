@@ -22,4 +22,5 @@ export default defineConfig({
   targets: {
     ie: 11,
   },
+  publicPath:"./"
 });

@@ -1,5 +1,3 @@
-import ex from 'umi/dist';
-
 export const checkSession = (key: string): string | false => {
   const value = sessionStorage.getItem(key);
   if (value) return value;
@@ -35,9 +33,8 @@ export const stringToBinary = (b: string, len: number, size: number): string => 
   for (let i: number = 0; i < uStr.length; i++) {
     value += uStr.charCodeAt(i).toString(2);
   }
-  console.log(value);
   if (len > value.length) {
-    return '1'.repeat(size)  + value + '0'.repeat(Math.abs(len + 1 - value.length));
+    return '1'.repeat(size) + value + '0'.repeat(Math.abs(len + 1 - value.length));
   }
   return '1'.repeat(size) + value;
 };
@@ -45,4 +42,8 @@ export const stringToBinary = (b: string, len: number, size: number): string => 
 export const getProgress = (b: string): number => {
   const oneLen: number = b.match(/1/g)?.length || 0;
   return oneLen / b.length * 100;
+};
+
+export const getSuffix = (fileName: string): string | undefined => {
+  return fileName.split('.').pop();
 };

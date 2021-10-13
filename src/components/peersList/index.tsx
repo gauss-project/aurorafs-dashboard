@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Peers, Peer } from '@/declare/api';

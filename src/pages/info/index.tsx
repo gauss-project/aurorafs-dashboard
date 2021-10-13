@@ -8,7 +8,7 @@ import { time } from '@/config/url';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
-  const { debugApi, version, topology } = useSelector((state: Models) => state.global);
+  const { debugApi, health, topology } = useSelector((state: Models) => state.global);
   const { addresses } = useSelector((state: Models) => state.info);
   const getTopology = () => {
     dispatch({
@@ -32,18 +32,19 @@ const Main: React.FC = () => {
     };
   }, []);
   return <>
-    <div style={{ display: 'flex',flexDirection:'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div className={styles.topology}>
         <Card title={'Connected Peers'} text={topology?.connected || 0}
               style={{ minWidth: 525, marginRight: 50, marginBottom: 30 }} />
         <Card title={'Discovered Peers'} text={topology?.population || 0} style={{ minWidth: 525, marginBottom: 30 }} />
       </div>
       <div className={styles.address}>
-        <p>AGENT VERSION:&nbsp;&nbsp;{version}</p>
+        <p>NODE MODE:&nbsp;&nbsp;{health?.fullNode?"Full Node":"Light Node"}</p>
+        <p>AGENT VERSION:&nbsp;&nbsp;{health?.version}</p>
         <p>PUBLIC KEY:&nbsp;&nbsp;{addresses?.public_key} </p>
         <p>OVERLAY ADDRESS(PEER ID):&nbsp;&nbsp;{addresses?.overlay}</p>
         <div className={styles.underlayTitle}>UNDERLAY ADDRESS</div>
-        <ul className={styles.underlay} >
+        <ul className={styles.underlay}>
           {
             addresses?.underlay?.map((item, index) => {
               return <li className={styles.underlayList} key={index}>{item}</li>;
