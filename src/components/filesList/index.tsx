@@ -6,6 +6,7 @@ import styles from './index.less';
 import {
   DownloadOutlined,
   DeleteOutlined,
+  FolderOpenOutlined
 } from '@ant-design/icons';
 import CopyText from '@/components/copyText';
 import { useDispatch, useSelector } from 'umi';
@@ -96,6 +97,17 @@ const FilesList: React.FC = () => {
           e.preventDefault();
         }}>
           <DownloadOutlined style={{ fontSize: 25 }} />
+        </a>
+      ,
+      align: 'center',
+    },
+    {
+      title: <div className={styles.head}>Open</div>,
+      key: 'open',
+      render: (text, record) =>
+        <a href={`${api}/files/${record.fileHash}`} target={"_blank"} onClick={(e)=>{
+        }}>
+          <FolderOpenOutlined style={{ fontSize: 25 }} />
         </a>
       ,
       align: 'center',
