@@ -37,14 +37,14 @@ const Layouts: React.FC = (props) => {
       icon: <HomeOutlined />,
     },
     {
-      text: 'Files',
-      router: '/files',
-      icon: <FileTextOutlined />,
-    },
-    {
       text: 'Peers',
       router: '/peers',
       icon: <PartitionOutlined />,
+    },
+    {
+      text: 'Files',
+      router: '/files',
+      icon: <FileTextOutlined />,
     },
     {
       text: 'Setting',
