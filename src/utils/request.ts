@@ -38,7 +38,10 @@ request.interceptors.request.use(
   config => {
 
     let reqData: string = '';
-
+    
+    if (config.method !== 'post') {
+      config.timeout = 5 * 1000;
+    }
     if (config.method === 'get') {
       reqData = config.url + config.method + JSON.stringify(config.params);
     } else {
@@ -76,7 +79,7 @@ request.interceptors.response.use(
       });
     }
     if (error.message === 'Network Error') {
-      eventEmitter.emit("404")
+      eventEmitter.emit('404');
       return Promise.reject(new Error('Connection Failed'));
     }
     return Promise.reject(error.response?.data?.message ? Error(error.response?.data.message) : error);

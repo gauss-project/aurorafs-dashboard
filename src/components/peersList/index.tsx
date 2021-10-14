@@ -8,7 +8,6 @@ export interface Props {
   peers: Peers;
 }
 
-
 const PeersList: React.FC<Props> = (props) => {
   const columns: ColumnsType<Peer> = [
     {
