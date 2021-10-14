@@ -1,5 +1,9 @@
 const router =  [
   {
+    path: "/video",
+    component: "@/pages/video"
+  },
+  {
     path: '/',
     component: '@/layouts',
     routes:[
@@ -24,8 +28,7 @@ const router =  [
         component: '@/pages/404'
       }
     ]
-  },
-
+  }
 ]
 
 export default router
