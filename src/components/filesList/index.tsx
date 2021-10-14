@@ -6,7 +6,7 @@ import styles from './index.less';
 import {
   DownloadOutlined,
   DeleteOutlined,
-  FolderOpenOutlined
+  FolderOpenOutlined,
 } from '@ant-design/icons';
 import CopyText from '@/components/copyText';
 import { useDispatch, useSelector } from 'umi';
@@ -16,6 +16,8 @@ import { getSize, stringToBinary, getProgress } from '@/utils/util';
 
 import pinSvg from '@/assets/icon/pin.svg';
 import unPinSvg from '@/assets/icon/Pin Off.svg';
+import { downloadFile } from '@/api/api';
+import Video from '@/components/video';
 
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
@@ -93,11 +95,17 @@ const FilesList: React.FC = () => {
       title: <div className={styles.head}>Download</div>,
       key: 'local',
       render: (text, record) =>
-        <a href={`${api}/files/${record.fileHash}`}  onClick={(e)=>{
-          e.preventDefault();
+        <div onClick={async () => {
+          const data = await downloadFile(api, record.fileHash);
+          let link = document.createElement('a');
+          link.download = window.decodeURI(data.headers['content-disposition'].split('=')[1].slice(1))
+          link.href = URL.createObjectURL(new Blob([data.data], { type: data.data.type }));
+          document.body.appendChild(link);
+          link.click();
+          URL.revokeObjectURL(link.href);
         }}>
           <DownloadOutlined style={{ fontSize: 25 }} />
-        </a>
+        </div>
       ,
       align: 'center',
     },
@@ -105,7 +113,7 @@ const FilesList: React.FC = () => {
       title: <div className={styles.head}>Open</div>,
       key: 'open',
       render: (text, record) =>
-        <a href={`${api}/files/${record.fileHash}`} target={"_blank"} onClick={(e)=>{
+        <a href={`${api}/files/${record.fileHash}`} target={'_blank'} onClick={(e) => {
         }}>
           <FolderOpenOutlined style={{ fontSize: 25 }} />
         </a>

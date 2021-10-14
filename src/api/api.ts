@@ -9,9 +9,22 @@ export const isConnected = (url: string): Promise<AxiosResponse<string>> => {
 };
 
 export const uploadFile = (url: string, file: File): Promise<AxiosResponse<{ reference: string }>> => {
-  let upload = file.type === 'application/x-tar' ? '/aurora' : '/files';
+  if (file.type === 'application/x-tar') {
+    let appointFile = file?.name.split('.').slice(0, -1).join('.');
+    console.log(appointFile);
+    return request({
+      url: url + '/aurora',
+      method: 'post',
+      data: file,
+      params: { name: file.name },
+      headers: {
+        'Content-Type': file.type || 'application/x-www-form-urlencoded',
+        'Boson-Index-Document': appointFile,
+      },
+    });
+  }
   return request({
-    url: url + upload,
+    url: url + '/files',
     method: 'post',
     data: file,
     params: { name: file.name },
@@ -48,6 +61,21 @@ export const deleteFile = (url: string, hash: string): Promise<any> => {
   });
 };
 
+export const downloadFile = (url: string, hash: string): Promise<any> => {
+  return request({
+    url: url + '/files/' + hash,
+    method: 'get',
+    responseType:"blob",
+  });
+};
+
+export const queryFile = (url: string, hash: string): Promise<any> => {
+  return request({
+    url: url + '/manifest/' + hash,
+    method: 'get',
+  });
+};
+
 
 export default {
   isConnected,
@@ -56,4 +84,6 @@ export default {
   unPin,
   getFilesList,
   deleteFile,
+  downloadFile,
+  queryFile
 };
