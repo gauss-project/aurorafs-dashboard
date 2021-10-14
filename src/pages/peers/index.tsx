@@ -37,7 +37,7 @@ const Main: React.FC = () => {
   return <>
     <div>
       <div>
-        <Card title={'Discovered Peers'} text={topology?.population || 0} />
+        <Card title={'Discovered Full Peers'} text={topology?.population || 0} />
       </div>
       <div style={{ display: 'flex', marginTop: '30px' }}>
         <Card title={'Connected Full Peers'} text={topology?.connected || 0}
