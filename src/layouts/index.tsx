@@ -15,6 +15,7 @@ import Loading from '@/components/loading';
 
 import { version } from '@/config/version';
 import { eventEmitter } from '@/utils/request';
+import logoImg from '@/assets/img/logo.png';
 
 type Nav = {
   text: string;
@@ -92,10 +93,7 @@ const Layouts: React.FC = (props) => {
           <div className={styles.menu}>
             <div className={styles.logo}>
               <a href={'/'}>
-                <img
-                  src={require('@/assets/img/logo.png')}
-                  className={styles.logoImg}
-                />
+                <img src={logoImg} className={styles.logoImg} />
                 <span className={styles.logoText}>AuroraFS</span>
               </a>
             </div>
