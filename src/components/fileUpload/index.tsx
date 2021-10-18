@@ -40,31 +40,30 @@ const FileUpload: React.FC = () => {
   const fileList = useMemo(() => {
     return file ? [file] : [];
   }, [file]);
-  return <div className={styles.fileUpload}>
-    <div style={{ flex: 1 }}>
-      <Dragger
-        maxCount={1}
-        beforeUpload={beforeUpload}
-        onRemove={onRemove}
-        listType={'picture'}
-        fileList={fileList}
-        onDrop={onDrop}
-      >
-        <p className='ant-upload-drag-icon'>
-          <InboxOutlined />
-        </p>
-        <p className='ant-upload-text'>Click or drag file to this area to upload</p>
-      </Dragger>
+  return (
+    <div className={styles.fileUpload}>
+      <div style={{ flex: 1 }}>
+        <Dragger
+          maxCount={1}
+          beforeUpload={beforeUpload}
+          onRemove={onRemove}
+          // listType={'picture'}
+          fileList={fileList}
+          onDrop={onDrop}
+        >
+          <p className={styles.uploadIcon}>
+            <InboxOutlined />
+          </p>
+          <p className="ant-upload-text">
+            Click or drag file to this area to upload
+          </p>
+        </Dragger>
+      </div>
+      <Button className={styles.upload} onClick={upload} disabled={!file}>
+        upload
+      </Button>
     </div>
-    <Button
-      className={styles.upload}
-      type='primary'
-      onClick={upload}
-      disabled={!file}
-    >
-      upload
-    </Button>
-  </div>;
+  );
 };
 
 export default FileUpload;

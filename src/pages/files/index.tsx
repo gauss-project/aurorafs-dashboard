@@ -12,7 +12,9 @@ const Main: React.FC = (props) => {
   let dispatch = useDispatch();
   const { uploadStatus } = useSelector((state: Models) => state.files);
   const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList } = useSelector((state: Models) => state.files);
+  const { filesList, downloadList, filesInfo } = useSelector(
+    (state: Models) => state.files,
+  );
   let timer = useRef<NodeJS.Timer | null>(null);
   let count = useRef(0);
   const getFilesList = (): void => {
@@ -26,9 +28,12 @@ const Main: React.FC = (props) => {
 
   useEffect(() => {
     let notFoundError = true;
+    let notInfoHash: string[] = [];
     filesList.forEach((item, index) => {
       const i = downloadList.indexOf(item.fileHash);
-      const status = !/0/.test(stringToBinary(item.bitVector.b, item.bitVector.len, item.size));
+      const status = !/0/.test(
+        stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
+      );
       if (i !== -1) {
         notFoundError = false;
         if (status) {
@@ -47,6 +52,10 @@ const Main: React.FC = (props) => {
           },
         });
       }
+      // notInfoHash
+      if (!filesInfo[item.fileHash]) {
+        notInfoHash.push(item.fileHash);
+      }
     });
     if (downloadList.length && count.current >= 10 && notFoundError) {
       dispatch({
@@ -54,6 +63,15 @@ const Main: React.FC = (props) => {
         payload: { downloadList: [] },
       });
     }
+    notInfoHash.forEach((item) => {
+      dispatch({
+        type: 'files/queryFile',
+        payload: {
+          url: api,
+          hash: item,
+        },
+      });
+    });
   }, [filesList]);
   useEffect(() => {
     if (downloadList.length) {
@@ -80,32 +98,27 @@ const Main: React.FC = (props) => {
       });
     };
   }, []);
-  return <>
-    <div>
+  return (
+    <>
       <div>
-        <Download />
+        <div>
+          <Download />
+        </div>
+        <div style={{ marginTop: 50 }}>
+          <FileUpload />
+        </div>
+        <div style={{ marginTop: 50 }}>
+          <FilesList />
+        </div>
+        {uploadStatus && (
+          <Loading text={'File uploading'} status={uploadStatus} />
+        )}
       </div>
-      <div style={{ marginTop: 50 }}>
-        <FileUpload />
-      </div>
-      <div style={{ marginTop: 50 }}>
-        <FilesList />
-      </div>
-      {
-        uploadStatus && <Loading text={'File uploading'} status={uploadStatus} />
-      }
-    </div>
-  </>;
+    </>
+  );
 };
 const Files: React.FC = (props) => {
   const { status } = useSelector((state: Models) => state.global);
-  return <>
-    {
-      status ?
-        <Main />
-        :
-        <NotConnected />
-    }
-  </>;
+  return <>{status ? <Main /> : <NotConnected />}</>;
 };
 export default Files;

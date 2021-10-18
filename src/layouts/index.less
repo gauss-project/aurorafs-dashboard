@@ -1,4 +1,4 @@
-@import "../global";
+@import '../global';
 
 .app_left {
   display: flex;
@@ -30,7 +30,9 @@
         }
 
         .logoText {
-          color: rgb(0, 0, 0, .85);
+          position: relative;
+          top: -2px;
+          color: @main_color;
           margin-left: 10px;
           font-size: 28px;
           font-weight: 600;
@@ -70,8 +72,9 @@
       }
 
       .active {
-        border-right: 2px solid skyblue;
+        border-left: 3px solid @main_color;
         background-color: #fafafa;
+        color: @main_color;
       }
     }
 
@@ -80,26 +83,28 @@
       letter-spacing: 1px;
 
       .connected {
-        color: #4B7902;
+        color: #4b7902;
+
         &:before {
-          content: "";
+          content: '';
           display: inline-block;
           width: 10px;
           height: 10px;
-          background-color: #4B7902;
+          background-color: #4b7902;
           border-radius: 50%;
           margin-right: 5px;
         }
       }
 
       .disconnected {
-        color: #D9001B;
+        color: #d9001b;
+
         &:before {
-          content: "";
+          content: '';
           display: inline-block;
           width: 10px;
           height: 10px;
-          background-color: #D9001B;
+          background-color: #d9001b;
           border-radius: 50%;
           margin-right: 5px;
         }

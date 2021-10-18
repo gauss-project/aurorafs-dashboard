@@ -17,15 +17,17 @@ import { version } from '@/config/version';
 import { eventEmitter } from '@/utils/request';
 
 type Nav = {
-  text: string,
-  router: string,
-  icon?: JSX.Element,
-}
-type ClickHandle = (path: string) => void
+  text: string;
+  router: string;
+  icon?: JSX.Element;
+};
+type ClickHandle = (path: string) => void;
 
 const Layouts: React.FC = (props) => {
   const dispatch = useDispatch();
-  const { api, debugApi, refresh } = useSelector((state: Models) => state.global);
+  const { api, debugApi, refresh } = useSelector(
+    (state: Models) => state.global,
+  );
   const { status } = useSelector((state: Models) => state.global);
   const history = useHistory();
   const path = useLocation().pathname;
@@ -58,7 +60,6 @@ const Layouts: React.FC = (props) => {
     }
   };
 
-
   useEffect(() => {
     setActive(path);
   }, [path]);
@@ -72,7 +73,8 @@ const Layouts: React.FC = (props) => {
     dispatch({
       type: 'global/getStatus',
       payload: {
-        api, debugApi,
+        api,
+        debugApi,
       },
     });
     eventEmitter.on('404', () => {
@@ -90,40 +92,49 @@ const Layouts: React.FC = (props) => {
           <div className={styles.menu}>
             <div className={styles.logo}>
               <a href={'/'}>
-                <img src={require('@/assets/img/logo.png')} className={styles.logoImg} />
-                <span className={styles.logoText}>AuFS</span>
+                <img
+                  src={require('@/assets/img/logo.png')}
+                  className={styles.logoImg}
+                />
+                <span className={styles.logoText}>AuroraFS</span>
               </a>
             </div>
             <div style={{ height: '10px', backgroundColor: '#fafafa' }} />
             <nav className={styles.nav}>
               <ul>
-                {
-                  navList.map((item, index) => {
-                    return <li key={index} onClick={() => clickHandle(item.router)}
-                               className={classNames({ [styles.active]: active === item.router })}>
-                      {
-                        item.icon ? <span className={styles.navIcon}> {item.icon}</span> : <></>
-                      }
+                {navList.map((item, index) => {
+                  return (
+                    <li
+                      key={index}
+                      onClick={() => clickHandle(item.router)}
+                      className={classNames({
+                        [styles.active]: active === item.router,
+                      })}
+                    >
+                      {item.icon ? (
+                        <span className={styles.navIcon}> {item.icon}</span>
+                      ) : (
+                        <></>
+                      )}
                       <span className={styles.navText}>{item.text}</span>
-                    </li>;
-                  })
-                }
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
             <div className={styles.statusInfo}>
-              <div
-                className={status ? styles.connected : styles.disconnected}>{status ? 'Connected' : 'Disconnected'}</div>
+              <div className={status ? styles.connected : styles.disconnected}>
+                {status ? 'Connected' : 'Disconnected'}
+              </div>
               <div>Version:{version}</div>
             </div>
           </div>
         </div>
-        <article className={styles.app_right}>
-          {props.children}
-        </article>
+        <article className={styles.app_right}>{props.children}</article>
       </div>
-      {
-        refresh && <Loading text={'Node connection in progress'} status={refresh} />
-      }
+      {refresh && (
+        <Loading text={'Node connection in progress'} status={refresh} />
+      )}
     </>
   );
 };

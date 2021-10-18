@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo } from 'react';
-import { Table, Tooltip, Popconfirm, Progress } from 'antd';
+import { Table, Tooltip, Popconfirm, Progress, Modal } from 'antd';
+
+const { confirm } = Modal;
 import { ColumnsType } from 'antd/es/table';
-import { FileType } from '@/declare/api';
+import { AllFileInfo } from '@/declare/api';
 import styles from './index.less';
 import {
   DownloadOutlined,
@@ -15,14 +17,15 @@ import ChunkTooltip from '@/components/chunkTooltip';
 import { getSize, stringToBinary, getProgress } from '@/utils/util';
 
 import pinSvg from '@/assets/icon/pin.svg';
-import unPinSvg from '@/assets/icon/Pin Off.svg';
+import unPinSvg from '@/assets/icon/unPin.svg';
 import { downloadFile } from '@/api/api';
-import Video from '@/components/video';
 
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
   const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList } = useSelector((state: Models) => state.files);
+  const { filesList, downloadList, filesInfo } = useSelector(
+    (state: Models) => state.files,
+  );
 
   const pinOrUnPin = (hash: string, pinState: boolean): void => {
     dispatch({
@@ -35,7 +38,7 @@ const FilesList: React.FC = () => {
     });
   };
   // delete
-  const confirm = (hash: string): void => {
+  const confirmDelete = (hash: string): void => {
     dispatch({
       type: 'files/deleteDLHash',
       payload: {
@@ -51,95 +54,163 @@ const FilesList: React.FC = () => {
     });
   };
   // table field
-  const columns: ColumnsType<FileType> = [
+  const columns: ColumnsType<AllFileInfo> = [
     {
       title: <div className={styles.head}>File</div>,
       key: 'hash',
-      render: (text, record) => <>
-        <span style={{ marginRight: 5 }}>{record.fileHash}</span><CopyText text={record.fileHash} />
-        {
-          downloadList.indexOf(record.fileHash) !== -1 && <div style={{ width: '70%', display: 'flex' }}>
-            <Progress percent={getProgress(record.bitVector.b)} showInfo={false} />
-            <Tooltip placement='bottom' title={<ChunkTooltip chunk={record.bitVector.b} />} color='#fff' trigger='click'
-                     arrowPointAtCenter overlayClassName={styles.chunkTooltip} overlayInnerStyle={{ minHeight: 0 }}>
-              <div style={{ marginLeft: '10px', color: '#F59A23', cursor: 'default' }}>details</div>
-            </Tooltip>
+      render: (text, record) => (
+        <>
+          <div
+            style={{
+              fontSize: 20,
+              // fontWeight: 600,
+            }}
+          >
+            {(record.name?.length as number) > 20
+              ? record.name?.substr(0, 20) + '...'
+              : record.name}
           </div>
-        }
-      </>,
+          <span style={{ marginRight: 5, color: '#666' }}>
+            {record.fileHash}
+          </span>
+          <CopyText text={record.fileHash} />
+          {downloadList.indexOf(record.fileHash) !== -1 && (
+            <div style={{ width: '70%', display: 'flex' }}>
+              <Progress
+                percent={getProgress(record.bitVector.b)}
+                showInfo={false}
+              />
+              <Tooltip
+                placement="bottom"
+                title={<ChunkTooltip chunk={record.bitVector.b} />}
+                color="#fff"
+                trigger="click"
+                arrowPointAtCenter
+                overlayClassName={styles.chunkTooltip}
+                overlayInnerStyle={{ minHeight: 0 }}
+              >
+                <div
+                  style={{
+                    marginLeft: '10px',
+                    color: '#F59A23',
+                    cursor: 'default',
+                  }}
+                >
+                  details
+                </div>
+              </Tooltip>
+            </div>
+          )}
+        </>
+      ),
     },
     {
       title: <div className={styles.head}>Size</div>,
       key: 'size',
-      render: (text, record) => <span>{getSize((record.fileSize) * 256, 1)}</span>,
+      render: (text, record) => (
+        <span style={{ fontSize: 16 }}>
+          {record.manifestSize
+            ? getSize(record.manifestSize, 0)
+            : getSize(record.fileSize * 256, 1)}
+        </span>
+      ),
       align: 'center',
     },
     {
       title: <div className={styles.head}>Pin/UnPin</div>,
       key: 'pin',
-      render: (text, record) =>
+      render: (text, record) => (
         <>
-          {
-            /0/.test(record.bitVector.b) ||
-            <Tooltip placement='top' title={record.pinState ? 'unpin the file' : 'pin the file'} arrowPointAtCenter>
-              <img src={record.pinState ? pinSvg : unPinSvg} width={25} style={{ cursor: 'pointer' }} onClick={() => {
-                pinOrUnPin(record.fileHash, record.pinState);
-              }} />
+          {/0/.test(record.bitVector.b) || (
+            <Tooltip
+              placement="top"
+              title={record.pinState ? 'unpin the file' : 'pin the file'}
+              arrowPointAtCenter
+            >
+              <img
+                src={record.pinState ? pinSvg : unPinSvg}
+                width={25}
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  pinOrUnPin(record.fileHash, record.pinState);
+                }}
+              />
             </Tooltip>
-          }
+          )}
         </>
-      ,
+      ),
       align: 'center',
     },
-    {
-      title: <div className={styles.head}>Download</div>,
-      key: 'local',
-      render: (text, record) =>
-        <div onClick={async () => {
-          const data = await downloadFile(api, record.fileHash);
-          let link = document.createElement('a');
-          link.download = window.decodeURI(data.headers['content-disposition'].split('=')[1].slice(1))
-          link.href = URL.createObjectURL(new Blob([data.data], { type: data.data.type }));
-          document.body.appendChild(link);
-          link.click();
-          URL.revokeObjectURL(link.href);
-        }}>
-          <DownloadOutlined style={{ fontSize: 25 }} />
-        </div>
-      ,
-      align: 'center',
-    },
+    // {
+    //  title: <div className={styles.head}>Download</div>,
+    //  key: 'local',
+    //   render: (text, record) => <>
+    //     {
+    //       !record.sub && <div onClick={async () => {
+    //         const data = await downloadFile(api, record.fileHash);
+    //         let link = document.createElement('a');
+    //         link.download = window.decodeURI(data.headers['content-disposition'].split('=')[1].slice(1, -1));
+    //         link.href = URL.createObjectURL(new Blob([data.data], { type: data.data.type }));
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         URL.revokeObjectURL(link.href);
+    //       }}>
+    //         <DownloadOutlined className={"mainColor iconSize"} />
+    //       </div>
+    //     }
+    //   </>
+    //   ,
+    //   align: 'center',
+    // },
     {
       title: <div className={styles.head}>Open</div>,
       key: 'open',
-      render: (text, record) =>
-        <a href={`${api}/files/${record.fileHash}`} target={'_blank'} onClick={(e) => {
-        }}>
-          <FolderOpenOutlined style={{ fontSize: 25 }} />
-        </a>
-      ,
+      render: (text, record) => (
+        <div
+          onClick={() => {
+            if (record.isM3u8) {
+              window.open(`#/video/${record.fileHash}`);
+            } else if (record.sub) {
+              window.open(`${api}/aurora/${record.fileHash}`);
+            } else {
+              window.open(`${api}/files/${record.fileHash}`);
+            }
+          }}
+        >
+          <FolderOpenOutlined className={'mainColor iconSize'} />
+        </div>
+      ),
       align: 'center',
     },
     {
       title: <div className={styles.head}>Delete</div>,
       key: 'Delete',
-      render: (text, record) =>
-        <Popconfirm
-          title='Are you sure to delete the file?'
-          onConfirm={() => {
-            confirm(record.fileHash);
-          }}
-          okText='Yes'
-          cancelText='No'
-        >
-          <DeleteOutlined style={{ fontSize: 25, cursor: 'pointer' }} />
-        </Popconfirm>,
+      render: (text, record) => (
+        <>
+          <DeleteOutlined
+            className={'mainColor iconSize'}
+            onClick={() => {
+              confirm({
+                title: 'Are you sure to delete the file?',
+                okText: 'Yes',
+                okType: 'danger',
+                icon: <></>,
+                // centered:true,
+                cancelText: 'No',
+                onOk() {
+                  confirmDelete(record.fileHash);
+                },
+              });
+            }}
+          />
+        </>
+      ),
       align: 'center',
     },
   ];
   // table data
   const reFilesList = useMemo(() => {
-    return filesList.map(item => ({
+    return filesList.map((item) => ({
       ...item,
       bitVector: {
         ...item.bitVector,
@@ -147,16 +218,24 @@ const FilesList: React.FC = () => {
       },
     }));
   }, [filesList]);
-  return <div>
-    <Table<FileType>
-      className={styles.filesList}
-      dataSource={reFilesList}
-      columns={columns}
-      rowKey={item => item.fileHash}
-      pagination={false}
-      locale={{ emptyText: 'No Data' }}
-    />
-  </div>;
+
+  const data: AllFileInfo[] = useMemo(() => {
+    return reFilesList.map((item) => {
+      return { ...item, ...filesInfo[item.fileHash] };
+    });
+  }, [reFilesList, filesInfo]);
+  return (
+    <div>
+      <Table<AllFileInfo>
+        className={styles.filesList}
+        dataSource={data}
+        columns={columns}
+        rowKey={(item) => item.fileHash}
+        pagination={false}
+        locale={{ emptyText: 'No Data' }}
+      />
+    </div>
+  );
 };
 
 export default FilesList;
