@@ -1,34 +1,34 @@
-const router =  [
+const router = [
   {
-    path: "/video",
-    component: "@/pages/video"
+    path: '/video/:path',
+    component: '@/pages/video/',
   },
   {
     path: '/',
     component: '@/layouts',
-    routes:[
+    routes: [
       {
-        path:"/",
+        path: '/',
         component: '@/pages/info',
       },
       {
-        path:"/files",
+        path: '/files',
         component: '@/pages/files',
       },
       {
-        path:"/peers",
+        path: '/peers',
         component: '@/pages/peers',
       },
       {
-        path:"/setting",
+        path: '/setting',
         component: '@/pages/setting',
       },
       {
         path: '/*',
-        component: '@/pages/404'
-      }
-    ]
-  }
-]
+        component: '@/pages/404',
+      },
+    ],
+  },
+];
 
-export default router
+export default router;
