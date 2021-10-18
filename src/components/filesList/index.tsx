@@ -195,6 +195,7 @@ const FilesList: React.FC = () => {
                 okText: 'Yes',
                 okType: 'danger',
                 icon: <></>,
+                maskClosable: true,
                 // centered:true,
                 cancelText: 'No',
                 onOk() {
