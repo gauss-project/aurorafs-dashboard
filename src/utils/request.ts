@@ -7,6 +7,7 @@ export const eventEmitter = new EventEmitter();
 
 const request = axios.create({
   baseURL: '',
+  timeout: 5e3,
 });
 
 let requestIndex: number = 0;
@@ -28,24 +29,21 @@ const removePending = (key: string, isRequest = false): void => {
   delete pending[key];
 };
 
-export const getConfirmation = (mes = '', callback = () => {
-}): void => {
+export const getConfirmation = (mes = '', callback = () => {}): void => {
   removeAllPendingRequestsRecord();
   callback();
 };
 
 request.interceptors.request.use(
-  config => {
-
+  (config) => {
+    console.log(config);
     let reqData: string = '';
-    
-    if (config.method !== 'post') {
-      config.timeout = 5 * 1000;
-    }
+
     if (config.method === 'get') {
       reqData = config.url + config.method + JSON.stringify(config.params);
     } else {
-      reqData = (config.url as string) + config.method + JSON.stringify(config.data);
+      reqData =
+        (config.url as string) + config.method + JSON.stringify(config.data);
     }
 
     removePending(reqData, true);
@@ -58,31 +56,34 @@ request.interceptors.request.use(
     NProgress.start();
     return config;
   },
-  error => {
+  (error) => {
     return Promise.reject(error);
   },
 );
 
 request.interceptors.response.use(
-  response => {
+  (response) => {
     responseIndex++;
     if (responseIndex === requestIndex) {
       NProgress.done();
     }
     return response;
   },
-  error => {
+  (error) => {
     responseIndex = requestIndex = 0;
     NProgress.done();
     if (axios.isCancel(error)) {
-      return new Promise(() => {
-      });
+      return new Promise(() => {});
     }
     if (error.message === 'Network Error') {
       eventEmitter.emit('404');
       return Promise.reject(new Error('Connection Failed'));
     }
-    return Promise.reject(error.response?.data?.message ? Error(error.response?.data.message) : error);
+    return Promise.reject(
+      error.response?.data?.message
+        ? Error(error.response?.data.message)
+        : error,
+    );
   },
 );
 

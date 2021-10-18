@@ -1,12 +1,15 @@
 import ModelsType, { Models } from '@/declare/modelType';
-import { FileType } from '@/declare/api';
+import { FileType, FileInfoMap } from '@/declare/api';
+
 import Api from '@/api/api';
 import { message } from 'antd';
+import { mapQueryM3u8 } from '@/utils/util';
 
 export interface State {
-  filesList: FileType[],
-  uploadStatus: boolean,
-  downloadList: string[],
+  filesList: FileType[];
+  uploadStatus: boolean;
+  downloadList: string[];
+  filesInfo: FileInfoMap;
 }
 
 export default {
@@ -14,8 +17,17 @@ export default {
     uploadStatus: false,
     filesList: [],
     downloadList: [],
+    filesInfo: {},
   },
   reducers: {
+    addFilesInfo(state, { payload }) {
+      const filesInfo = JSON.parse(JSON.stringify(state)).filesInfo;
+      const { fileInfo } = payload;
+      return {
+        ...state,
+        filesInfo: { ...filesInfo, ...fileInfo },
+      };
+    },
     setFilesList(state, { payload }) {
       const { filesList } = payload;
       return {
@@ -63,7 +75,7 @@ export default {
     },
   },
   effects: {
-    * upload({ payload }, { call, put }) {
+    *upload({ payload }, { call, put }) {
       const { url, file } = payload;
       try {
         yield put({ type: 'setUploadStatus', payload: { uploadStatus: true } });
@@ -73,10 +85,13 @@ export default {
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       } finally {
-        yield put({ type: 'setUploadStatus', payload: { uploadStatus: false } });
+        yield put({
+          type: 'setUploadStatus',
+          payload: { uploadStatus: false },
+        });
       }
     },
-    * getFilesList({ payload }, { call, put }) {
+    *getFilesList({ payload }, { call, put }) {
       const { url } = payload;
       try {
         const { data } = yield call(Api.getFilesList, url);
@@ -90,10 +105,12 @@ export default {
         if (e instanceof Error) message.info(e.message);
       }
     },
-    * pinOrUnPin({ payload }, { call, put }) {
+    *pinOrUnPin({ payload }, { call, put }) {
       const { url, hash, pinState } = payload;
       try {
-        const { data } = pinState ? yield call(Api.unPin, url, hash) : yield call(Api.pin, url, hash);
+        const { data } = pinState
+          ? yield call(Api.unPin, url, hash)
+          : yield call(Api.pin, url, hash);
         if (data.code === 200) {
           message.success(data.message);
           yield put({ type: 'getFilesList', payload: { url } });
@@ -102,12 +119,43 @@ export default {
         if (e instanceof Error) message.info(e.message);
       }
     },
-    * deleteFile({ payload }, { call, put }) {
+    *deleteFile({ payload }, { call, put }) {
       const { url, hash } = payload;
       try {
         const { data } = yield call(Api.deleteFile, url, hash);
         message.success(data.message);
         yield put({ type: 'getFilesList', payload: { url } });
+      } catch (e) {
+        if (e instanceof Error) message.info(e.message);
+      }
+    },
+    *queryFile({ payload }, { call, put, select }) {
+      const { url, hash } = payload;
+      try {
+        let { data } = yield call(Api.queryFile, url, hash);
+        data = JSON.parse(
+          JSON.stringify(data).replace(/size/g, 'manifestSize'),
+        );
+        if (data.sub && data.type === 'directory') {
+          yield put({
+            type: 'addFilesInfo',
+            payload: {
+              fileInfo: {
+                [hash]: {
+                  ...data,
+                  name: 'Directory',
+                  isM3u8: mapQueryM3u8(data.sub),
+                },
+              },
+            },
+          });
+        } else {
+          yield put({
+            type: 'addFilesInfo',
+            payload: { fileInfo: { [hash]: data } },
+          });
+        }
+        // message.success(data.message);
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       }
