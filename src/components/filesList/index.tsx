@@ -62,8 +62,7 @@ const FilesList: React.FC = () => {
         <>
           <div
             style={{
-              fontSize: 20,
-              // fontWeight: 600,
+              fontSize: 16,
             }}
           >
             {(record.name?.length as number) > 20

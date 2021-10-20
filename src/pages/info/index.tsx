@@ -38,12 +38,12 @@ const Main: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <div className={styles.topology}>
           <Card
-            title={'Connected Peers'}
+            title={'Connected Full Peers'}
             text={topology?.connected || 0}
             style={{ minWidth: 525, marginRight: 50, marginBottom: 30 }}
           />
           <Card
-            title={'Discovered Peers'}
+            title={'Discovered Full Peers'}
             text={topology?.population || 0}
             style={{ minWidth: 525, marginBottom: 30 }}
           />
