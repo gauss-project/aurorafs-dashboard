@@ -1,18 +1,23 @@
-import styles from "./index.less";
-import { history } from "umi";
+import styles from './index.less';
+import { history } from 'umi';
 import React from 'react';
 
+import _404Img from '@/assets/img/404.png';
 
-const _404:React.FC = ()=>{
-  const goBack = ():void => {
-      history.push("/")
-  }
-  return <div className={styles.notFind}>
-    <img src={require("@/assets/img/404.png")} alt="" />
-    <span className={styles.tip}>Your page was robbed by other public chains～</span>
-    <span className={styles.back} onClick={goBack}>
+const _404: React.FC = () => {
+  const goBack = (): void => {
+    history.push('/');
+  };
+  return (
+    <div className={styles.notFind}>
+      <img src={_404Img} alt="" />
+      <span className={styles.tip}>
+        Your page was robbed by other public chains～
+      </span>
+      <span className={styles.back} onClick={goBack}>
         Return to info page
       </span>
-  </div>
-}
+    </div>
+  );
+};
 export default _404;
