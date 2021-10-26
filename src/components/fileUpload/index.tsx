@@ -48,7 +48,7 @@ const FileUpload: React.FC = () => {
     setFileAttr({
       ...fileAttr,
       isTar: file?.type === 'application/x-tar',
-      name: file?.name.split('.').slice(0, -1).join('.') || '',
+      name: file?.name.split('.').slice(0, -1).join('.') || file?.name || '',
     });
     return file ? [file] : [];
   }, [file]);
