@@ -1,25 +1,33 @@
 import ModelsType from '@/declare/modelType';
-import { defaultDebugApi, defaultApi, sessionStorageDebugApi, sessionStorageApi } from '@/config/url';
+import {
+  defaultDebugApi,
+  defaultApi,
+  sessionStorageDebugApi,
+  sessionStorageApi,
+} from '@/config/url';
 import { checkSession } from '@/utils/util';
 import { isStatus } from '@/api/common';
 import { message, Button } from 'antd';
 import { Topology } from '@/declare/api';
 import DebugApi from '@/api/debugApi';
 import { getConfirmation } from '@/utils/request';
+import semver from 'semver';
+import { auroraVersion } from '@/config/version';
 
+export type ErrorType = 'apiError' | 'versionError';
 
 export interface State {
-  status: boolean,
-  api: string,
-  debugApi: string,
-  refresh: boolean,
+  status: boolean;
+  api: string;
+  debugApi: string;
+  refresh: boolean;
   health: {
-    status: string,
-    version: string,
-    fullNode: boolean,
-    bootNodeMode: boolean
-  } | null,
-  topology: Topology,
+    status: string;
+    version: string;
+    fullNode: boolean;
+    bootNodeMode: boolean;
+  } | null;
+  topology: Topology;
 }
 
 export default {
@@ -70,11 +78,15 @@ export default {
     },
   },
   effects: {
-    * getStatus({ payload }, { call, put }) {
+    *getStatus({ payload }, { call, put }) {
       const { api, debugApi } = payload;
       try {
         const data = yield call(isStatus, api, debugApi);
-        const status = data[0].data && data[1].data.status === 'ok';
+        const aurora = semver.satisfies(
+          semver.coerce(data[1].data.version)?.version as string,
+          `>=${auroraVersion}`,
+        );
+        const status = data[0].data && data[1].data.status === 'ok' && aurora;
         yield put({
           type: 'setStatus',
           payload: {
@@ -89,6 +101,8 @@ export default {
               health: data[1].data,
             },
           });
+        } else if (!aurora) {
+          message.error('Please upgrade the node version');
         }
       } catch (err) {
         if (err instanceof Error) message.info(err.message);
@@ -108,7 +122,7 @@ export default {
         yield put({ type: 'setApi', payload: { api, debugApi } });
       }
     },
-    * getTopology({ payload }, { call, put }) {
+    *getTopology({ payload }, { call, put }) {
       const { url } = payload;
       try {
         const { data } = yield call(DebugApi.getTopology, url);

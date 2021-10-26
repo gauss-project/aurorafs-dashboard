@@ -40,19 +40,38 @@ export declare type FileType = {
     b: string;
   };
 };
+
+export declare type FileSub = Record<
+  string,
+  {
+    type?: string;
+    name?: string;
+    size?: number;
+    ext?: string;
+    mime?: string;
+    hash?: string;
+    sub?: FileSub;
+  }
+>;
+
 export declare type FileInfo = {
-  type?: string;
-  sub?: {};
-  name?: string;
-  size?: number;
-  ext?: string;
-  mime?: string;
-  manifestSize?: number;
+  type: string;
+  name: string;
+  sub: FileSub;
 };
 
 export declare type FileInfoMap = Record<
   string,
-  FileInfo & { isM3u8?: boolean }
+  FileInfo & { isM3u8?: boolean; manifestSize?: number }
 >;
 
-export declare type AllFileInfo = FileType & FileInfo & { isM3u8?: boolean };
+export declare type AllFileInfo = FileType &
+  FileInfo & { isM3u8?: boolean; manifestSize?: number };
+
+export declare type FileAttr = {
+  isTar: boolean;
+  pin: boolean;
+  name: string;
+  dOpen: string;
+  eOPen: string;
+};

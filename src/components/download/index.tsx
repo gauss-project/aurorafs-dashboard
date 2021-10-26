@@ -11,7 +11,7 @@ const Download: React.FC = () => {
   const { filesList } = useSelector((state: Models) => state.files);
 
   const download = (hashValue: string): void => {
-    window.open(api + '/files/' + hashValue);
+    window.open(api + '/aurora/' + hashValue);
     if (filesList.findIndex((item) => item.fileHash === hashValue) === -1) {
       dispatch({
         type: 'files/addDLHash',

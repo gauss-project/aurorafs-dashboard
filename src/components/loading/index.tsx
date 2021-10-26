@@ -10,26 +10,13 @@ export type Props = {
 
 const Loading: React.FC<Props> = (props) => {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: 'rgba(238,238,238,.85)',
-        zIndex: 999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <div className={styles.layer}>
       <Spin
-        className={styles.iconColor}
+        style={{ color: 'inherit' }}
         spinning={props.status}
         delay={500}
         size="large"
-        indicator={<LoadingOutlined className={styles.iconColor} />}
+        indicator={<LoadingOutlined className={'mainColor'} />}
         tip={props.text}
       />
     </div>

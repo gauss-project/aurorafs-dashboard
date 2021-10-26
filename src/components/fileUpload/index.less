@@ -1,12 +1,33 @@
 .fileUpload {
-  width: 50%;
+  width: 1100px;
   display: flex;
-  align-items: flex-end;
+  //align-items: flex-end;
 }
+
+.uploadArea {
+  width: 400px;
+}
+
 .upload {
   width: 100px;
   margin-left: 50px;
+  align-self: flex-end;
 }
+
+.uploadAttr {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  margin-left: 50px;
+  font-size: 14px;
+
+  .radioGrid {
+    display: grid;
+    grid-template-columns: 100px auto;
+    justify-items: start;
+  }
+}
+
 .uploadIcon {
   font-size: 50px;
   color: @main_color;

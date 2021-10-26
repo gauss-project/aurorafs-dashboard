@@ -36,7 +36,6 @@ export const getConfirmation = (mes = '', callback = () => {}): void => {
 
 request.interceptors.request.use(
   (config) => {
-    console.log(config);
     let reqData: string = '';
 
     if (config.method === 'get') {
