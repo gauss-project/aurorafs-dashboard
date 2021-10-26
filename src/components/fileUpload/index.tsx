@@ -83,15 +83,17 @@ const FileUpload: React.FC = () => {
       </div>
       {file && (
         <div className={styles.uploadAttr}>
-          <div className={styles.radioGrid}>
-            <label>Directory</label>
-            <Checkbox
-              checked={fileAttr.isTar}
-              onChange={(e) => {
-                setFileAttr({ ...fileAttr, isTar: e.target.checked });
-              }}
-            />
-          </div>
+          {file.type === 'application/x-tar' && (
+            <div className={styles.radioGrid}>
+              <label>Directory</label>
+              <Checkbox
+                checked={fileAttr.isTar}
+                onChange={(e) => {
+                  setFileAttr({ ...fileAttr, isTar: e.target.checked });
+                }}
+              />
+            </div>
+          )}
           <div className={styles.radioGrid}>
             <label>PinStatus</label>
             <Checkbox

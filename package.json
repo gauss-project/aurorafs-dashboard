@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
-    "@types/semver": "^7.3.9",
     "axios": "^0.21.1",
     "classnames": "^2.3.1",
     "eventemitter3": "^4.0.7",
@@ -37,6 +36,7 @@
     "umi": "^3.5.13"
   },
   "devDependencies": {
+    "@types/semver": "^7.3.9",
     "@types/antd": "^1.0.0",
     "@types/axios": "^0.14.0",
     "@types/hls.js": "^1.0.0",
