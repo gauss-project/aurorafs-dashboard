@@ -5,11 +5,7 @@ const { confirm } = Modal;
 import { ColumnsType } from 'antd/es/table';
 import { AllFileInfo } from '@/declare/api';
 import styles from './index.less';
-import {
-  DownloadOutlined,
-  DeleteOutlined,
-  FolderOpenOutlined,
-} from '@ant-design/icons';
+import { DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import CopyText from '@/components/copyText';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
@@ -23,7 +19,7 @@ import { downloadFile } from '@/api/api';
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
   const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList, filesInfo } = useSelector(
+  const { filesList, downloadList, filesInfo, pins } = useSelector(
     (state: Models) => state.files,
   );
 
@@ -169,10 +165,8 @@ const FilesList: React.FC = () => {
           onClick={() => {
             if (record.isM3u8) {
               window.open(`#/video/${record.fileHash}`);
-            } else if (record.sub) {
-              window.open(`${api}/aurora/${record.fileHash}`);
             } else {
-              window.open(`${api}/files/${record.fileHash}`);
+              window.open(`${api}/aurora/${record.fileHash}`);
             }
           }}
         >
@@ -208,22 +202,20 @@ const FilesList: React.FC = () => {
       align: 'center',
     },
   ];
-  // table data
-  const reFilesList = useMemo(() => {
-    return filesList.map((item) => ({
-      ...item,
-      bitVector: {
-        ...item.bitVector,
-        b: stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
-      },
-    }));
-  }, [filesList]);
-
+  // Table Data
   const data: AllFileInfo[] = useMemo(() => {
-    return reFilesList.map((item) => {
-      return { ...item, ...filesInfo[item.fileHash] };
+    return filesList.map((item) => {
+      return {
+        ...item,
+        ...filesInfo[item.fileHash],
+        pinState: pins.indexOf(item.fileHash) !== -1,
+        bitVector: {
+          ...item.bitVector,
+          b: stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
+        },
+      };
     });
-  }, [reFilesList, filesInfo]);
+  }, [filesList, filesInfo, pins]);
   return (
     <div>
       <Table<AllFileInfo>

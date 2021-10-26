@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
+    "@types/semver": "^7.3.9",
     "axios": "^0.21.1",
     "classnames": "^2.3.1",
     "eventemitter3": "^4.0.7",
@@ -30,6 +31,7 @@
     "react": "17.x",
     "react-copy-to-clipboard": "^5.0.4",
     "react-dom": "17.x",
+    "semver": "^7.3.5",
     "umi": "^3.5.13"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
-import ModelsType, { Models } from '@/declare/modelType';
-import { FileType, FileInfoMap } from '@/declare/api';
+import ModelsType from '@/declare/modelType';
+import { FileType, FileInfoMap, FileSub } from '@/declare/api';
 
 import Api from '@/api/api';
 import { message } from 'antd';
@@ -10,6 +10,7 @@ export interface State {
   uploadStatus: boolean;
   downloadList: string[];
   filesInfo: FileInfoMap;
+  pins: string[];
 }
 
 export default {
@@ -18,6 +19,7 @@ export default {
     filesList: [],
     downloadList: [],
     filesInfo: {},
+    pins: [],
   },
   reducers: {
     addFilesInfo(state, { payload }) {
@@ -26,27 +28,6 @@ export default {
       return {
         ...state,
         filesInfo: { ...filesInfo, ...fileInfo },
-      };
-    },
-    setFilesList(state, { payload }) {
-      const { filesList } = payload;
-      return {
-        ...state,
-        filesList,
-      };
-    },
-    setUploadStatus(state, { payload }) {
-      const { uploadStatus } = payload;
-      return {
-        ...state,
-        uploadStatus,
-      };
-    },
-    setDownloadList(state, { payload }) {
-      const { downloadList } = payload;
-      return {
-        ...state,
-        downloadList,
       };
     },
     deleteDLHash(state, { payload }) {
@@ -73,14 +54,43 @@ export default {
         downloadList,
       };
     },
+    setFilesList(state, { payload }) {
+      const { filesList } = payload;
+      return {
+        ...state,
+        filesList,
+      };
+    },
+    setPins(state, { payload }) {
+      const { pins } = payload;
+      return {
+        ...state,
+        pins,
+      };
+    },
+    setUploadStatus(state, { payload }) {
+      const { uploadStatus } = payload;
+      return {
+        ...state,
+        uploadStatus,
+      };
+    },
+    setDownloadList(state, { payload }) {
+      const { downloadList } = payload;
+      return {
+        ...state,
+        downloadList,
+      };
+    },
   },
   effects: {
     *upload({ payload }, { call, put }) {
-      const { url, file } = payload;
+      const { url, file, fileAttr } = payload;
       try {
         yield put({ type: 'setUploadStatus', payload: { uploadStatus: true } });
-        yield call(Api.uploadFile, url, file);
+        yield call(Api.uploadFile, url, file, fileAttr);
         yield put({ type: 'getFilesList', payload: { url } });
+        yield put({ type: 'getPins', payload: { url } });
         message.success('upload success');
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
@@ -111,10 +121,22 @@ export default {
         const { data } = pinState
           ? yield call(Api.unPin, url, hash)
           : yield call(Api.pin, url, hash);
-        if (data.code === 200) {
-          message.success(data.message);
-          yield put({ type: 'getFilesList', payload: { url } });
+        if (data.code === 200 || data.code === 201) {
+          message.success(data.message, 0.1);
+          yield put({ type: 'getPins', payload: { url } });
         }
+      } catch (e) {
+        if (e instanceof Error) message.info(e.message);
+      }
+    },
+    *getPins({ payload }, { call, put }) {
+      const { url } = payload;
+      try {
+        const { data } = yield call(Api.getPins, url);
+        yield put({
+          type: 'setPins',
+          payload: { pins: data.references ?? [] },
+        });
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       }
@@ -129,32 +151,26 @@ export default {
         if (e instanceof Error) message.info(e.message);
       }
     },
-    *queryFile({ payload }, { call, put, select }) {
+    *queryFile({ payload }, { call, put }) {
       const { url, hash } = payload;
       try {
         let { data } = yield call(Api.queryFile, url, hash);
-        data = JSON.parse(
-          JSON.stringify(data).replace(/size/g, 'manifestSize'),
-        );
-        if (data.sub && data.type === 'directory') {
-          yield put({
-            type: 'addFilesInfo',
-            payload: {
-              fileInfo: {
-                [hash]: {
-                  ...data,
-                  name: 'Directory',
-                  isM3u8: mapQueryM3u8(data.sub),
-                },
+        yield put({
+          type: 'addFilesInfo',
+          payload: {
+            fileInfo: {
+              [hash]: {
+                ...data,
+                isM3u8: mapQueryM3u8(data.sub),
+                manifestSize: (Object.values(data.sub) as FileSub[])
+                  .map((item) => (item?.size as number) || 0)
+                  .reduce((total, item) => {
+                    return total + item;
+                  }, 0),
               },
             },
-          });
-        } else {
-          yield put({
-            type: 'addFilesInfo',
-            payload: { fileInfo: { [hash]: data } },
-          });
-        }
+          },
+        });
         // message.success(data.message);
       } catch (e) {
         if (e instanceof Error) message.info(e.message);

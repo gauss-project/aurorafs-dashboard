@@ -1,3 +1,5 @@
+import { FileSub } from '@/declare/api';
+
 export const checkSession = (key: string): string | false => {
   const value = sessionStorage.getItem(key);
   if (value) return value;
@@ -57,16 +59,24 @@ export const getSuffix = (fileName: string): string | undefined => {
   return fileName.split('.').pop();
 };
 
-export const mapQueryM3u8 = (
-  sub: Record<string, { type: string }>,
-): boolean => {
+export const mapQueryM3u8 = (sub: FileSub): boolean => {
   for (let i in sub) {
     if (sub[i].type === 'index') {
-      if (getSuffix(i) === 'm3u8') {
-        return true;
-      }
-      return false;
+      return getSuffix(i) === 'm3u8' && sub[i].mime !== 'application/x-tar';
     }
   }
   return false;
 };
+
+export function encodeUnicode(str: string): string {
+  let res = [];
+  for (let i = 0; i < str.length; i++) {
+    res[i] = ('00' + str.charCodeAt(i).toString(16)).slice(-4);
+  }
+  return '\\u' + res.join('\\u');
+}
+
+export function decodeUnicode(str: string): string {
+  str = str.replace(/\\/g, '%');
+  return unescape(str);
+}
