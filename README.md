@@ -5,7 +5,7 @@
 **Warning: This project is in alpha state. There might (and most probably will) be changes in the future to its API and
 working. Also, no guarantees can be made about its stability, efficiency, and security at this stage.**
 
-This project is intended to be used with **Aurora version 1.0.0**. Using it with older or newer Aurora versions is not
+This project is intended to be used with **Aurora version 1.1.0**. Using it with older or newer Aurora versions is not
 recommended and may not work. Stay up to date by joining the [official Discord](https://discord.com/invite/nDFnN6zScC)
 and by keeping an eye on the [releases tab](https://github.com/gauss-project/aurorafs-dashboard/releases).
 
@@ -26,7 +26,8 @@ and by keeping an eye on the [releases tab](https://github.com/gauss-project/aur
 
 :warning: To successfully connect to the Aurora node, you will need to enable the Debug API and CORS. You can do so by
 setting `cors-allowed-origins: ['*']` and `debug-api-enable: true` in the Aurora config file and then restart the Aurora
-node. To see where the config file is, consult the [official Aurora documentation]()
+node. To see where the config file is, consult
+the [official Aurora documentation](https://docs.aufs.io/docs/api-reference/api-and-debugapi)
 
 ### Development
 
