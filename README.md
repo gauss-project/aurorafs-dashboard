@@ -32,17 +32,22 @@ the [official Aurora documentation](https://docs.aufs.io/docs/api-reference/api-
 ### Development
 
 ```sh
-// Installing the yarn toolkit
+## Installing the yarn toolkit
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt update
 sudo apt install yarn
 
-// Start-up dashboard, start-up process takes 1-2 minutes
+## Start-up dashboard, start-up process takes 1-2 minutes
 git clone https://github.com/gauss-project/aurorafs-dashboard.git
 cd aurorafs-dashboard
 yarn 
 yarn start
+
+## If you run the exe, enter the following command after yarn
+yarn build
+yarn electron
+
 ```
 
 The Aurora Dashboard runs in development mode on [http://localhost:8000/](http://localhost:8000/)
