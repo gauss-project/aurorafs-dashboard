@@ -25,15 +25,6 @@ const Main: React.FC = (props) => {
       },
     });
   };
-  const getPins = (): void => {
-    dispatch({
-      type: 'files/getPins',
-      payload: {
-        url: api,
-      },
-    });
-  };
-
   useEffect(() => {
     let notFoundError = true;
     let notInfoHash: string[] = [];
@@ -96,7 +87,6 @@ const Main: React.FC = (props) => {
   }, [downloadList]);
   useEffect(() => {
     getFilesList();
-    getPins();
     return () => {
       if (timer.current) clearInterval(timer.current);
       dispatch({

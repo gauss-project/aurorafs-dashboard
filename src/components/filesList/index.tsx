@@ -19,7 +19,7 @@ import { downloadFile } from '@/api/api';
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
   const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList, filesInfo, pins } = useSelector(
+  const { filesList, downloadList, filesInfo } = useSelector(
     (state: Models) => state.files,
   );
 
@@ -208,14 +208,13 @@ const FilesList: React.FC = () => {
       return {
         ...item,
         ...filesInfo[item.fileHash],
-        pinState: pins.indexOf(item.fileHash) !== -1,
         bitVector: {
           ...item.bitVector,
           b: stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
         },
       };
     });
-  }, [filesList, filesInfo, pins]);
+  }, [filesList, filesInfo]);
   return (
     <div>
       <Table<AllFileInfo>

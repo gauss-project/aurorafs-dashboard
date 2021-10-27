@@ -55,14 +55,6 @@ export const uploadFile = (
   });
 };
 
-export const getPins = (
-  url: string,
-): Promise<AxiosResponse<{ references: string[] }>> => {
-  return request({
-    url: url + '/pins',
-  });
-};
-
 export const pin = (url: string, hash: string): Promise<AxiosResponse<any>> => {
   return request({
     url: url + '/pins/' + hash,
@@ -122,5 +114,4 @@ export default {
   deleteFile,
   downloadFile,
   queryFile,
-  getPins,
 };

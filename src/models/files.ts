@@ -10,7 +10,6 @@ export interface State {
   uploadStatus: boolean;
   downloadList: string[];
   filesInfo: FileInfoMap;
-  pins: string[];
 }
 
 export default {
@@ -19,7 +18,6 @@ export default {
     filesList: [],
     downloadList: [],
     filesInfo: {},
-    pins: [],
   },
   reducers: {
     addFilesInfo(state, { payload }) {
@@ -61,13 +59,6 @@ export default {
         filesList,
       };
     },
-    setPins(state, { payload }) {
-      const { pins } = payload;
-      return {
-        ...state,
-        pins,
-      };
-    },
     setUploadStatus(state, { payload }) {
       const { uploadStatus } = payload;
       return {
@@ -90,7 +81,6 @@ export default {
         yield put({ type: 'setUploadStatus', payload: { uploadStatus: true } });
         yield call(Api.uploadFile, url, file, fileAttr);
         yield put({ type: 'getFilesList', payload: { url } });
-        yield put({ type: 'getPins', payload: { url } });
         message.success('upload success');
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
@@ -123,20 +113,8 @@ export default {
           : yield call(Api.pin, url, hash);
         if (data.code === 200 || data.code === 201) {
           message.success(data.message, 0.1);
-          yield put({ type: 'getPins', payload: { url } });
+          yield put({ type: 'getFilesList', payload: { url } });
         }
-      } catch (e) {
-        if (e instanceof Error) message.info(e.message);
-      }
-    },
-    *getPins({ payload }, { call, put }) {
-      const { url } = payload;
-      try {
-        const { data } = yield call(Api.getPins, url);
-        yield put({
-          type: 'setPins',
-          payload: { pins: data.references ?? [] },
-        });
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       }
