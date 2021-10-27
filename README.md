@@ -7,7 +7,7 @@ working. Also, no guarantees can be made about its stability, efficiency, and se
 
 This project is intended to be used with **Aurora version 1.1.0**. Using it with older or newer Aurora versions is not
 recommended and may not work. Stay up to date by joining the [official Discord](https://discord.com/invite/nDFnN6zScC)
-and by keeping an eye on the [releases tab](https://github.com/gauss-project/aurorafs-dashboard/releases).
+and by keeping an eye on the [releases tab](https://github.com/gauss-project/aurorafs/releases).
 
 ![Info page](/ui_samples/info.png)
 
