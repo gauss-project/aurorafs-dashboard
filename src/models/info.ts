@@ -4,12 +4,12 @@ import DebugApi from '@/api/debugApi';
 import { message } from 'antd';
 
 export interface State {
-  addresses?:Addresses,
+  addresses?: Addresses;
 }
 
 export default {
   state: {
-    addresses:{}
+    addresses: {},
   },
   reducers: {
     setAddresses(state, { payload }) {
@@ -21,18 +21,17 @@ export default {
     },
   },
   effects: {
-    * getAddresses({ payload }, { call, put }) {
+    *getAddresses({ payload }, { call, put }) {
       const { url } = payload;
       try {
-        const { data }  = yield call(DebugApi.getAddresses,url);
+        const { data } = yield call(DebugApi.getAddresses, url);
         yield put({
-          type:"setAddresses",
-          payload:{
-            addresses:data,
-          }
-        })
-      }
-      catch (err){
+          type: 'setAddresses',
+          payload: {
+            addresses: data,
+          },
+        });
+      } catch (err) {
         if (err instanceof Error) message.info(err.message);
       }
     },

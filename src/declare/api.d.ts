@@ -28,6 +28,7 @@ export declare type Addresses = {
   overlay?: string;
   underlay?: string[];
   public_key?: string;
+  network_id?: number;
 };
 
 export declare type FileType = {

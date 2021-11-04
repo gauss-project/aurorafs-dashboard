@@ -48,25 +48,36 @@ const Main: React.FC = () => {
             style={{ minWidth: 525, marginBottom: 30 }}
           />
         </div>
-        <div className={styles.address}>
-          {/*<p>NODE MODE:&nbsp;&nbsp;{health?.fullNode?"Full Node":"Light Node"}</p>*/}
+        <div className={`${styles.address} info_content`}>
           <p>
             NODE MODE:&nbsp;&nbsp;
-            {health?.bootNodeMode
-              ? 'Boot Node'
-              : health?.fullNode
-              ? 'Full Node'
-              : 'Light Node'}
+            <span>
+              {health?.bootNodeMode
+                ? 'Boot Node'
+                : health?.fullNode
+                ? 'Full Node'
+                : 'Light Node'}
+            </span>
           </p>
-          <p>AGENT VERSION:&nbsp;&nbsp;{health?.version}</p>
-          <p>PUBLIC KEY:&nbsp;&nbsp;{addresses?.public_key} </p>
-          <p>OVERLAY ADDRESS(PEER ID):&nbsp;&nbsp;{addresses?.overlay}</p>
+          <p>
+            AGENT VERSION:&nbsp;&nbsp;<span>{health?.version}</span>
+          </p>
+          <p>
+            NETWORK ID:&nbsp;&nbsp;<span>{addresses?.network_id}</span>
+          </p>
+          <p>
+            PUBLIC KEY:&nbsp;&nbsp;<span>{addresses?.public_key}</span>
+          </p>
+          <p>
+            OVERLAY ADDRESS(PEER ID):&nbsp;&nbsp;
+            <span>{addresses?.overlay}</span>
+          </p>
           <div className={styles.underlayTitle}>UNDERLAY ADDRESS</div>
           <ul className={styles.underlay}>
             {addresses?.underlay?.map((item, index) => {
               return (
                 <li className={styles.underlayList} key={index}>
-                  {item}
+                  <span>{item}</span>
                 </li>
               );
             })}
