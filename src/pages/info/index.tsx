@@ -69,7 +69,7 @@ const Main: React.FC = () => {
             PUBLIC KEY:&nbsp;&nbsp;<span>{addresses?.public_key}</span>
           </p>
           <p>
-            OVERLAY ADDRESS(PEER ID):&nbsp;&nbsp;
+            OVERLAY ADDRESS:&nbsp;&nbsp;
             <span>{addresses?.overlay}</span>
           </p>
           <div className={styles.underlayTitle}>UNDERLAY ADDRESS</div>

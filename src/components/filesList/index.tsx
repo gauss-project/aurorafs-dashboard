@@ -56,11 +56,7 @@ const FilesList: React.FC = () => {
       key: 'hash',
       render: (text, record) => (
         <>
-          <div
-            style={{
-              fontSize: 16,
-            }}
-          >
+          <div style={{ fontSize: 16 }}>
             {(record.name?.length as number) > 20
               ? record.name?.substr(0, 20) + '...'
               : record.name}
@@ -98,6 +94,7 @@ const FilesList: React.FC = () => {
           )}
         </>
       ),
+      width: 600,
     },
     {
       title: <div className={styles.head}>Size</div>,
@@ -109,7 +106,7 @@ const FilesList: React.FC = () => {
             : getSize(record.fileSize * 256, 1)}
         </span>
       ),
-      align: 'center',
+      // align: 'center',
     },
     {
       title: <div className={styles.head}>Pin/UnPin</div>,
@@ -224,6 +221,7 @@ const FilesList: React.FC = () => {
         rowKey={(item) => item.fileHash}
         pagination={false}
         locale={{ emptyText: 'No Data' }}
+        scroll={filesList.length > 7 ? { y: 560 } : {}}
       />
     </div>
   );

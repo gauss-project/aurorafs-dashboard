@@ -29,6 +29,7 @@
     "hls": "^0.0.1",
     "moment": "^2.29.1",
     "nprogress": "^0.2.0",
+    "public-ip": "^4.0.4",
     "react": "17.x",
     "react-copy-to-clipboard": "^5.0.4",
     "react-dom": "17.x",
@@ -36,7 +37,6 @@
     "umi": "^3.5.13"
   },
   "devDependencies": {
-    "@types/semver": "^7.3.9",
     "@types/antd": "^1.0.0",
     "@types/axios": "^0.14.0",
     "@types/hls.js": "^1.0.0",
@@ -44,6 +44,7 @@
     "@types/react": "^17.0.0",
     "@types/react-copy-to-clipboard": "^5.0.1",
     "@types/react-dom": "^17.0.0",
+    "@types/semver": "^7.3.9",
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.5.13",
     "electron": "^15.3.0",

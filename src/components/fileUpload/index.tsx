@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import { FileAttr } from '@/declare/api';
 import { UploadFile } from 'antd/es/upload/interface';
+import FilesShowInfo from '@/components/filesShowInfo';
 
 const { Dragger } = Upload;
 
@@ -81,70 +82,75 @@ const FileUpload: React.FC = () => {
           </p>
         </Dragger>
       </div>
-      {file && (
-        <div className={styles.uploadAttr}>
-          {file.type === 'application/x-tar' && (
-            <div className={styles.radioGrid}>
-              <label>Directory</label>
-              <Checkbox
-                checked={fileAttr.isTar}
-                onChange={(e) => {
-                  setFileAttr({ ...fileAttr, isTar: e.target.checked });
-                }}
-              />
-            </div>
-          )}
-          <div className={styles.radioGrid}>
-            <label>PinStatus</label>
-            <Checkbox
-              checked={fileAttr.pin}
-              onChange={(e) => {
-                setFileAttr({ ...fileAttr, pin: e.target.checked });
-              }}
-            />
-          </div>
-          <div className={styles.radioGrid}>
-            <label>FileName</label>
-            <Input
-              placeholder="File Name"
-              size="small"
-              value={fileAttr.name}
-              onChange={(e) => {
-                setFileAttr({ ...fileAttr, name: e.target.value });
-              }}
-            />
-          </div>
-          {fileAttr.isTar && (
-            <div className={styles.radioGrid}>
-              <label>DefaultOpen</label>
-              <Input
-                placeholder="Default Open"
-                size="small"
-                value={fileAttr.dOpen}
-                onChange={(e) => {
-                  setFileAttr({ ...fileAttr, dOpen: e.target.value });
-                }}
-              />
-            </div>
-          )}
-          {fileAttr.isTar && (
-            <div className={styles.radioGrid}>
-              <label>ErrorOpen</label>
-              <Input
-                placeholder="Error Open"
-                size="small"
-                value={fileAttr.eOPen}
-                onChange={(e) => {
-                  setFileAttr({ ...fileAttr, eOPen: e.target.value });
-                }}
-              />
+      <div className={styles.uploadAttrArea}>
+        <div>
+          {file && (
+            <div className={styles.uploadAttr}>
+              {file.type === 'application/x-tar' && (
+                <div className={styles.radioGrid}>
+                  <label>Directory</label>
+                  <Checkbox
+                    checked={fileAttr.isTar}
+                    onChange={(e) => {
+                      setFileAttr({ ...fileAttr, isTar: e.target.checked });
+                    }}
+                  />
+                </div>
+              )}
+              <div className={styles.radioGrid}>
+                <label>PinStatus</label>
+                <Checkbox
+                  checked={fileAttr.pin}
+                  onChange={(e) => {
+                    setFileAttr({ ...fileAttr, pin: e.target.checked });
+                  }}
+                />
+              </div>
+              <div className={styles.radioGrid}>
+                <label>FileName</label>
+                <Input
+                  placeholder="File Name"
+                  size="small"
+                  value={fileAttr.name}
+                  onChange={(e) => {
+                    setFileAttr({ ...fileAttr, name: e.target.value });
+                  }}
+                />
+              </div>
+              {fileAttr.isTar && (
+                <div className={styles.radioGrid}>
+                  <label>DefaultOpen</label>
+                  <Input
+                    placeholder="Default Open"
+                    size="small"
+                    value={fileAttr.dOpen}
+                    onChange={(e) => {
+                      setFileAttr({ ...fileAttr, dOpen: e.target.value });
+                    }}
+                  />
+                </div>
+              )}
+              {fileAttr.isTar && (
+                <div className={styles.radioGrid}>
+                  <label>ErrorOpen</label>
+                  <Input
+                    placeholder="Error Open"
+                    size="small"
+                    value={fileAttr.eOPen}
+                    onChange={(e) => {
+                      setFileAttr({ ...fileAttr, eOPen: e.target.value });
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
-      <Button className={styles.upload} onClick={upload} disabled={!file}>
-        upload
-      </Button>
+        <Button className={styles.upload} onClick={upload} disabled={!file}>
+          upload
+        </Button>
+      </div>
+      <FilesShowInfo />
     </div>
   );
 };
