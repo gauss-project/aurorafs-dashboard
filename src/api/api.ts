@@ -29,9 +29,11 @@ export const uploadFile = (
   file: File,
   fileAttr: FileAttr,
 ): Promise<AxiosResponse<{ reference: string }>> => {
-  let fileName: string = fileAttr.name || file.name;
+  let fileName: string = fileAttr.name;
   let headers: AxiosRequestConfig['headers'] = {};
-  headers['Aurora-Collection-Name'] = encodeUnicode(fileName);
+  if (fileName) {
+    headers['Aurora-Collection-Name'] = encodeUnicode(fileName);
+  }
   headers['Aurora-Pin'] = fileAttr.pin;
   if (fileAttr.isTar) {
     headers['Aurora-Collection'] = true;
