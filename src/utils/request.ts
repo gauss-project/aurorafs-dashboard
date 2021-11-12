@@ -33,6 +33,12 @@ export const getConfirmation = (mes = '', callback = () => {}): void => {
   removeAllPendingRequestsRecord();
   callback();
 };
+export const cancelProgressArr = ['/metrics'];
+
+export const cancelProgress = (uri: string): boolean => {
+  const url = new URL(uri);
+  return cancelProgressArr.some((item) => item === url.pathname);
+};
 
 request.interceptors.request.use(
   (config) => {
@@ -51,8 +57,10 @@ request.interceptors.request.use(
       pending[reqData] = c;
     });
 
-    requestIndex++;
-    NProgress.start();
+    if (config.url && !cancelProgress(config.url)) {
+      requestIndex++;
+      NProgress.start();
+    }
     return config;
   },
   (error) => {
@@ -62,9 +70,11 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
   (response) => {
-    responseIndex++;
-    if (responseIndex === requestIndex) {
-      NProgress.done();
+    if (response.config.url && !cancelProgress(response.config.url)) {
+      responseIndex++;
+      if (responseIndex === requestIndex) {
+        NProgress.done();
+      }
     }
     return response;
   },

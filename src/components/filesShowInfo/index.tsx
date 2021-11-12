@@ -3,20 +3,21 @@ import styles from './index.less';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import warningSvg from '@/assets/icon/warning.svg';
-import publicIp from 'public-ip';
 
 const FilesShowInfo: React.FC = () => {
   const dispatch = useDispatch();
-  const [ip, setIp] = useState('');
   const { debugApi, health, topology } = useSelector(
     (state: Models) => state.global,
   );
   useEffect(() => {
-    publicIp.v4().then((res) => {
-      setIp(res);
-    });
     dispatch({
       type: 'info/getAddresses',
+      payload: {
+        url: debugApi,
+      },
+    });
+    dispatch({
+      type: 'global/getTopology',
       payload: {
         url: debugApi,
       },
@@ -30,8 +31,12 @@ const FilesShowInfo: React.FC = () => {
         <span className={styles.value}>{addresses?.overlay}</span>
       </div>
       <div>
-        <span className={styles.key}>IP</span>:&nbsp;&nbsp;
-        <span className={styles.value}>{ip}</span>
+        <span className={styles.key}>IPv4</span>:&nbsp;&nbsp;
+        <span className={styles.value}>{addresses?.public_ip?.ipv4}</span>
+      </div>
+      <div>
+        <span className={styles.key}>IPv6</span>:&nbsp;&nbsp;
+        <span className={styles.value}>{addresses?.public_ip?.ipv6}</span>
       </div>
       <div>
         <span className={styles.key}>Connected</span>:&nbsp;&nbsp;
@@ -47,13 +52,15 @@ const FilesShowInfo: React.FC = () => {
             : 'Light Node'}
         </span>
       </div>
-      <div className={styles.tips}>
-        <img alt="warning" src={warningSvg} style={{ width: 30 }} />
-        <span className={styles.warning}>
-          If the node mode is light, the file you upload here could not be
-          downloaded by other nodes
-        </span>
-      </div>
+      {!health?.fullNode && (
+        <div className={styles.tips}>
+          <img alt="warning" src={warningSvg} style={{ width: 30 }} />
+          <span className={styles.warning}>
+            If the node mode is light, the file you upload here could not be
+            downloaded by other nodes
+          </span>
+        </div>
+      )}
     </div>
   );
 };

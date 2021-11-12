@@ -1,6 +1,9 @@
 @global_width: 1100px;
 @nav_width: 250px;
 
+span {
+  padding: 0;
+}
 body {
   font-size: 16px;
   background-color: #fafafa;
@@ -52,6 +55,19 @@ body {
   border: 1px solid @main_color !important;
 }
 
-.info_content span {
-  color: #666;
+.info_content {
+  ul,
+  li {
+    padding: 0;
+    margin: 0;
+  }
+
+  div {
+    height: 30px;
+    line-height: 30px;
+  }
+
+  span {
+    color: #666;
+  }
 }

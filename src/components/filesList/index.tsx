@@ -1,11 +1,17 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Table, Tooltip, Popconfirm, Progress, Modal } from 'antd';
 
 const { confirm } = Modal;
 import { ColumnsType } from 'antd/es/table';
 import { AllFileInfo } from '@/declare/api';
 import styles from './index.less';
-import { DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  FolderOpenOutlined,
+  ExclamationCircleOutlined,
+  VerticalAlignBottomOutlined,
+  ToTopOutlined,
+} from '@ant-design/icons';
 import CopyText from '@/components/copyText';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
@@ -15,13 +21,17 @@ import { getSize, stringToBinary, getProgress } from '@/utils/util';
 import pinSvg from '@/assets/icon/pin.svg';
 import unPinSvg from '@/assets/icon/unPin.svg';
 import { downloadFile } from '@/api/api';
+import Popup from '@/components/popup';
+import SourceInfo from '@/components/sourceInfo';
 
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
-  const { api } = useSelector((state: Models) => state.global);
+  const { api, metrics } = useSelector((state: Models) => state.global);
   const { filesList, downloadList, filesInfo } = useSelector(
     (state: Models) => state.files,
   );
+
+  const [hashInfo, setHashInfo] = useState<AllFileInfo | null>(null);
 
   const pinOrUnPin = (hash: string, pinState: boolean): void => {
     dispatch({
@@ -49,6 +59,10 @@ const FilesList: React.FC = () => {
       },
     });
   };
+
+  const clickHandle = (hashInfo: AllFileInfo): void => {
+    setHashInfo(hashInfo);
+  };
   // table field
   const columns: ColumnsType<AllFileInfo> = [
     {
@@ -64,32 +78,19 @@ const FilesList: React.FC = () => {
           <span style={{ marginRight: 5, color: '#666' }}>
             {record.fileHash}
           </span>
-          <CopyText text={record.fileHash} />
+          <CopyText text={record.fileHash} />{' '}
+          <ExclamationCircleOutlined
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              clickHandle(record);
+            }}
+          />
           {downloadList.indexOf(record.fileHash) !== -1 && (
             <div style={{ width: '70%', display: 'flex' }}>
               <Progress
                 percent={getProgress(record.bitVector.b)}
                 showInfo={false}
               />
-              <Tooltip
-                placement="bottom"
-                title={<ChunkTooltip chunk={record.bitVector.b} />}
-                color="#fff"
-                trigger="click"
-                arrowPointAtCenter
-                overlayClassName={styles.chunkTooltip}
-                overlayInnerStyle={{ minHeight: 0 }}
-              >
-                <div
-                  style={{
-                    marginLeft: '10px',
-                    color: '#F59A23',
-                    cursor: 'default',
-                  }}
-                >
-                  details
-                </div>
-              </Tooltip>
             </div>
           )}
         </>
@@ -106,7 +107,6 @@ const FilesList: React.FC = () => {
             : getSize(record.fileSize * 256, 1)}
         </span>
       ),
-      // align: 'center',
     },
     {
       title: <div className={styles.head}>Pin/UnPin</div>,
@@ -133,27 +133,6 @@ const FilesList: React.FC = () => {
       ),
       align: 'center',
     },
-    // {
-    //  title: <div className={styles.head}>Download</div>,
-    //  key: 'local',
-    //   render: (text, record) => <>
-    //     {
-    //       !record.sub && <div onClick={async () => {
-    //         const data = await downloadFile(api, record.fileHash);
-    //         let link = document.createElement('a');
-    //         link.download = window.decodeURI(data.headers['content-disposition'].split('=')[1].slice(1, -1));
-    //         link.href = URL.createObjectURL(new Blob([data.data], { type: data.data.type }));
-    //         document.body.appendChild(link);
-    //         link.click();
-    //         URL.revokeObjectURL(link.href);
-    //       }}>
-    //         <DownloadOutlined className={"mainColor iconSize"} />
-    //       </div>
-    //     }
-    //   </>
-    //   ,
-    //   align: 'center',
-    // },
     {
       title: <div className={styles.head}>Open</div>,
       key: 'open',
@@ -214,6 +193,15 @@ const FilesList: React.FC = () => {
   }, [filesList, filesInfo]);
   return (
     <div>
+      <div style={{ fontSize: 20 }}>
+        <span>
+          <VerticalAlignBottomOutlined />{' '}
+          {getSize(metrics.downloadSpeed * 256 * 1024, 0)}/s
+        </span>
+        <span style={{ marginLeft: 20 }}>
+          <ToTopOutlined /> {getSize(metrics.uploadSpeed * 256 * 1024, 0)}/s
+        </span>
+      </div>
       <Table<AllFileInfo>
         className={styles.filesList}
         dataSource={data}
@@ -223,6 +211,26 @@ const FilesList: React.FC = () => {
         locale={{ emptyText: 'No Data' }}
         scroll={filesList.length > 7 ? { y: 560 } : {}}
       />
+      <Popup
+        visible={!!hashInfo}
+        onCancel={() => {
+          setHashInfo(null);
+        }}
+        title={
+          <>
+            <div style={{ fontSize: 16 }}>
+              {(hashInfo?.name?.length as number) > 20
+                ? hashInfo?.name?.substr(0, 20) + '...'
+                : hashInfo?.name}
+            </div>
+            <span style={{ marginRight: 5, color: '#666' }}>
+              {hashInfo?.fileHash}
+            </span>
+          </>
+        }
+      >
+        {hashInfo && <SourceInfo hashInfo={hashInfo} />}
+      </Popup>
     </div>
   );
 };

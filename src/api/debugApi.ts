@@ -1,34 +1,51 @@
 import request from '@/utils/request';
-import {AxiosResponse} from "axios"
-import {Topology,Peers} from '@/declare/api'
+import { AxiosResponse } from 'axios';
+import { Topology, Peers, ChunkSource } from '@/declare/api';
 
-export const getHealth = (url:string):Promise<any> => {
+export const getHealth = (url: string): Promise<any> => {
   return request({
-    url:url + "/health",
-  })
-}
+    url: url + '/health',
+  });
+};
 
-export const getTopology = (url:string):Promise<AxiosResponse<Topology>> => {
+export const getTopology = (url: string): Promise<AxiosResponse<Topology>> => {
   return request({
-    url:url + "/topology",
-  })
-}
+    url: url + '/topology',
+  });
+};
 
-export const getPeers= (url:string):Promise<AxiosResponse<Peers>> => {
+export const getPeers = (url: string): Promise<AxiosResponse<Peers>> => {
   return request({
-    url:url + "/peers",
-  })
-}
+    url: url + '/peers',
+  });
+};
 
-export const getAddresses= (url:string):Promise<AxiosResponse<Peers>> => {
+export const getAddresses = (url: string): Promise<AxiosResponse<Peers>> => {
   return request({
-    url:url + "/addresses",
-  })
-}
+    url: url + '/addresses',
+  });
+};
+
+export const getMetrics = (url: string): Promise<AxiosResponse<string>> => {
+  return request({
+    url: url + '/metrics',
+  });
+};
+
+export const getChunkSource = (
+  url: string,
+  hash: string,
+): Promise<AxiosResponse<ChunkSource>> => {
+  return request({
+    url: url + '/chunk/source/' + hash,
+  });
+};
 
 export default {
   getHealth,
   getTopology,
   getPeers,
-  getAddresses
-}
+  getAddresses,
+  getMetrics,
+  getChunkSource,
+};

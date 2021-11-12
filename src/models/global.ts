@@ -1,4 +1,4 @@
-import ModelsType from '@/declare/modelType';
+import ModelsType, { Models } from '@/declare/modelType';
 import {
   defaultDebugApi,
   defaultApi,
@@ -28,6 +28,18 @@ export interface State {
     bootNodeMode: boolean;
   } | null;
   topology: Topology;
+  metrics: {
+    // retrievalDownload: number,
+    // retrievalUpload: number,
+    // chunkInfoDownload: number,
+    // chunkInfoUpload: number
+    downloadNumber: number;
+    uploadNumber: number;
+    downloadTotal: number;
+    uploadTotal: number;
+    downloadSpeed: number;
+    uploadSpeed: number;
+  };
 }
 
 export default {
@@ -38,6 +50,14 @@ export default {
     debugApi: checkSession(sessionStorageDebugApi) || defaultDebugApi,
     health: null,
     topology: {},
+    metrics: {
+      downloadNumber: -1,
+      uploadNumber: -1,
+      downloadTotal: 0,
+      uploadTotal: 0,
+      downloadSpeed: 0,
+      uploadSpeed: 0,
+    },
   },
   reducers: {
     setApi(state, { payload }) {
@@ -74,6 +94,20 @@ export default {
       return {
         ...state,
         topology,
+      };
+    },
+    setMetrics(state, { payload }) {
+      const { metrics } = payload;
+      return {
+        ...state,
+        metrics,
+      };
+    },
+    setSpeed(state, { payload }) {
+      const { speed } = payload;
+      return {
+        ...state,
+        speed,
       };
     },
   },
@@ -134,6 +168,56 @@ export default {
         });
       } catch (err) {
         if (err instanceof Error) message.info(err.message);
+      }
+    },
+    *getMetrics({ payload }, { call, put, select }) {
+      const { url } = payload;
+      const { data } = yield call(DebugApi.getMetrics, url);
+      const { metrics } = yield select((state: Models) => state.global);
+      const retrievalDownload =
+        Number(
+          data.match(/\baurora_retrieval_total_retrieved\b\s(\d+)/)?.[1],
+        ) ?? 0;
+      const retrievalUpload =
+        Number(
+          data.match(/\baurora_retrieval_total_transferred\b\s(\d+)/)?.[1],
+        ) ?? 0;
+      const chunkInfoDownload =
+        Number(
+          data.match(/\baurora_chunkinfo_total_retrieved\b\s(\d+)/)?.[1],
+        ) ?? 0;
+      const chunkInfoUpload =
+        Number(
+          data.match(/\baurora_chunkinfo_total_transferred\b\s(\d+)/)?.[1],
+        ) ?? 0;
+      if (metrics.downloadNumber === -1 || metrics.uploadNumber === -1) {
+        yield put({
+          type: 'setMetrics',
+          payload: {
+            metrics: {
+              downloadNumber: retrievalDownload,
+              uploadNumber: retrievalUpload,
+              downloadTotal: retrievalDownload + chunkInfoDownload,
+              uploadTotal: retrievalUpload + chunkInfoUpload,
+              downloadSpeed: 0,
+              uploadSpeed: 0,
+            },
+          },
+        });
+      } else {
+        yield put({
+          type: 'setMetrics',
+          payload: {
+            metrics: {
+              downloadNumber: retrievalDownload,
+              uploadNumber: retrievalUpload,
+              downloadTotal: retrievalDownload + chunkInfoDownload,
+              uploadTotal: retrievalUpload + chunkInfoUpload,
+              downloadSpeed: retrievalDownload - metrics.downloadNumber,
+              uploadSpeed: retrievalUpload - metrics.uploadNumber,
+            },
+          },
+        });
       }
     },
   },

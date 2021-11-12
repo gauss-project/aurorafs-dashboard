@@ -55,6 +55,13 @@ const Layouts: React.FC = (props) => {
       icon: <SettingOutlined />,
     },
   ];
+
+  const getMetrics = () => {
+    dispatch({
+      type: 'global/getMetrics',
+      payload: { url: debugApi },
+    });
+  };
   const clickHandle: ClickHandle = (newPath) => {
     if (path !== newPath) {
       history.push(newPath);
@@ -85,6 +92,12 @@ const Layouts: React.FC = (props) => {
       });
     });
   }, []);
+  useEffect(() => {
+    if (status) {
+      getMetrics();
+      setInterval(getMetrics, 15 * 1000);
+    }
+  }, [status]);
 
   return (
     <>

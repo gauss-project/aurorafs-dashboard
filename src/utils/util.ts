@@ -21,7 +21,11 @@ export const isURL = (url: string): boolean => {
   return re.test(url);
 };
 
-export const getSize = (size: number, level: number = 0): string => {
+export const getSize = (
+  size: number,
+  level: number = 0,
+  max: number = 0,
+): string => {
   let levelList: string[] = ['B', 'KB', 'M', 'G', 'T'];
   let n: number = 0;
   while (size >= Math.pow(1024, n + 1)) {
@@ -40,19 +44,24 @@ export const stringToBinary = (
   let value: string = '';
   let uStr: string = window.atob(b);
   for (let i: number = 0; i < uStr.length; i++) {
-    value += uStr.charCodeAt(i).toString(2);
+    let char = uStr.charCodeAt(i).toString(2);
+    char = char.split('').reverse().join('');
+    value += char + '0'.repeat(8 - char.length);
   }
-  if (len > value.length) {
-    return (
-      '1'.repeat(size) + value + '0'.repeat(Math.abs(len + 1 - value.length))
-    );
+  if (len < value.length) {
+    value = value.substr(0, len);
   }
+  console.log(value.length);
   return '1'.repeat(size) + value;
 };
 
 export const getProgress = (b: string): number => {
   const oneLen: number = b.match(/1/g)?.length || 0;
   return (oneLen / b.length) * 100;
+};
+
+export const getDownloadNumber = (b: string): number => {
+  return b.match(/1/g)?.length || 0;
 };
 
 export const getSuffix = (fileName: string): string | undefined => {

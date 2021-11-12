@@ -1,3 +1,5 @@
+import { getChunkSource } from '@/api/debugApi';
+
 export declare type Topology = {
   baseAddr?: string;
   population?: number;
@@ -29,6 +31,11 @@ export declare type Addresses = {
   underlay?: string[];
   public_key?: string;
   network_id?: number;
+  public_ip?: {
+    ipv4: string;
+    ipv6: string;
+  };
+  nat_route?: string[];
 };
 
 export declare type FileType = {
@@ -75,4 +82,17 @@ export declare type FileAttr = {
   name: string;
   dOpen: string;
   eOPen: string;
+};
+
+export declare type ChunkSource = {
+  pyramidSource?: string;
+  chunkSource?:
+    | {
+        overlay: string;
+        chunkBit: {
+          len: number;
+          b: string;
+        };
+      }[]
+    | null;
 };

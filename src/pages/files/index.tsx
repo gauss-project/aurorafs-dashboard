@@ -7,6 +7,7 @@ import Download from '@/components/download';
 import FilesList from '@/components/filesList';
 import Loading from '@/components/loading';
 import { stringToBinary } from '@/utils/util';
+import Popup from '@/components/popup';
 
 const Main: React.FC = (props) => {
   let dispatch = useDispatch();
