@@ -16,6 +16,12 @@ export declare type Topology = {
       connectedPeers?: null | string[];
     }
   >;
+  bootNodes?: {
+    connected: number;
+    connectedPeers: null | Peers;
+    disconnectedPeers: null | Peers;
+    population: number;
+  };
   lightNodes?: {
     connected: number;
     connectedPeers: null | Peers;

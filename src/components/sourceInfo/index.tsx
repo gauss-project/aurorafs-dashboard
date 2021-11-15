@@ -41,34 +41,51 @@ const SourceInfo: React.FC<Props> = (props) => {
     let arr: Data[] = [];
     data.chunkSource?.forEach((item, index) => {
       const binary = stringToBinary(item.chunkBit.b, item.chunkBit.len, 0);
-      console.log(binary);
-      const downloadLen = getDownloadNumber(binary);
-      if (!arr.length || arr[index - 1].downloadLen > downloadLen) {
-        arr.push({
-          ...item,
-          chunkBit: {
-            len: item.chunkBit.len + len,
-            b: binary,
-          },
-          downloadLen,
-        });
-      } else {
-        arr.unshift({
-          ...item,
-          chunkBit: {
-            len: item.chunkBit.len + len,
-            b: binary,
-          },
-          downloadLen,
-        });
+      let downloadLen = getDownloadNumber(binary);
+      if (item.overlay === data.pyramidSource) {
+        downloadLen += len;
       }
+      item.chunkBit.len += len;
+      // if (!arr.length || arr[index - 1].downloadLen > downloadLen) {
+      //   arr.push({
+      //     ...item,
+      //     chunkBit: {
+      //       len: item.chunkBit.len,
+      //       b: binary,
+      //     },
+      //     downloadLen,
+      //   });
+      // } else {
+      //   arr.unshift({
+      //     ...item,
+      //     chunkBit: {
+      //       len: item.chunkBit.len + len,
+      //       b: binary,
+      //     },
+      //     downloadLen,
+      //   });
+      // }
+      let preIndex = index - 1;
+      let current = {
+        ...item,
+        chunkBit: {
+          len: item.chunkBit.len,
+          b: binary,
+        },
+        downloadLen,
+      };
+      while (preIndex >= 0 && arr[preIndex].downloadLen < downloadLen) {
+        arr[preIndex + 1] = arr[preIndex];
+        preIndex--;
+      }
+      arr[preIndex + 1] = current;
     });
     return arr;
   };
 
   const getChunkArr = (data: Data[]) => {
     let chunkArr: number[] = [];
-    let n = data[0].chunkBit.len;
+    let n = data[0].chunkBit.len - len;
     for (let i = 0; i < n - len; i++) {
       for (let j = 0; j < data.length; j++) {
         chunkArr[i] = 0;
@@ -114,10 +131,11 @@ const SourceInfo: React.FC<Props> = (props) => {
                       style={{
                         width: 15,
                         height: 15,
-                        backgroundColor: colorArr[index + 1],
+                        backgroundColor:
+                          index < 5 ? colorArr[index + 1] : colorArr[6],
                       }}
                     />
-                    <div>{item.overlay}</div>
+                    <div className={'greyColor'}>{item.overlay}</div>
                     <div>
                       {((item.downloadLen / item.chunkBit.len) * 100).toFixed(
                         2,
