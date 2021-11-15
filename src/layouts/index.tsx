@@ -94,6 +94,7 @@ const Layouts: React.FC = (props) => {
   }, []);
   useEffect(() => {
     if (status) {
+      console.log(debugApi);
       getMetrics();
       setInterval(getMetrics, 15 * 1000);
     }

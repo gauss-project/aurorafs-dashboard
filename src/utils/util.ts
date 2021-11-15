@@ -1,4 +1,5 @@
 import { FileSub } from '@/declare/api';
+import moment from 'moment';
 
 export const checkSession = (key: string): string | false => {
   const value = sessionStorage.getItem(key);
@@ -21,11 +22,7 @@ export const isURL = (url: string): boolean => {
   return re.test(url);
 };
 
-export const getSize = (
-  size: number,
-  level: number = 0,
-  max: number = 0,
-): string => {
+export const getSize = (size: number, level: number = 0): string => {
   let levelList: string[] = ['B', 'KB', 'M', 'G', 'T'];
   let n: number = 0;
   while (size >= Math.pow(1024, n + 1)) {
@@ -51,7 +48,6 @@ export const stringToBinary = (
   if (len < value.length) {
     value = value.substr(0, len);
   }
-  console.log(value.length);
   return '1'.repeat(size) + value;
 };
 
@@ -89,3 +85,25 @@ export function decodeUnicode(str: string): string {
   str = str.replace(/\\/g, '%');
   return unescape(str);
 }
+
+export const initChartData = (n: number): any[] => {
+  const timestamp = moment().valueOf();
+  const arr: any[] = [];
+  for (let i = 0; i < n; i++) {
+    arr.push({
+      time: moment(timestamp - (n - i - 1) * 15 * 1000)
+        .utcOffset(480)
+        .format('HH.mm.ss'),
+      category: 'retrieved',
+      speed: 0,
+    });
+    arr.push({
+      time: moment(timestamp - (n - i - 1) * 15 * 1000)
+        .utcOffset(480)
+        .format('HH.mm.ss'),
+      category: 'transferred',
+      speed: 0,
+    });
+  }
+  return arr;
+};

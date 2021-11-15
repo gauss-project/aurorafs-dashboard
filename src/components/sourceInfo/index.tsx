@@ -41,6 +41,7 @@ const SourceInfo: React.FC<Props> = (props) => {
     let arr: Data[] = [];
     data.chunkSource?.forEach((item, index) => {
       const binary = stringToBinary(item.chunkBit.b, item.chunkBit.len, 0);
+      console.log(binary);
       const downloadLen = getDownloadNumber(binary);
       if (!arr.length || arr[index - 1].downloadLen > downloadLen) {
         arr.push({
@@ -85,15 +86,13 @@ const SourceInfo: React.FC<Props> = (props) => {
   };
 
   useEffect(() => {
-    getChunkSource(debugApi, hash)
-      .then(({ data }) => {
-        if (data.chunkSource) {
-          setSource(changeData(data));
-        } else {
-          setSource(null);
-        }
-      })
-      .catch();
+    getChunkSource(debugApi, hash).then(({ data }) => {
+      if (data.chunkSource) {
+        setSource(changeData(data));
+      } else {
+        setSource(null);
+      }
+    });
   }, []);
   return (
     <>

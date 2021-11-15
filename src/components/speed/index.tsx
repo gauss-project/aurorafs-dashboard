@@ -12,29 +12,9 @@ export declare type DataType = {
   speed: number;
 };
 const Speed: React.FC = () => {
-  const { metrics } = useSelector((state: Models) => state.global);
-  const createData = (n: number): DataType[] => {
-    const timestamp = moment().valueOf();
-    const arr: DataType[] = [];
-    for (let i = 0; i < n; i++) {
-      arr.push({
-        time: moment(timestamp - (n - i - 1) * 15 * 1000)
-          .utcOffset(480)
-          .format('HH.mm.ss'),
-        category: 'incomming',
-        speed: 0,
-      });
-      arr.push({
-        time: moment(timestamp - (n - i - 1) * 15 * 1000)
-          .utcOffset(480)
-          .format('HH.mm.ss'),
-        category: 'outgoing',
-        speed: 0,
-      });
-    }
-    return arr;
-  };
-  const [data, setData] = useState<DataType[]>(createData(60));
+  const { metrics, chartData, debugApi } = useSelector(
+    (state: Models) => state.global,
+  );
   let chart = useRef<any>(null);
   const init = (data: DataType[]): void => {
     chart.current = new Chart({
@@ -79,7 +59,7 @@ const Speed: React.FC = () => {
     chart.current
       .line()
       .position('time*speed')
-      .color('category')
+      .color('category', '#4147C4-#b8741a')
       .shape('smooth')
       .tooltip(
         'time*category*speed',
@@ -94,77 +74,62 @@ const Speed: React.FC = () => {
     chart.current
       .point()
       .position('time*speed')
-      .color('category')
-      .shape('circle');
+      .color('category', '#4147C4-#b8741a')
+      .shape('circle')
+      .tooltip(false);
 
     chart.current.render();
   };
   useEffect(() => {
     console.log(metrics);
-    let newData: DataType[] = data.concat([
-      {
-        time: moment().utcOffset(480).format('HH.mm.ss'),
-        category: 'incomming',
-        speed: (metrics.downloadSpeed * 256) / 1024 / 15,
-      },
-      {
-        time: moment().utcOffset(480).format('HH.mm.ss'),
-        category: 'outgoing',
-        speed: (metrics.uploadSpeed * 256) / 1024 / 15,
-      },
-    ]);
-    newData.splice(0, 2);
-    setData(newData);
-  }, [metrics]);
-  useEffect(() => {
-    if (chart.current && data.length) {
-      chart.current.changeData(data);
+    if (chart.current && chartData.length) {
+      chart.current.changeData(chartData);
     } else {
-      init(data);
+      init(chartData);
     }
-  }, [data]);
+  }, [chartData]);
   return (
     <div className={styles.speed}>
       <div style={{ display: 'flex' }}>
         <div style={{ display: 'flex' }}>
           <div
             className={styles.block}
-            style={{ backgroundColor: '#5B8FF9' }}
+            style={{ backgroundColor: '#4147C4' }}
           />
           <div>
             <div>
-              <span className={styles.key}>incomming:</span>
+              <span className={styles.key}>retrieved:</span>
               <span className={styles.value}>
-                {getSize(metrics.downloadSpeed * 256 * 1024, 0)}/s
-              </span>
-            </div>
-            <div>
-              <span className={styles.key}>total:</span>
-              <span className={styles.value}>
-                {getSize(metrics.downloadTotal * 256, 1)}
+                {getSize(metrics.downloadSpeed * 256, 1)}/s
               </span>
             </div>
           </div>
         </div>
-        <div style={{ marginLeft: 100, display: 'flex' }}>
+        <div style={{ marginLeft: 50, display: 'flex' }}>
           <div
             className={styles.block}
-            style={{ backgroundColor: '#5AD8A6' }}
+            style={{ backgroundColor: '#b8741a' }}
           />
           <div>
             <div>
-              <span className={styles.key}>outgoing:</span>
+              <span className={styles.key}>transferred:</span>
               <span className={styles.value}>
-                {getSize(metrics.uploadSpeed * 256 * 1024, 0)}/s
-              </span>
-            </div>
-            <div>
-              <span className={styles.key}> total:</span>
-              <span className={styles.value}>
-                {getSize(metrics.uploadTotal * 256, 1)}
+                {getSize(metrics.uploadSpeed * 256, 1)}/s
               </span>
             </div>
           </div>
+        </div>
+        <div style={{ marginLeft: 100 }}>
+          <span className={styles.key}>retrievedTotal:</span>
+          <span className={styles.value}>
+            {getSize(metrics.downloadTotal * 256, 1)}
+          </span>
+        </div>
+        <div style={{ marginLeft: 50 }}>
+          <span className={styles.key}>transferredTotal:</span>
+          <span className={styles.value}>
+            {getSize(metrics.uploadTotal * 256, 1)}
+          </span>
         </div>
       </div>
       <div id="speed" />

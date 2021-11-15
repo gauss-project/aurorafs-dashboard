@@ -5,7 +5,7 @@ import {
   sessionStorageDebugApi,
   sessionStorageApi,
 } from '@/config/url';
-import { checkSession } from '@/utils/util';
+import { checkSession, initChartData } from '@/utils/util';
 import { isStatus } from '@/api/common';
 import { message, Button } from 'antd';
 import { Topology } from '@/declare/api';
@@ -13,8 +13,15 @@ import DebugApi from '@/api/debugApi';
 import { getConfirmation } from '@/utils/request';
 import semver from 'semver';
 import { auroraVersion } from '@/config/version';
+import moment from 'moment';
 
 export type ErrorType = 'apiError' | 'versionError';
+
+export type ChartData = {
+  time: string;
+  category: 'retrieved' | 'transferred';
+  speed: number;
+};
 
 export interface State {
   status: boolean;
@@ -29,10 +36,6 @@ export interface State {
   } | null;
   topology: Topology;
   metrics: {
-    // retrievalDownload: number,
-    // retrievalUpload: number,
-    // chunkInfoDownload: number,
-    // chunkInfoUpload: number
     downloadNumber: number;
     uploadNumber: number;
     downloadTotal: number;
@@ -40,6 +43,7 @@ export interface State {
     downloadSpeed: number;
     uploadSpeed: number;
   };
+  chartData: ChartData[];
 }
 
 export default {
@@ -58,6 +62,7 @@ export default {
       downloadSpeed: 0,
       uploadSpeed: 0,
     },
+    chartData: [],
   },
   reducers: {
     setApi(state, { payload }) {
@@ -110,12 +115,20 @@ export default {
         speed,
       };
     },
+    setChartData(state, { payload }) {
+      const { chartData } = payload;
+      return {
+        ...state,
+        chartData,
+      };
+    },
   },
   effects: {
     *getStatus({ payload }, { call, put }) {
       const { api, debugApi } = payload;
       try {
         const data = yield call(isStatus, api, debugApi);
+        yield put({ type: 'setApi', payload: { api, debugApi } });
         const aurora = semver.satisfies(
           semver.coerce(data[1].data.version)?.version as string,
           `>=${auroraVersion}`,
@@ -153,7 +166,6 @@ export default {
             refresh: false,
           },
         });
-        yield put({ type: 'setApi', payload: { api, debugApi } });
       }
     },
     *getTopology({ payload }, { call, put }) {
@@ -173,7 +185,9 @@ export default {
     *getMetrics({ payload }, { call, put, select }) {
       const { url } = payload;
       const { data } = yield call(DebugApi.getMetrics, url);
-      const { metrics } = yield select((state: Models) => state.global);
+      const { metrics, chartData } = yield select(
+        (state: Models) => state.global,
+      );
       const retrievalDownload =
         Number(
           data.match(/\baurora_retrieval_total_retrieved\b\s(\d+)/)?.[1],
@@ -204,6 +218,12 @@ export default {
             },
           },
         });
+        yield put({
+          type: 'setChartData',
+          payload: {
+            chartData: initChartData(60),
+          },
+        });
       } else {
         yield put({
           type: 'setMetrics',
@@ -216,6 +236,25 @@ export default {
               downloadSpeed: retrievalDownload - metrics.downloadNumber,
               uploadSpeed: retrievalUpload - metrics.uploadNumber,
             },
+          },
+        });
+        let newChartData: ChartData[] = chartData.concat([
+          {
+            time: moment().utcOffset(480).format('HH.mm.ss'),
+            category: 'retrieved',
+            speed: (metrics.downloadSpeed * 256) / 1024 / 15,
+          },
+          {
+            time: moment().utcOffset(480).format('HH.mm.ss'),
+            category: 'transferred',
+            speed: (metrics.uploadSpeed * 256) / 1024 / 15,
+          },
+        ]);
+        newChartData.splice(0, 2);
+        yield put({
+          type: 'setChartData',
+          payload: {
+            chartData: newChartData,
           },
         });
       }
