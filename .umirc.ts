@@ -2,13 +2,14 @@ import { defineConfig } from 'umi';
 
 import routes from './src/config/routes';
 import theme from './src/config/theme';
+
 export default defineConfig({
   routes,
   theme,
   links: [
     {
       rel: 'icon',
-      href: 'https://www.aufs.io/main/wp-content/uploads/2021/09/cropped-aurorafs_logo-03-32x32.png',
+      href: './logo.ico',
     },
   ],
   title: 'AuFs Dashboard',
@@ -25,6 +26,7 @@ export default defineConfig({
   targets: {
     ie: 11,
   },
-  // publicPath: './',
+  dynamicImport: {},
+  publicPath: './',
   mfsu: {},
 });
