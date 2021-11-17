@@ -70,10 +70,8 @@ const FilesList: React.FC = () => {
       key: 'hash',
       render: (text, record) => (
         <>
-          <div style={{ fontSize: 16 }}>
-            {(record.name?.length as number) > 20
-              ? record.name?.substr(0, 20) + '...'
-              : record.name}
+          <div style={{ fontSize: 16 }} className={styles.fileName}>
+            {record.name}
           </div>
           <span style={{ marginRight: 5, color: '#666' }}>
             {record.fileHash}
@@ -210,11 +208,7 @@ const FilesList: React.FC = () => {
         }}
         title={
           <>
-            <div style={{ fontSize: 16 }}>
-              {(hashInfo?.name?.length as number) > 20
-                ? hashInfo?.name?.substr(0, 20) + '...'
-                : hashInfo?.name}
-            </div>
+            <div className={styles.name}>{hashInfo?.name}</div>
             <span style={{ marginRight: 5, color: '#666' }}>
               {hashInfo?.fileHash}
             </span>
