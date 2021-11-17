@@ -6,6 +6,7 @@ import moment from 'moment';
 import { getSize } from '@/utils/util';
 import styles from './index.less';
 import debugApi from '@/api/debugApi';
+import { speedTime } from '@/config/url';
 
 export declare type DataType = {
   time: string;

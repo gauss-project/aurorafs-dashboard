@@ -143,11 +143,16 @@ const Layouts: React.FC = (props) => {
               <div style={{ marginBottom: 20, fontSize: 14 }}>
                 <span className={'mainColor'}>
                   <ArrowDownOutlined />
-                  {getSize((metrics.downloadSpeed * 256) / 15, 1)}/s
+                  {getSize(
+                    (metrics.downloadSpeed * 256) / (speedTime / 1000),
+                    1,
+                  )}
+                  /s
                 </span>
                 <span style={{ marginLeft: 10 }} className={'uploadColor'}>
                   <ArrowUpOutlined />
-                  {getSize((metrics.uploadSpeed * 256) / 15, 1)}/s
+                  {getSize((metrics.uploadSpeed * 256) / (speedTime / 1000), 1)}
+                  /s
                 </span>
               </div>
               <div className={status ? styles.connected : styles.disconnected}>

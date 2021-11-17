@@ -244,12 +244,17 @@ export default {
             time: moment().utcOffset(480).format('HH.mm.ss'),
             category: 'retrieved',
             speed:
-              ((retrievalDownload - metrics.downloadNumber) * 256) / 1024 / 15,
+              ((retrievalDownload - metrics.downloadNumber) * 256) /
+              1024 /
+              (speedTime / 1000),
           },
           {
             time: moment().utcOffset(480).format('HH.mm.ss'),
             category: 'transferred',
-            speed: ((retrievalUpload - metrics.uploadNumber) * 256) / 1024 / 15,
+            speed:
+              ((retrievalUpload - metrics.uploadNumber) * 256) /
+              1024 /
+              (speedTime / 1000),
           },
         ]);
         newChartData.splice(0, 2);
