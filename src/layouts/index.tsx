@@ -8,6 +8,10 @@ import {
   FileTextOutlined,
   PartitionOutlined,
   SettingOutlined,
+  VerticalAlignBottomOutlined,
+  ToTopOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
 } from '@ant-design/icons';
 
 import { Models } from '@/declare/modelType';
@@ -16,6 +20,8 @@ import Loading from '@/components/loading';
 import { version } from '@/config/version';
 import { eventEmitter } from '@/utils/request';
 import logoImg from '@/assets/img/logo.png';
+import { getSize } from '@/utils/util';
+import { speedTime } from '@/config/url';
 
 type Nav = {
   text: string;
@@ -29,7 +35,7 @@ const Layouts: React.FC = (props) => {
   const { api, debugApi, refresh } = useSelector(
     (state: Models) => state.global,
   );
-  const { status } = useSelector((state: Models) => state.global);
+  const { status, metrics } = useSelector((state: Models) => state.global);
   const history = useHistory();
   const path = useLocation().pathname;
   const [active, setActive] = useState(path);
@@ -94,9 +100,8 @@ const Layouts: React.FC = (props) => {
   }, []);
   useEffect(() => {
     if (status) {
-      console.log(debugApi);
       getMetrics();
-      setInterval(getMetrics, 15 * 1000);
+      setInterval(getMetrics, speedTime);
     }
   }, [status]);
 
@@ -135,6 +140,16 @@ const Layouts: React.FC = (props) => {
               </ul>
             </nav>
             <div className={styles.statusInfo}>
+              <div style={{ marginBottom: 20, fontSize: 14 }}>
+                <span className={'mainColor'}>
+                  <ArrowDownOutlined />
+                  {getSize((metrics.downloadSpeed * 256) / 15, 1)}/s
+                </span>
+                <span style={{ marginLeft: 10 }} className={'uploadColor'}>
+                  <ArrowUpOutlined />
+                  {getSize((metrics.uploadSpeed * 256) / 15, 1)}/s
+                </span>
+              </div>
               <div className={status ? styles.connected : styles.disconnected}>
                 {status ? 'Connected' : 'Disconnected'}
               </div>

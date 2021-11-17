@@ -84,6 +84,7 @@ const FilesList: React.FC = () => {
             onClick={() => {
               clickHandle(record);
             }}
+            className={'mainColor'}
           />
           {downloadList.indexOf(record.fileHash) !== -1 && (
             <div style={{ width: '70%', display: 'flex' }}>
@@ -193,15 +194,6 @@ const FilesList: React.FC = () => {
   }, [filesList, filesInfo]);
   return (
     <div>
-      <div style={{ fontSize: 20 }}>
-        <span>
-          <VerticalAlignBottomOutlined />{' '}
-          {getSize(metrics.downloadSpeed * 256 * 1024, 0)}/s
-        </span>
-        <span style={{ marginLeft: 20 }}>
-          <ToTopOutlined /> {getSize(metrics.uploadSpeed * 256 * 1024, 0)}/s
-        </span>
-      </div>
       <Table<AllFileInfo>
         className={styles.filesList}
         dataSource={data}

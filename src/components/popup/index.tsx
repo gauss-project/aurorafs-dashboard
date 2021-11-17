@@ -29,12 +29,12 @@ const Popup: React.FC<Props> = (props) => {
             <div className={styles.header}>
               <span>{props.title}</span>
               <div>
-                <img
-                  src={full ? narrowSvg : enlargeSvg}
-                  alt={''}
-                  onClick={clickHandle}
-                  style={{ cursor: 'pointer' }}
-                />
+                {/*<img*/}
+                {/*  src={full ? narrowSvg : enlargeSvg}*/}
+                {/*  alt={''}*/}
+                {/*  onClick={clickHandle}*/}
+                {/*  style={{ cursor: 'pointer' }}*/}
+                {/*/>*/}
                 <img
                   src={deleteSvg}
                   onClick={() => {

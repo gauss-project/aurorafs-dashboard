@@ -73,32 +73,32 @@ export const mapQueryM3u8 = (sub: FileSub): boolean => {
   return false;
 };
 
-export function encodeUnicode(str: string): string {
+export const encodeUnicode = (str: string): string => {
   let res = [];
   for (let i = 0; i < str.length; i++) {
     res[i] = ('00' + str.charCodeAt(i).toString(16)).slice(-4);
   }
   return '\\u' + res.join('\\u');
-}
+};
 
-export function decodeUnicode(str: string): string {
+export const decodeUnicode = (str: string): string => {
   str = str.replace(/\\/g, '%');
   return unescape(str);
-}
+};
 
-export const initChartData = (n: number): any[] => {
+export const initChartData = (n: number, speedTime: number = 5000): any[] => {
   const timestamp = moment().valueOf();
   const arr: any[] = [];
   for (let i = 0; i < n; i++) {
     arr.push({
-      time: moment(timestamp - (n - i - 1) * 15 * 1000)
+      time: moment(timestamp - (n - i - 1) * speedTime)
         .utcOffset(480)
         .format('HH.mm.ss'),
       category: 'retrieved',
       speed: 0,
     });
     arr.push({
-      time: moment(timestamp - (n - i - 1) * 15 * 1000)
+      time: moment(timestamp - (n - i - 1) * speedTime)
         .utcOffset(480)
         .format('HH.mm.ss'),
       category: 'transferred',

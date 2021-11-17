@@ -49,7 +49,9 @@ const Setting: React.FC = (props) => {
       </div>
       <div style={{ marginTop: '50px' }}>
         <Button size={'large'} onClick={saveApi}>
-          <span style={{ letterSpacing: '2px', padding: '0 20px' }}>Save</span>
+          <span style={{ letterSpacing: '2px', padding: '0 20px' }}>
+            Connect
+          </span>
         </Button>
       </div>
     </>

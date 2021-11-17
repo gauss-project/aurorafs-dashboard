@@ -42,7 +42,9 @@ const SourceInfo: React.FC<Props> = (props) => {
     data.chunkSource?.forEach((item, index) => {
       const binary = stringToBinary(item.chunkBit.b, item.chunkBit.len, 0);
       let downloadLen = getDownloadNumber(binary);
+      console.log(item.overlay, data.pyramidSource);
       if (item.overlay === data.pyramidSource) {
+        console.log(1);
         downloadLen += len;
       }
       item.chunkBit.len += len;
@@ -85,8 +87,9 @@ const SourceInfo: React.FC<Props> = (props) => {
 
   const getChunkArr = (data: Data[]) => {
     let chunkArr: number[] = [];
-    let n = data[0].chunkBit.len - len;
-    for (let i = 0; i < n - len; i++) {
+    let n = props.hashInfo.bitVector.len;
+    console.log(n);
+    for (let i = 0; i < n; i++) {
       for (let j = 0; j < data.length; j++) {
         chunkArr[i] = 0;
         if (data[j].chunkBit.b[i] === '1') {
@@ -164,9 +167,9 @@ const SourceInfo: React.FC<Props> = (props) => {
       ) : (
         <div className={styles.chunk}>
           <ChunkTooltip
-            chunk={new Array(
-              props.hashInfo.size + props.hashInfo.bitVector.len,
-            ).fill(1)}
+            chunk={props.hashInfo.bitVector.b
+              .split('')
+              .map((item) => parseInt(item))}
           />
         </div>
       )}

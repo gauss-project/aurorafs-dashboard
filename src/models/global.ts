@@ -13,6 +13,7 @@ import DebugApi from '@/api/debugApi';
 import { getConfirmation } from '@/utils/request';
 import semver from 'semver';
 import { auroraVersion } from '@/config/version';
+import { speedTime } from '@/config/url';
 import moment from 'moment';
 
 export type ErrorType = 'apiError' | 'versionError';
@@ -221,7 +222,7 @@ export default {
         yield put({
           type: 'setChartData',
           payload: {
-            chartData: initChartData(60),
+            chartData: initChartData(120, speedTime),
           },
         });
       } else {
@@ -242,12 +243,13 @@ export default {
           {
             time: moment().utcOffset(480).format('HH.mm.ss'),
             category: 'retrieved',
-            speed: (metrics.downloadSpeed * 256) / 1024 / 15,
+            speed:
+              ((retrievalDownload - metrics.downloadNumber) * 256) / 1024 / 15,
           },
           {
             time: moment().utcOffset(480).format('HH.mm.ss'),
             category: 'transferred',
-            speed: (metrics.uploadSpeed * 256) / 1024 / 15,
+            speed: ((retrievalUpload - metrics.uploadNumber) * 256) / 1024 / 15,
           },
         ]);
         newChartData.splice(0, 2);
