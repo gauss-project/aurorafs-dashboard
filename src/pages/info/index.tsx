@@ -39,12 +39,16 @@ const Main: React.FC = () => {
       <div className={styles.topology}>
         <Card
           title={'Connected Full Peers'}
-          text={topology?.connected || 0}
+          text={
+            (topology?.connected || 0) + (topology?.bootNodes?.connected || 0)
+          }
           style={{ minWidth: 525, marginRight: 50, marginBottom: 30 }}
         />
         <Card
           title={'Discovered Full Peers'}
-          text={topology?.population || 0}
+          text={
+            (topology?.population || 0) + (topology?.bootNodes?.connected || 0)
+          }
           style={{ minWidth: 525, marginBottom: 30 }}
         />
       </div>

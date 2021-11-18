@@ -40,7 +40,9 @@ const FilesShowInfo: React.FC = () => {
       </div>
       <div>
         <span className={styles.key}>Connected</span>:&nbsp;&nbsp;
-        <span className={styles.value}>{topology?.connected || 0}</span>
+        <span className={styles.value}>
+          {(topology?.connected || 0) + (topology?.bootNodes?.connected || 0)}
+        </span>
       </div>
       <div>
         <span className={styles.key}>Node Mode</span>:&nbsp;&nbsp;
