@@ -48,25 +48,6 @@ const SourceInfo: React.FC<Props> = (props) => {
         downloadLen += len;
       }
       item.chunkBit.len += len;
-      // if (!arr.length || arr[index - 1].downloadLen > downloadLen) {
-      //   arr.push({
-      //     ...item,
-      //     chunkBit: {
-      //       len: item.chunkBit.len,
-      //       b: binary,
-      //     },
-      //     downloadLen,
-      //   });
-      // } else {
-      //   arr.unshift({
-      //     ...item,
-      //     chunkBit: {
-      //       len: item.chunkBit.len + len,
-      //       b: binary,
-      //     },
-      //     downloadLen,
-      //   });
-      // }
       let preIndex = index - 1;
       let current = {
         ...item,
@@ -165,12 +146,14 @@ const SourceInfo: React.FC<Props> = (props) => {
           </div>
         </div>
       ) : (
-        <div className={styles.chunk}>
-          <ChunkTooltip
-            chunk={props.hashInfo.bitVector.b
-              .split('')
-              .map((item) => parseInt(item))}
-          />
+        <div className={styles.content}>
+          <div className={styles.chunk}>
+            <ChunkTooltip
+              chunk={props.hashInfo.bitVector.b
+                .split('')
+                .map((item) => parseInt(item))}
+            />
+          </div>
         </div>
       )}
     </>
