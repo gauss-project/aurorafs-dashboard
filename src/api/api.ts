@@ -86,6 +86,7 @@ export const deleteFile = (url: string, hash: string): Promise<any> => {
   return request({
     url: url + '/aurora/' + hash,
     method: 'delete',
+    timeout: 30 * 1000,
   });
 };
 
