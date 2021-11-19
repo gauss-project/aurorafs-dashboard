@@ -192,11 +192,11 @@ export default {
       const retrievalDownload =
         Number(
           data.match(/\baurora_retrieval_total_retrieved\b\s(\d+)/)?.[1],
-        ) ?? 0;
+        ) ?? metrics.downloadNumber;
       const retrievalUpload =
         Number(
           data.match(/\baurora_retrieval_total_transferred\b\s(\d+)/)?.[1],
-        ) ?? 0;
+        ) ?? metrics.uploadNumber;
       const chunkInfoDownload =
         Number(
           data.match(/\baurora_chunkinfo_total_retrieved\b\s(\d+)/)?.[1],
@@ -212,8 +212,11 @@ export default {
             metrics: {
               downloadNumber: retrievalDownload,
               uploadNumber: retrievalUpload,
-              downloadTotal: retrievalDownload + chunkInfoDownload,
-              uploadTotal: retrievalUpload + chunkInfoUpload,
+              downloadTotal:
+                (retrievalDownload < 0 ? 0 : retrievalDownload) +
+                chunkInfoDownload,
+              uploadTotal:
+                (retrievalUpload < 0 ? 0 : retrievalUpload) + chunkInfoUpload,
               downloadSpeed: 0,
               uploadSpeed: 0,
             },
