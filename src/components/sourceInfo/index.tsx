@@ -36,15 +36,13 @@ const SourceInfo: React.FC<Props> = (props) => {
   const { fileHash: hash, size: len } = props.hashInfo;
   const { debugApi } = useSelector((state: Models) => state.global);
   const [showLimit, setShowLimit] = useState(true);
-  const [source, setSource] = useState<Data[] | null>([]);
+  const [source, setSource] = useState<Data[] | null>(null);
   const changeData = (data: ChunkSource) => {
     let arr: Data[] = [];
     data.chunkSource?.forEach((item, index) => {
       const binary = stringToBinary(item.chunkBit.b, item.chunkBit.len, 0);
       let downloadLen = getDownloadNumber(binary);
-      console.log(item.overlay, data.pyramidSource);
       if (item.overlay === data.pyramidSource) {
-        console.log(1);
         downloadLen += len;
       }
       item.chunkBit.len += len;
