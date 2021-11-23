@@ -7,13 +7,24 @@ import Card from '@/components/card';
 import PeersList from '@/components/peersList';
 import { time } from '@/config/url';
 import classNames from 'classnames';
+import { Button, Input, message, Modal } from 'antd';
+import { connect } from '@/api/debugApi';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [peersList, setPeersList] = useState('full');
   const { debugApi, topology } = useSelector((state: Models) => state.global);
+  const { addresses } = useSelector((state: Models) => state.info);
   const { peers } = useSelector((state: Models) => state.peers);
+  const [visible, setVisible] = useState(false);
+  const [connectValue, setConnectValue] = React.useState('');
   const getInfo = () => {
+    dispatch({
+      type: 'info/getAddresses',
+      payload: {
+        url: debugApi,
+      },
+    });
     dispatch({
       type: 'global/getTopology',
       payload: {
@@ -34,6 +45,24 @@ const Main: React.FC = () => {
       clearInterval(timer);
     };
   }, []);
+  const cancel = (): void => {
+    setConnectValue('');
+    setVisible(false);
+  };
+  const connectHandle = async (): Promise<void> => {
+    let underlay = connectValue.replace(/^(\/)*/, '');
+    try {
+      await connect(debugApi, underlay);
+      message.success('successful');
+    } catch (err) {
+      if (err instanceof Error) {
+        let errMessage =
+          err.message === 'already connected' ? 'already connected' : 'failed';
+        message.info(errMessage);
+      }
+    }
+    cancel();
+  };
   return (
     <>
       <div>
@@ -89,6 +118,49 @@ const Main: React.FC = () => {
             >
               Light Peers
             </h3>
+            <div className={styles.addConnection}>
+              <Button
+                onClick={() => {
+                  setVisible(true);
+                }}
+              >
+                Add Connection
+              </Button>
+              <Modal
+                title="Add Connection"
+                footer={[
+                  <Button key="back" onClick={cancel}>
+                    Cancel
+                  </Button>,
+                  <Button
+                    key="submit"
+                    disabled={!connectValue}
+                    onClick={connectHandle}
+                  >
+                    Add
+                  </Button>,
+                ]}
+                visible={visible}
+                onCancel={cancel}
+                bodyStyle={{ padding: '20px 15px' }}
+              >
+                <div>
+                  <div>
+                    Insert the peer underlay/overlay address you want to connect
+                    to.
+                  </div>
+                  <div>Example:</div>
+                  <div className={'greyColor'}>{addresses?.underlay?.[0]}</div>
+                  <div>or</div>
+                  <div className={'greyColor'}>{addresses?.overlay}</div>
+                  <Input
+                    value={connectValue}
+                    onChange={(e) => setConnectValue(e.target.value)}
+                    style={{ marginTop: 10 }}
+                  />
+                </div>
+              </Modal>
+            </div>
           </div>
           <PeersList
             peers={peers.filter(

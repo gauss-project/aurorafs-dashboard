@@ -9,8 +9,6 @@ import {
   DeleteOutlined,
   FolderOpenOutlined,
   ExclamationCircleOutlined,
-  VerticalAlignBottomOutlined,
-  ToTopOutlined,
 } from '@ant-design/icons';
 import CopyText from '@/components/copyText';
 import { useDispatch, useSelector } from 'umi';
@@ -24,9 +22,11 @@ import { downloadFile } from '@/api/api';
 import Popup from '@/components/popup';
 import SourceInfo from '@/components/sourceInfo';
 
+// import {  } from '@/utils/electronMethod';
+
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
-  const { api, metrics } = useSelector((state: Models) => state.global);
+  const { api, electron } = useSelector((state: Models) => state.global);
   const { filesList, downloadList, filesInfo } = useSelector(
     (state: Models) => state.files,
   );

@@ -45,6 +45,7 @@ export interface State {
     uploadSpeed: number;
   };
   chartData: ChartData[];
+  electron: boolean;
 }
 
 export default {
@@ -64,6 +65,8 @@ export default {
       uploadSpeed: 0,
     },
     chartData: [],
+    electron:
+      window.navigator.userAgent.toLowerCase().indexOf('electron') !== -1,
   },
   reducers: {
     setApi(state, { payload }) {

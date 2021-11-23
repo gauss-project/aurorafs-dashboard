@@ -41,6 +41,16 @@ export const getChunkSource = (
   });
 };
 
+export const connect = (
+  url: string,
+  underlay: string,
+): Promise<AxiosResponse<{ address: string }>> => {
+  return request({
+    url: url + '/connect/' + underlay,
+    method: 'post',
+  });
+};
+
 export default {
   getHealth,
   getTopology,
@@ -48,4 +58,5 @@ export default {
   getAddresses,
   getMetrics,
   getChunkSource,
+  connect,
 };

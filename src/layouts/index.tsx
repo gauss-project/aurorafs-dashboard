@@ -22,6 +22,7 @@ import { eventEmitter } from '@/utils/request';
 import logoImg from '@/assets/img/logo.png';
 import { getSize } from '@/utils/util';
 import { speedTime } from '@/config/url';
+import semver from 'semver';
 
 type Nav = {
   text: string;
@@ -164,7 +165,7 @@ const Layouts: React.FC = (props) => {
               </div>
               <div>
                 Version:{version}
-                {status && `(${health?.version})`}
+                {status && `(${semver.coerce(health?.version)})`}
               </div>
             </div>
           </div>
