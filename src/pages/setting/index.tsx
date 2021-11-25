@@ -27,12 +27,15 @@ const Setting: React.FC = (props) => {
     sessionStorage.setItem(sessionStorageDebugApi, debugApiValue);
     if (!status || api !== apiValue || debugApi !== debugApiValue)
       dispatch({
-        type: 'global/getStatus',
-        payload: {
-          api: apiValue,
-          debugApi: debugApiValue,
-        },
+        type: 'global/initMetrics',
       });
+    dispatch({
+      type: 'global/getStatus',
+      payload: {
+        api: apiValue,
+        debugApi: debugApiValue,
+      },
+    });
   };
 
   return (

@@ -61,11 +61,13 @@ const Layouts: React.FC = (props) => {
       icon: <SettingOutlined />,
     },
   ];
+  let timer = useRef<null | NodeJS.Timer>(null);
 
-  const getMetrics = () => {
+  const getMetrics = (url: string) => {
+    console.log(debugApi);
     dispatch({
       type: 'global/getMetrics',
-      payload: { url: debugApi },
+      payload: { url },
     });
   };
   const clickHandle: ClickHandle = (newPath) => {
@@ -99,11 +101,14 @@ const Layouts: React.FC = (props) => {
     });
   }, []);
   useEffect(() => {
+    if (timer.current) clearInterval(timer.current);
     if (status) {
-      getMetrics();
-      setInterval(getMetrics, speedTime);
+      getMetrics(debugApi);
+      timer.current = setInterval(() => {
+        getMetrics(debugApi);
+      }, speedTime);
     }
-  }, [status]);
+  }, [status, debugApi, api]);
 
   return (
     <>
