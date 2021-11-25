@@ -123,6 +123,20 @@ export default {
         chartData,
       };
     },
+    initMetrics(state) {
+      return {
+        ...state,
+        metrics: {
+          downloadNumber: -1,
+          uploadNumber: -1,
+          downloadTotal: 0,
+          uploadTotal: 0,
+          downloadSpeed: 0,
+          uploadSpeed: 0,
+        },
+        chartData: [],
+      };
+    },
   },
   effects: {
     *getStatus({ payload }, { call, put }) {
