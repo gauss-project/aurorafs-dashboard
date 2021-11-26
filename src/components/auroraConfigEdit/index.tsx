@@ -3,10 +3,11 @@ import styles from './index.less';
 import { Button, Input, message } from 'antd';
 import { Event } from 'electron';
 import { throttle } from '@/utils/util';
+import { isElectron } from '@/config/version';
 
 const { TextArea } = Input;
-let ipcRenderer: any;
-if (window.navigator.userAgent.toLowerCase().indexOf('electron') !== -1) {
+let ipcRenderer: any = null;
+if (isElectron) {
   ipcRenderer = window.require('electron').ipcRenderer;
 }
 

@@ -5,9 +5,10 @@ import { useHistory, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import { Event } from 'electron';
 import NotConnected from '@/components/notConnected';
+import { isElectron } from '@/config/version';
 
-let ipcRenderer: any;
-if (window.navigator.userAgent.toLowerCase().indexOf('electron') !== -1) {
+let ipcRenderer: any = null;
+if (isElectron) {
   ipcRenderer = window.require('electron').ipcRenderer;
 }
 
