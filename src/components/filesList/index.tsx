@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Table, Tooltip, Popconfirm, Progress, Modal } from 'antd';
 
 const { confirm } = Modal;
@@ -22,16 +22,18 @@ import { downloadFile } from '@/api/api';
 import Popup from '@/components/popup';
 import SourceInfo from '@/components/sourceInfo';
 
-// import {  } from '@/utils/electronMethod';
-
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
-  const { api, electron } = useSelector((state: Models) => state.global);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  const { api } = useSelector((state: Models) => state.global);
   const { filesList, downloadList, filesInfo } = useSelector(
     (state: Models) => state.files,
   );
 
   const [hashInfo, setHashInfo] = useState<AllFileInfo | null>(null);
+
+  const [top, setTop] = useState(0);
 
   const pinOrUnPin = (hash: string, pinState: boolean): void => {
     dispatch({
@@ -177,6 +179,18 @@ const FilesList: React.FC = () => {
       align: 'center',
     },
   ];
+  useEffect(() => {
+    setTop(
+      document
+        .getElementsByClassName('ant-table-tbody')[0]
+        .getBoundingClientRect().top,
+    );
+  }, []);
+  const scrollY = useMemo(() => {
+    let h = document.body.clientHeight - top - 30;
+    if (h < 200) return 200;
+    return h;
+  }, [document.body.clientHeight, top]);
   // Table Data
   const data: AllFileInfo[] = useMemo(() => {
     return filesList.map((item) => {
@@ -191,7 +205,7 @@ const FilesList: React.FC = () => {
     });
   }, [filesList, filesInfo]);
   return (
-    <div>
+    <div ref={ref}>
       <Table<AllFileInfo>
         className={styles.filesList}
         dataSource={data}
@@ -199,7 +213,7 @@ const FilesList: React.FC = () => {
         rowKey={(item) => item.fileHash}
         pagination={false}
         locale={{ emptyText: 'No Data' }}
-        scroll={filesList.length > 7 ? { y: 560 } : {}}
+        scroll={{ y: scrollY }}
       />
       <Popup
         visible={!!hashInfo}

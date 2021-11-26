@@ -2,11 +2,8 @@ import React, { useEffect, useState, memo, useRef } from 'react';
 import { Chart } from '@antv/g2';
 import { useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
-import moment from 'moment';
 import { getSize } from '@/utils/util';
 import styles from './index.less';
-import debugApi from '@/api/debugApi';
-import { speedTime } from '@/config/url';
 
 export declare type DataType = {
   time: string;
@@ -14,9 +11,7 @@ export declare type DataType = {
   speed: number;
 };
 const Speed: React.FC = () => {
-  const { metrics, chartData, debugApi } = useSelector(
-    (state: Models) => state.global,
-  );
+  const { metrics, chartData } = useSelector((state: Models) => state.global);
   let chart = useRef<any>(null);
   const init = (data: DataType[]): void => {
     chart.current = new Chart({
