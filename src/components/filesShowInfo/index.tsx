@@ -34,10 +34,12 @@ const FilesShowInfo: React.FC = () => {
         <span className={styles.key}>IPv4</span>:&nbsp;&nbsp;
         <span className={styles.value}>{addresses?.public_ip?.ipv4}</span>
       </div>
-      <div>
-        <span className={styles.key}>IPv6</span>:&nbsp;&nbsp;
-        <span className={styles.value}>{addresses?.public_ip?.ipv6}</span>
-      </div>
+      {addresses?.public_ip?.ipv6 && (
+        <div>
+          <span className={styles.key}>IPv6</span>:&nbsp;&nbsp;
+          <span className={styles.value}>{addresses?.public_ip?.ipv6}</span>
+        </div>
+      )}
       <div>
         <span className={styles.key}>Connected</span>:&nbsp;&nbsp;
         <span className={styles.value}>

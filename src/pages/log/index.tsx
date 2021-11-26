@@ -18,13 +18,8 @@ const Main: React.FC = () => {
   const [logs, setLogs] = useState([]);
   useEffect(() => {
     ipcRenderer.on('logs', (event: Event, data: []) => {
-      console.log(
-        document.documentElement.scrollHeight,
-        document.body.clientHeight,
-        document.documentElement.scrollTop,
-      );
       const isBottom =
-        document.documentElement.scrollHeight ===
+        document.documentElement.scrollHeight <=
         document.body.clientHeight + document.documentElement.scrollTop;
       setLogs(data);
       if (isBottom) {

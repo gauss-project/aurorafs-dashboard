@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import styles from './index.less';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import NotConnected from '@/components/notConnected';
@@ -99,14 +100,14 @@ const Main: React.FC = (props) => {
   }, []);
   return (
     <>
-      <div>
+      <div className={styles.content}>
         <div>
           <Download />
         </div>
-        <div style={{ marginTop: 50 }}>
+        <div style={{ marginTop: 30 }}>
           <FileUpload />
         </div>
-        <div style={{ marginTop: 50 }}>
+        <div style={{ marginTop: 40 }}>
           <FilesList />
         </div>
         {uploadStatus && (
