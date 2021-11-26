@@ -107,3 +107,15 @@ export const initChartData = (n: number, speedTime: number = 5000): any[] => {
   }
   return arr;
 };
+
+export const throttle = function (func: Function, delay: number) {
+  let timer: NodeJS.Timer | null = null;
+  return function () {
+    if (!timer) {
+      func.apply(this, arguments);
+      timer = setTimeout(() => {
+        timer = null;
+      }, delay);
+    }
+  };
+};
