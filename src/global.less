@@ -18,10 +18,20 @@ body {
   transition: all 0.5s !important;
 }
 
-.ant-btn,
-.ant-input,
-.ant-upload-drbag,
 .ant-input {
+  &:hover {
+    border-color: @main_color !important;
+    outline: @main_color !important;
+  }
+
+  &:focus {
+    border-color: @main_color !important;
+    outline: @main_color !important;
+  }
+}
+
+.ant-btn,
+.ant-upload-drbag {
   &:hover {
     color: @main_color !important;
     border-color: @main_color !important;

@@ -6,11 +6,12 @@ import { Button } from 'antd';
 import { sessionStorageApi, sessionStorageDebugApi } from '@/config/url';
 import { checkSession, isURL } from '@/utils/util';
 import { Models } from '@/declare/modelType';
+import AuroraConfigEdit from '@/components/auroraConfigEdit';
 
 const Setting: React.FC = (props) => {
   const dispatch = useDispatch();
 
-  const { api, debugApi, status } = useSelector(
+  const { api, debugApi, status, electron } = useSelector(
     (state: Models) => state.global,
   );
 
@@ -40,23 +41,35 @@ const Setting: React.FC = (props) => {
 
   return (
     <>
-      <div className={styles.api}>
-        <SettingApi value={apiValue} title={'API Endpoint'} fn={setApiValue} />
-      </div>
-      <div className={styles.debug_api}>
-        <SettingApi
-          value={debugApiValue}
-          title={'Debug API Endpoint'}
-          fn={setDebugApiValue}
-        />
-      </div>
-      <div style={{ marginTop: '50px' }}>
-        <Button size={'large'} onClick={saveApi}>
-          <span style={{ letterSpacing: '2px', padding: '0 20px' }}>
-            Connect
-          </span>
-        </Button>
-      </div>
+      {electron ? (
+        <>
+          <AuroraConfigEdit />
+        </>
+      ) : (
+        <>
+          <div className={styles.api}>
+            <SettingApi
+              value={apiValue}
+              title={'API Endpoint'}
+              fn={setApiValue}
+            />
+          </div>
+          <div className={styles.debug_api}>
+            <SettingApi
+              value={debugApiValue}
+              title={'Debug API Endpoint'}
+              fn={setDebugApiValue}
+            />
+          </div>
+          <div style={{ marginTop: '50px' }}>
+            <Button size={'large'} onClick={saveApi}>
+              <span style={{ letterSpacing: '2px', padding: '0 20px' }}>
+                Connect
+              </span>
+            </Button>
+          </div>
+        </>
+      )}
     </>
   );
 };

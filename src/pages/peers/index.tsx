@@ -20,12 +20,6 @@ const Main: React.FC = () => {
   const [connectValue, setConnectValue] = React.useState('');
   const getInfo = () => {
     dispatch({
-      type: 'info/getAddresses',
-      payload: {
-        url: debugApi,
-      },
-    });
-    dispatch({
       type: 'global/getTopology',
       payload: {
         url: debugApi,
@@ -39,6 +33,12 @@ const Main: React.FC = () => {
     });
   };
   useEffect(() => {
+    dispatch({
+      type: 'info/getAddresses',
+      payload: {
+        url: debugApi,
+      },
+    });
     getInfo();
     let timer = setInterval(getInfo, time);
     return () => {
@@ -54,6 +54,7 @@ const Main: React.FC = () => {
     try {
       await connect(debugApi, underlay);
       message.success('successful');
+      getInfo();
     } catch (err) {
       if (err instanceof Error) {
         let errMessage =
@@ -150,9 +151,12 @@ const Main: React.FC = () => {
                     to.
                   </div>
                   <div>Example:</div>
-                  <div className={'greyColor'}>{addresses?.underlay?.[0]}</div>
-                  <div>or</div>
-                  <div className={'greyColor'}>{addresses?.overlay}</div>
+                  <div className={'greyColor'}>
+                    /ip4/192.100.255.18/tcp/1634/p2p/16Uiu2HAkvEorAWzPfdbThKexs1TQAhAjXMTTwtSSsQNzdbbHUovK
+                  </div>
+                  {/*<div className={'greyColor'}>{addresses?.underlay?.[0]}</div>*/}
+                  {/*<div>or</div>*/}
+                  {/*<div className={'greyColor'}>{addresses?.overlay}</div>*/}
                   <Input
                     value={connectValue}
                     onChange={(e) => setConnectValue(e.target.value)}

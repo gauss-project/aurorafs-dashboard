@@ -24,11 +24,14 @@ const router = [
         component: '@/pages/setting',
       },
       {
+        path: '/log',
+        component: '@/pages/log',
+      },
+      {
         path: '/*',
         component: '@/pages/404',
       },
     ],
   },
 ];
-
 export default router;

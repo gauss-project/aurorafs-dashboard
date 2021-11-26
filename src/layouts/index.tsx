@@ -8,21 +8,25 @@ import {
   FileTextOutlined,
   PartitionOutlined,
   SettingOutlined,
-  VerticalAlignBottomOutlined,
-  ToTopOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  FieldTimeOutlined,
 } from '@ant-design/icons';
 
 import { Models } from '@/declare/modelType';
 import Loading from '@/components/loading';
 
-import { version } from '@/config/version';
+import { version, isElectron } from '@/config/version';
 import { eventEmitter } from '@/utils/request';
 import logoImg from '@/assets/img/logo.png';
 import { getSize } from '@/utils/util';
 import { speedTime } from '@/config/url';
 import semver from 'semver';
+
+let ipcRenderer: any = null;
+if (isElectron) {
+  ipcRenderer = window.require('electron').ipcRenderer;
+}
 
 type Nav = {
   text: string;
@@ -33,9 +37,8 @@ type ClickHandle = (path: string) => void;
 
 const Layouts: React.FC = (props) => {
   const dispatch = useDispatch();
-  const { status, metrics, api, debugApi, refresh, health } = useSelector(
-    (state: Models) => state.global,
-  );
+  const { status, metrics, api, debugApi, refresh, health, electron } =
+    useSelector((state: Models) => state.global);
   const history = useHistory();
   const path = useLocation().pathname;
   const [active, setActive] = useState(path);
@@ -56,6 +59,11 @@ const Layouts: React.FC = (props) => {
       icon: <FileTextOutlined />,
     },
     {
+      text: 'Log',
+      router: '/log',
+      icon: <FieldTimeOutlined />,
+    },
+    {
       text: 'Setting',
       router: '/setting',
       icon: <SettingOutlined />,
@@ -64,7 +72,6 @@ const Layouts: React.FC = (props) => {
   let timer = useRef<null | NodeJS.Timer>(null);
 
   const getMetrics = (url: string) => {
-    console.log(debugApi);
     dispatch({
       type: 'global/getMetrics',
       payload: { url },
@@ -80,24 +87,44 @@ const Layouts: React.FC = (props) => {
     setActive(path);
   }, [path]);
   useEffect(() => {
+    if (electron) {
+      ipcRenderer.on('start', () => {
+        dispatch({
+          type: 'global/getStatus',
+          payload: {
+            api,
+            debugApi,
+          },
+        });
+      });
+      ipcRenderer.on('restart', () => {
+        dispatch({
+          type: 'global/setRefresh',
+          payload: {
+            refresh: true,
+          },
+        });
+        dispatch({
+          type: 'global/setStatus',
+          payload: {
+            status: false,
+          },
+        });
+      });
+    } else {
+      dispatch({
+        type: 'global/getStatus',
+        payload: {
+          api,
+          debugApi,
+        },
+      });
+    }
     dispatch({
       type: 'global/setRefresh',
       payload: {
         refresh: true,
       },
-    });
-    dispatch({
-      type: 'global/getStatus',
-      payload: {
-        api,
-        debugApi,
-      },
-    });
-    eventEmitter.on('404', () => {
-      dispatch({
-        type: 'global/setStatus',
-        payload: { status: false },
-      });
     });
   }, []);
   useEffect(() => {
@@ -107,6 +134,12 @@ const Layouts: React.FC = (props) => {
       timer.current = setInterval(() => {
         getMetrics(debugApi);
       }, speedTime);
+      eventEmitter.on('404', () => {
+        dispatch({
+          type: 'global/setStatus',
+          payload: { status: false },
+        });
+      });
     }
   }, [status, debugApi, api]);
 
@@ -116,7 +149,7 @@ const Layouts: React.FC = (props) => {
         <div className={styles.app_left}>
           <div className={styles.menu}>
             <div className={styles.logo}>
-              <a href={'/'}>
+              <a href={'#/'}>
                 <img src={logoImg} className={styles.logoImg} />
                 <span className={styles.logoText}>AuroraFS</span>
               </a>
@@ -125,6 +158,9 @@ const Layouts: React.FC = (props) => {
             <nav className={styles.nav}>
               <ul>
                 {navList.map((item, index) => {
+                  if (!electron && item.text === 'Log') {
+                    return <div key={index} />;
+                  }
                   return (
                     <li
                       key={index}
