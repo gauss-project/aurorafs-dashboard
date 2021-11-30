@@ -64,17 +64,17 @@ const Layouts: React.FC = (props) => {
       icon: <FieldTimeOutlined />,
     },
     {
-      text: 'Setting',
+      text: 'Settings',
       router: '/setting',
       icon: <SettingOutlined />,
     },
   ];
   let timer = useRef<null | NodeJS.Timer>(null);
 
-  const getMetrics = (url: string) => {
+  const getMetrics = (url: string, init: boolean = false) => {
     dispatch({
       type: 'global/getMetrics',
-      payload: { url },
+      payload: { url, init },
     });
   };
   const clickHandle: ClickHandle = (newPath) => {
@@ -126,23 +126,22 @@ const Layouts: React.FC = (props) => {
         refresh: true,
       },
     });
+    eventEmitter.on('404', () => {
+      dispatch({
+        type: 'global/setStatus',
+        payload: { status: false },
+      });
+    });
   }, []);
   useEffect(() => {
     if (timer.current) clearInterval(timer.current);
     if (status) {
-      getMetrics(debugApi);
+      getMetrics(debugApi, true);
       timer.current = setInterval(() => {
         getMetrics(debugApi);
       }, speedTime);
-      eventEmitter.on('404', () => {
-        dispatch({
-          type: 'global/setStatus',
-          payload: { status: false },
-        });
-      });
     }
   }, [status, debugApi, api]);
-
   return (
     <>
       <div className={styles.app}>
@@ -183,18 +182,18 @@ const Layouts: React.FC = (props) => {
             <div className={styles.statusInfo}>
               {status && (
                 <div style={{ marginBottom: 20, fontSize: 14 }}>
-                  <span className={'mainColor'}>
-                    <ArrowDownOutlined />
+                  <span className={'uploadColor'}>
+                    <ArrowUpOutlined />
                     {getSize(
-                      (metrics.downloadSpeed * 256) / (speedTime / 1000),
+                      (metrics.uploadSpeed * 256) / (speedTime / 1000),
                       1,
                     )}
                     /s
                   </span>
-                  <span style={{ marginLeft: 10 }} className={'uploadColor'}>
-                    <ArrowUpOutlined />
+                  <span className={'mainColor'} style={{ marginLeft: 10 }}>
+                    <ArrowDownOutlined />
                     {getSize(
-                      (metrics.uploadSpeed * 256) / (speedTime / 1000),
+                      (metrics.downloadSpeed * 256) / (speedTime / 1000),
                       1,
                     )}
                     /s

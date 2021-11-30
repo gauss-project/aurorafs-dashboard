@@ -1,7 +1,13 @@
 .content {
   display: flex;
   flex-direction: column;
-  height: 630px;
+  max-height: 700px;
+  width: 800px;
+}
+
+.sourcesList {
+  max-height: 125px;
+  overflow-y: auto;
 }
 
 .sources {
@@ -9,11 +15,8 @@
   border-bottom: 1px #ccc solid;
 }
 
-.sourcesList {
-  //max-height: 75px;
-}
-
 .sourcesGrid {
+  height: 25px;
   display: grid;
   grid-template-columns: 15px 600px auto;
   gap: 0 10px;

@@ -4,6 +4,7 @@ import { FileType, FileInfoMap, FileSub } from '@/declare/api';
 import Api from '@/api/api';
 import { message } from 'antd';
 import { mapQueryM3u8 } from '@/utils/util';
+import _ from 'lodash';
 
 export interface State {
   filesList: FileType[];
@@ -21,7 +22,7 @@ export default {
   },
   reducers: {
     addFilesInfo(state, { payload }) {
-      const filesInfo = JSON.parse(JSON.stringify(state)).filesInfo;
+      const filesInfo = _.cloneDeep(state).filesInfo;
       const { fileInfo } = payload;
       return {
         ...state,
@@ -140,11 +141,12 @@ export default {
               [hash]: {
                 ...data,
                 isM3u8: mapQueryM3u8(data.sub),
-                manifestSize: (Object.values(data.sub) as FileSub[])
-                  .map((item) => (item?.size as number) || 0)
-                  .reduce((total, item) => {
-                    return total + item;
-                  }, 0),
+                manifestSize: Object.values(data.sub).reduce(
+                  (total, item: any) => {
+                    return total + item.size;
+                  },
+                  0,
+                ),
               },
             },
           },

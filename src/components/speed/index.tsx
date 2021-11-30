@@ -17,7 +17,6 @@ const Speed: React.FC = () => {
     chart.current = new Chart({
       container: 'speed',
       autoFit: true,
-      height: 400,
     });
     chart.current.data(data);
 
@@ -77,10 +76,9 @@ const Speed: React.FC = () => {
     } else {
       init(chartData);
     }
-    // sessionStorage.setItem(debugApi, JSON.stringify(chartData));
   }, [chartData]);
   return (
-    <div className={styles.speed}>
+    <div className={styles.content}>
       <div
         style={{
           display: 'flex',
@@ -88,22 +86,7 @@ const Speed: React.FC = () => {
           justifyContent: 'flex-end',
         }}
       >
-        <div className={'mainColor'} style={{ display: 'flex' }}>
-          <div
-            className={styles.block}
-            style={{ backgroundColor: '#4147C4' }}
-          />
-        </div>
-        <div className={'mainColor'}>
-          <span className={styles.key}>Retrieved:</span>
-          <span className={styles.value}>
-            {getSize(metrics.downloadTotal * 256, 1)}
-          </span>
-        </div>
-        <div
-          className={'uploadColor'}
-          style={{ marginLeft: 50, display: 'flex' }}
-        >
+        <div className={'uploadColor'} style={{ display: 'flex' }}>
           <div
             className={styles.block}
             style={{ backgroundColor: '#b8741a' }}
@@ -115,8 +98,23 @@ const Speed: React.FC = () => {
             {getSize(metrics.uploadTotal * 256, 1)}
           </span>
         </div>
+        <div
+          className={'mainColor'}
+          style={{ marginLeft: 50, display: 'flex' }}
+        >
+          <div
+            className={styles.block}
+            style={{ backgroundColor: '#4147C4' }}
+          />
+        </div>
+        <div className={'mainColor'}>
+          <span className={styles.key}>Retrieved:</span>
+          <span className={styles.value}>
+            {getSize(metrics.downloadTotal * 256, 1)}
+          </span>
+        </div>
       </div>
-      <div id="speed" />
+      <div id="speed" className={styles.speed} />
     </div>
   );
 };

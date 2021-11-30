@@ -37,8 +37,6 @@ export interface State {
   } | null;
   topology: Topology;
   metrics: {
-    downloadNumber: number;
-    uploadNumber: number;
     downloadTotal: number;
     uploadTotal: number;
     downloadSpeed: number;
@@ -57,8 +55,6 @@ export default {
     health: null,
     topology: {},
     metrics: {
-      downloadNumber: -1,
-      uploadNumber: -1,
       downloadTotal: 0,
       uploadTotal: 0,
       downloadSpeed: 0,
@@ -130,8 +126,6 @@ export default {
       return {
         ...state,
         metrics: {
-          downloadNumber: -1,
-          uploadNumber: -1,
           downloadTotal: 0,
           uploadTotal: 0,
           downloadSpeed: 0,
@@ -201,89 +195,89 @@ export default {
       }
     },
     *getMetrics({ payload }, { call, put, select }) {
-      const { url } = payload;
-      const { data } = yield call(DebugApi.getMetrics, url);
-      const { metrics, chartData } = yield select(
-        (state: Models) => state.global,
-      );
-      const retrievalDownload =
-        Number(
-          data.match(/\baurora_retrieval_total_retrieved\b\s(\d+)/)?.[1],
-        ) ?? metrics.downloadNumber;
-      const retrievalUpload =
-        Number(
-          data.match(/\baurora_retrieval_total_transferred\b\s(\d+)/)?.[1],
-        ) ?? metrics.uploadNumber;
-      const chunkInfoDownload =
-        Number(
-          data.match(/\baurora_chunkinfo_total_retrieved\b\s(\d+)/)?.[1],
-        ) ?? 0;
-      const chunkInfoUpload =
-        Number(
-          data.match(/\baurora_chunkinfo_total_transferred\b\s(\d+)/)?.[1],
-        ) ?? 0;
-      if (metrics.downloadNumber === -1 || metrics.uploadNumber === -1) {
-        yield put({
-          type: 'setMetrics',
-          payload: {
-            metrics: {
-              downloadNumber: retrievalDownload,
-              uploadNumber: retrievalUpload,
-              downloadTotal:
-                (retrievalDownload < 0 ? 0 : retrievalDownload) +
-                chunkInfoDownload,
-              uploadTotal:
-                (retrievalUpload < 0 ? 0 : retrievalUpload) + chunkInfoUpload,
-              downloadSpeed: 0,
-              uploadSpeed: 0,
+      const { url, init } = payload;
+      try {
+        const { data } = yield call(DebugApi.getMetrics, url);
+        const { metrics, chartData } = yield select(
+          (state: Models) => state.global,
+        );
+        const retrievalDownload =
+          Number(
+            data.match(/\baurora_retrieval_total_retrieved\b\s(\d+)/)?.[1],
+          ) ?? metrics.downloadNumber;
+        const retrievalUpload =
+          Number(
+            data.match(/\baurora_retrieval_total_transferred\b\s(\d+)/)?.[1],
+          ) ?? metrics.uploadNumber;
+        const chunkInfoDownload =
+          Number(
+            data.match(/\baurora_chunkinfo_total_retrieved\b\s(\d+)/)?.[1],
+          ) ?? 0;
+        const chunkInfoUpload =
+          Number(
+            data.match(/\baurora_chunkinfo_total_transferred\b\s(\d+)/)?.[1],
+          ) ?? 0;
+        const retrievedTotal = retrievalDownload + chunkInfoDownload;
+        const transferredTotal = retrievalUpload + chunkInfoUpload;
+        if (init) {
+          yield put({
+            type: 'setMetrics',
+            payload: {
+              metrics: {
+                downloadTotal: retrievedTotal,
+                uploadTotal: transferredTotal,
+                downloadSpeed: 0,
+                uploadSpeed: 0,
+              },
             },
-          },
-        });
-        yield put({
-          type: 'setChartData',
-          payload: {
-            chartData: initChartData(120, speedTime),
-          },
-        });
-      } else {
-        yield put({
-          type: 'setMetrics',
-          payload: {
-            metrics: {
-              downloadNumber: retrievalDownload,
-              uploadNumber: retrievalUpload,
-              downloadTotal: retrievalDownload + chunkInfoDownload,
-              uploadTotal: retrievalUpload + chunkInfoUpload,
-              downloadSpeed: retrievalDownload - metrics.downloadNumber,
-              uploadSpeed: retrievalUpload - metrics.uploadNumber,
+          });
+          yield put({
+            type: 'setChartData',
+            payload: {
+              chartData: initChartData(120, speedTime),
             },
-          },
-        });
-        let newChartData: ChartData[] = chartData.concat([
-          {
-            time: moment().utcOffset(480).format('HH.mm.ss'),
-            category: 'retrieved',
-            speed:
-              ((retrievalDownload - metrics.downloadNumber) * 256) /
-              1024 /
-              (speedTime / 1000),
-          },
-          {
-            time: moment().utcOffset(480).format('HH.mm.ss'),
-            category: 'transferred',
-            speed:
-              ((retrievalUpload - metrics.uploadNumber) * 256) /
-              1024 /
-              (speedTime / 1000),
-          },
-        ]);
-        newChartData.splice(0, 2);
-        yield put({
-          type: 'setChartData',
-          payload: {
-            chartData: newChartData,
-          },
-        });
+          });
+        } else {
+          yield put({
+            type: 'setMetrics',
+            payload: {
+              metrics: {
+                ...metrics,
+                downloadTotal: retrievedTotal,
+                uploadTotal: transferredTotal,
+                downloadSpeed: retrievedTotal - metrics.downloadTotal,
+                uploadSpeed: transferredTotal - metrics.uploadTotal,
+              },
+            },
+          });
+          yield put({
+            type: 'setChartData',
+            payload: {
+              chartData: chartData
+                .concat([
+                  {
+                    time: moment().utcOffset(480).format('HH.mm.ss'),
+                    category: 'retrieved',
+                    speed:
+                      ((retrievedTotal - metrics.downloadTotal) * 256) /
+                      1024 /
+                      (speedTime / 1000),
+                  },
+                  {
+                    time: moment().utcOffset(480).format('HH.mm.ss'),
+                    category: 'transferred',
+                    speed:
+                      ((transferredTotal - metrics.uploadTotal) * 256) /
+                      1024 /
+                      (speedTime / 1000),
+                  },
+                ])
+                .slice(2),
+            },
+          });
+        }
+      } catch (e) {
+        console.log(e);
       }
     },
   },

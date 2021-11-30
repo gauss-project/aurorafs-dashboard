@@ -4,7 +4,7 @@ import styles from './index.less';
 import SettingApi from '@/components/settingApi';
 import { Button } from 'antd';
 import { sessionStorageApi, sessionStorageDebugApi } from '@/config/url';
-import { checkSession, isURL } from '@/utils/util';
+import { checkSession } from '@/utils/util';
 import { Models } from '@/declare/modelType';
 import AuroraConfigEdit from '@/components/auroraConfigEdit';
 
@@ -26,17 +26,21 @@ const Setting: React.FC = (props) => {
   const saveApi = (): void => {
     sessionStorage.setItem(sessionStorageApi, apiValue);
     sessionStorage.setItem(sessionStorageDebugApi, debugApiValue);
-    if (!status || api !== apiValue || debugApi !== debugApiValue)
+    if (!status || api !== apiValue || debugApi !== debugApiValue) {
+      //
+
+      dispatch({
+        type: 'global/getStatus',
+        payload: {
+          api: apiValue,
+          debugApi: debugApiValue,
+        },
+      });
+
       dispatch({
         type: 'global/initMetrics',
       });
-    dispatch({
-      type: 'global/getStatus',
-      payload: {
-        api: apiValue,
-        debugApi: debugApiValue,
-      },
-    });
+    }
   };
 
   return (

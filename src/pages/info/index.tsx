@@ -1,4 +1,10 @@
-import React, { useEffect } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import NotConnected from '@/components/notConnected';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
@@ -13,6 +19,7 @@ const Main: React.FC = () => {
     (state: Models) => state.global,
   );
   const { addresses } = useSelector((state: Models) => state.info);
+
   const getTopology = () => {
     dispatch({
       type: 'global/getTopology',
@@ -35,60 +42,67 @@ const Main: React.FC = () => {
     };
   }, []);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div className={styles.topology}>
-        <Card
-          title={'Connected Full Peers'}
-          text={
-            (topology?.connected || 0) + (topology?.bootNodes?.connected || 0)
-          }
-          style={{ minWidth: 525, marginRight: 50, marginBottom: 30 }}
-        />
-        <Card
-          title={'Discovered Full Peers'}
-          text={
-            (topology?.population || 0) + (topology?.bootNodes?.connected || 0)
-          }
-          style={{ minWidth: 525, marginBottom: 30 }}
-        />
+    <div className={styles.content}>
+      <div style={{ display: 'flex' }}>
+        <div className={`${styles.address} info_content`}>
+          <div>
+            NODE MODE:&nbsp;&nbsp;
+            <span>
+              {health?.bootNodeMode
+                ? 'Boot Node'
+                : health?.fullNode
+                ? 'Full Node'
+                : 'Light Node'}
+            </span>
+          </div>
+          <div>
+            AGENT VERSION:&nbsp;&nbsp;<span>{health?.version}</span>
+          </div>
+          <div>
+            NETWORK ID:&nbsp;&nbsp;<span>{addresses?.network_id}</span>
+          </div>
+        </div>
+        <div className={`${styles.address}`} style={{ marginLeft: 50 }}>
+          <div>
+            <span className={styles.peers}>Connected Full Peers</span>
+            <span className={styles.connected}>
+              {(topology?.connected || 0) +
+                (topology?.bootNodes?.connected || 0)}
+            </span>
+          </div>
+          <div>
+            <span className={styles.peers}>Discovered Full Peers</span>
+            <span className={styles.connected}>
+              {(topology?.population || 0) +
+                (topology?.bootNodes?.connected || 0)}
+            </span>
+          </div>
+        </div>
       </div>
-      <div className={`${styles.address} info_content`}>
-        <div>
-          NODE MODE:&nbsp;&nbsp;
-          <span>
-            {health?.bootNodeMode
-              ? 'Boot Node'
-              : health?.fullNode
-              ? 'Full Node'
-              : 'Light Node'}
-          </span>
-        </div>
-        <div>
-          AGENT VERSION:&nbsp;&nbsp;<span>{health?.version}</span>
-        </div>
-        <div>
-          NETWORK ID:&nbsp;&nbsp;<span>{addresses?.network_id}</span>
-        </div>
-      </div>
-      <div className={`${styles.address} info_content`}>
+      <div
+        className={`${styles.address} info_content`}
+        style={{ justifyContent: 'flex-start', flex: 1 }}
+      >
         <div>
           IPv4:&nbsp;&nbsp;
           <span>{addresses?.public_ip?.ipv4}</span>
         </div>
+        {addresses?.public_ip?.ipv6 && (
+          <div>
+            IPv6:&nbsp;&nbsp;
+            <span>{addresses?.public_ip?.ipv6}</span>
+          </div>
+        )}
         <div>
-          IPv6:&nbsp;&nbsp;
-          <span>{addresses?.public_ip?.ipv6}</span>
-        </div>
-        <div>NAT ROUTE:</div>
-        <ul className={styles.underlay}>
+          NAT ROUTE:&nbsp;&nbsp;
           {addresses?.nat_route?.map((item, index) => {
             return (
-              <li className={styles.underlayList} key={index}>
-                <span>{item}</span>
-              </li>
+              <span key={index} style={{ marginRight: 20 }}>
+                {item}
+              </span>
             );
           })}
-        </ul>
+        </div>
         <div>
           PUBLIC KEY:&nbsp;&nbsp;<span>{addresses?.public_key}</span>
         </div>

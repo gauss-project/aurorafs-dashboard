@@ -14,7 +14,6 @@ const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [peersList, setPeersList] = useState('full');
   const { debugApi, topology } = useSelector((state: Models) => state.global);
-  const { addresses } = useSelector((state: Models) => state.info);
   const { peers } = useSelector((state: Models) => state.peers);
   const [visible, setVisible] = useState(false);
   const [connectValue, setConnectValue] = React.useState('');
@@ -67,16 +66,15 @@ const Main: React.FC = () => {
   return (
     <>
       <div>
-        <div>
+        <div style={{ display: 'flex', marginTop: '30px' }}>
           <Card
             title={'Discovered Full Peers'}
             text={
               (topology?.population || 0) +
               (topology?.bootNodes?.connected || 0)
             }
+            style={{ flex: 1, marginRight: '50px' }}
           />
-        </div>
-        <div style={{ display: 'flex', marginTop: '30px' }}>
           <Card
             title={'Connected Full Peers'}
             text={
@@ -143,6 +141,8 @@ const Main: React.FC = () => {
                 ]}
                 visible={visible}
                 onCancel={cancel}
+                centered={true}
+                width={720}
                 bodyStyle={{ padding: '20px 15px' }}
               >
                 <div>

@@ -28,7 +28,7 @@ const Main: React.FC = (props) => {
   };
   useEffect(() => {
     let notFoundError = true;
-    let notInfoHash: string[] = [];
+    // let notInfoHash: string[] = [];
     filesList.forEach((item, index) => {
       const i = downloadList.indexOf(item.fileHash);
       const status = !/0/.test(
@@ -54,7 +54,13 @@ const Main: React.FC = (props) => {
       }
       // notInfoHash
       if (!filesInfo[item.fileHash]) {
-        notInfoHash.push(item.fileHash);
+        dispatch({
+          type: 'files/queryFile',
+          payload: {
+            url: api,
+            hash: item.fileHash,
+          },
+        });
       }
     });
     if (downloadList.length && count.current >= 10 && notFoundError) {
@@ -63,15 +69,6 @@ const Main: React.FC = (props) => {
         payload: { downloadList: [] },
       });
     }
-    notInfoHash.forEach((item) => {
-      dispatch({
-        type: 'files/queryFile',
-        payload: {
-          url: api,
-          hash: item,
-        },
-      });
-    });
   }, [filesList]);
   useEffect(() => {
     if (downloadList.length) {
@@ -81,7 +78,7 @@ const Main: React.FC = (props) => {
         count.current++;
         getFilesList();
       }, 3000);
-    } else if (!downloadList.length && timer.current) {
+    } else if (timer.current) {
       clearInterval(timer.current);
       timer.current = null;
     }

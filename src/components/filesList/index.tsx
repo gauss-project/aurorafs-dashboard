@@ -161,12 +161,22 @@ const FilesList: React.FC = () => {
             className={'mainColor iconSize'}
             onClick={() => {
               confirm({
-                title: 'Are you sure to delete the file?',
+                title: (
+                  <div className={'info_content'}>
+                    <div style={{ marginBottom: 10 }}>
+                      Are you sure to delete the file?
+                    </div>
+                    <div className={styles.name}>
+                      FileName:&nbsp;&nbsp;<span>{record.name}</span>
+                    </div>
+                    Rcid:&nbsp;&nbsp;<span>{record?.fileHash}</span>
+                  </div>
+                ),
                 okText: 'Yes',
                 okType: 'danger',
                 icon: <></>,
                 maskClosable: true,
-                // centered:true,
+                centered: true,
                 cancelText: 'No',
                 onOk() {
                   confirmDelete(record.fileHash);
@@ -213,7 +223,7 @@ const FilesList: React.FC = () => {
         rowKey={(item) => item.fileHash}
         pagination={false}
         locale={{ emptyText: 'No Data' }}
-        scroll={{ y: scrollY }}
+        scroll={data.length > scrollY / 80 ? { y: scrollY } : {}}
       />
       <Popup
         visible={!!hashInfo}
@@ -222,10 +232,12 @@ const FilesList: React.FC = () => {
         }}
         title={
           <>
-            <div className={styles.name}>{hashInfo?.name}</div>
-            <span style={{ marginRight: 5, color: '#666' }}>
-              {hashInfo?.fileHash}
-            </span>
+            <div className={'info_content'}>
+              <div className={styles.name}>
+                FileName:&nbsp;&nbsp;<span>{hashInfo?.name}</span>
+              </div>
+              Rcid:&nbsp;&nbsp;<span>{hashInfo?.fileHash}</span>
+            </div>
           </>
         }
       >

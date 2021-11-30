@@ -25,11 +25,11 @@ export declare type Data = {
 export const colorArr = [
   '#FFF',
   '#4147c4',
-  '#ec808d',
-  '#95f204',
-  '#facd91',
-  '#2468a2',
-  '#5067c1',
+  '#d93a49',
+  '#694d9f',
+  '#dea32c',
+  '#45b97c',
+  '#77787b',
 ];
 
 const SourceInfo: React.FC<Props> = (props) => {
@@ -67,7 +67,6 @@ const SourceInfo: React.FC<Props> = (props) => {
   const getChunkArr = (data: Data[]) => {
     let chunkArr: number[] = [];
     let n = props.hashInfo.bitVector.len;
-    console.log(n);
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < data.length; j++) {
         chunkArr[i] = 0;
@@ -106,7 +105,6 @@ const SourceInfo: React.FC<Props> = (props) => {
                     key={item.overlay}
                     className={classNames({
                       [styles.sourcesGrid]: true,
-                      [styles.none]: index >= 5 ? showLimit : false,
                     })}
                   >
                     <div
@@ -128,16 +126,6 @@ const SourceInfo: React.FC<Props> = (props) => {
                 );
               })}
             </div>
-            {source.length > 5 && (
-              <span
-                className={styles.showMore}
-                onClick={() => {
-                  setShowLimit(!showLimit);
-                }}
-              >
-                {showLimit ? 'show more' : 'close'}
-              </span>
-            )}
           </div>
           <div className={styles.chunk}>
             {source?.length && <ChunkTooltip chunk={getChunkArr(source)} />}
