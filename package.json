@@ -1,6 +1,14 @@
 {
+  "name": "aufs",
+  "version": "1.1.5",
+  "author": {
+    "name" : "aufs.Lester" ,
+    "email" : "**"
+  },
+  "description": "aurorafs_dashboard",
+  "license": "MIT",
   "private": true,
-  "main": "main.js",
+  "main": "electron/main.js",
   "scripts": {
     "start": "umi dev",
     "build": "umi build",
@@ -8,7 +16,47 @@
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
     "test": "umi-test",
     "test:coverage": "umi-test --coverage",
-    "electron": "electron ."
+    "electron:dev": "electron .",
+    "electron:win32": "electron-builder --win  --ia32",
+    "electron:win64": "electron-builder --win  --x64",
+    "electron:mac": "electron-builder --mac",
+    "electron:linux": "electron-builder --linux"
+  },
+  "build": {
+    "extraFiles": [
+      "public/logo.png"
+    ],
+    "productName": "aufs",
+    "appId": "com.aufs.app",
+    "directories": {
+      "output": "build"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "public/logo.png"
+    },
+    "win": {
+      "icon": "public/logo.png",
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "deb",
+      "icon": "public/logo.png"
+    }
   },
   "gitHooks": {
     "pre-commit": "lint-staged"
@@ -51,6 +99,7 @@
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.5.13",
     "electron": "^16.0.2",
+    "electron-builder": "^22.14.5",
     "lint-staged": "^10.0.7",
     "prettier": "^2.2.0",
     "typescript": "^4.1.2",

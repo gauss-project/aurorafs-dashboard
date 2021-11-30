@@ -14,7 +14,7 @@ const checkStatus = (win) => {
   let timer = setInterval(async () => {
     n++;
     const status = await getStatus();
-    if (status || n > 15) {
+    if (status || n > 10) {
       clearInterval(timer);
       win.webContents.send('start');
     }
