@@ -31,7 +31,7 @@ async function start(app, logs) {
       logs.push(data);
       dialog
         .showMessageBox({
-          type: 'error', //弹出框类型
+          type: 'error',
           title: 'Node Error',
           message: data,
         })
