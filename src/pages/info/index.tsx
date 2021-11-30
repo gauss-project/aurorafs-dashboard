@@ -37,6 +37,7 @@ const Main: React.FC = () => {
     });
     getTopology();
     let timer = setInterval(getTopology, time);
+
     return () => {
       clearInterval(timer);
     };
@@ -80,8 +81,9 @@ const Main: React.FC = () => {
         </div>
       </div>
       <div
+        id={'address'}
         className={`${styles.address} info_content`}
-        style={{ justifyContent: 'flex-start', flex: 1 }}
+        style={{ justifyContent: 'flex-start' }}
       >
         <div>
           IPv4:&nbsp;&nbsp;
@@ -121,7 +123,7 @@ const Main: React.FC = () => {
           })}
         </ul>
       </div>
-      <Speed />
+      {addresses?.overlay && <Speed />}
     </div>
   );
 };

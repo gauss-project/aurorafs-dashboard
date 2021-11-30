@@ -30,11 +30,11 @@ export interface State {
   debugApi: string;
   refresh: boolean;
   health: {
-    status: string;
-    version: string;
-    fullNode: boolean;
-    bootNodeMode: boolean;
-  } | null;
+    status?: string;
+    version?: string;
+    fullNode?: boolean;
+    bootNodeMode?: boolean;
+  };
   topology: Topology;
   metrics: {
     downloadTotal: number;
@@ -52,7 +52,7 @@ export default {
     status: false,
     api: checkSession(sessionStorageApi) || defaultApi,
     debugApi: checkSession(sessionStorageDebugApi) || defaultDebugApi,
-    health: null,
+    health: {},
     topology: {},
     metrics: {
       downloadTotal: 0,
