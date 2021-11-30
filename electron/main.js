@@ -2,8 +2,8 @@
 const { app, BrowserWindow, Menu, Tray } = require('electron');
 const path = require('path');
 const { ipcMain } = require('electron');
-const { start } = require('./electronUtils/run');
-const { checkStatus } = require('./electronUtils/util');
+const { start } = require('./run');
+const { checkStatus } = require('./util');
 const fs = require('fs');
 // const isReachable = require("is-reachable")
 
@@ -31,7 +31,7 @@ function createWindow() {
   });
   checkStatus(win);
   // Create the menu
-  tray = new Tray('./public/logo.ico'); // sets tray icon image
+  tray = new Tray('./public/logo.png'); // sets tray icon image
   const contextMenu = Menu.buildFromTemplate([
     // define menu items
     {
@@ -81,7 +81,7 @@ function createWindow() {
   win.show();
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  // win.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -124,7 +124,7 @@ ipcMain.on('save', (event, message) => {
 });
 
 ipcMain.on('reset', (event) => {
-  fs.readFile('./aurora/aurorafs.txt', 'utf-8', function (err, data) {
+  fs.readFile('./aurora/.aurorafs', 'utf-8', function (err, data) {
     event.reply('reset', { err, data });
   });
 });
