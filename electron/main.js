@@ -107,20 +107,20 @@ app.on('window-all-closed', function () {
 // code. You can also put them in separate files and require them here.
 
 ipcMain.on('config', (event) => {
-  fs.readFile('./aurora/aurorafs.yaml', 'utf-8', function (err, data) {
+  fs.readFile('./aurora/aurora.yaml', 'utf-8', function (err, data) {
     console.log(typeof data);
     event.reply('config', { err, data });
   });
 });
 
 ipcMain.on('save', (event, message) => {
-  fs.writeFile('./aurora/aurorafs.yaml', message, (err, data) => {
+  fs.writeFile('./aurora/aurora.yaml', message, (err, data) => {
     event.reply('save', { err, data });
   });
 });
 
 ipcMain.on('reset', (event) => {
-  fs.readFile('./aurora/.aurorafs', 'utf-8', function (err, data) {
+  fs.readFile('./aurora/.aurora', 'utf-8', function (err, data) {
     event.reply('reset', { err, data });
   });
 });
