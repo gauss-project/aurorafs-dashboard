@@ -11,7 +11,7 @@ let logs = [];
 let workerProcess;
 
 function quit() {
-  workerProcess.emit('exit');
+  workerProcess.emit('exit', true);
 }
 
 function createWindow() {

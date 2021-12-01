@@ -17,14 +17,14 @@ async function start(app, logs) {
   async function runExec(cmdStr) {
     workerProcess = exec(cmdStr, { cwd: cmdPath });
 
-    workerProcess.on('exit', async () => {
+    workerProcess.on('exit', async (isQuit = false) => {
       try {
         await kill(1635);
       } catch (e) {
         console.log(e);
       }
       workerProcess.kill();
-      app.quit();
+      if (isQuit) app.quit();
     });
 
     workerProcess.stdout.on('data', function (data) {
