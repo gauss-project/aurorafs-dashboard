@@ -212,9 +212,7 @@ const Layouts: React.FC = (props) => {
         </div>
         <article className={styles.app_right}>{props.children}</article>
       </div>
-      {refresh && (
-        <Loading text={'Node connection in progress'} status={refresh} />
-      )}
+      {refresh && <Loading text={'loading...'} status={refresh} />}
     </>
   );
 };
