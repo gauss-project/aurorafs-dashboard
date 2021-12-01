@@ -5,16 +5,13 @@ const { ipcMain } = require('electron');
 const { start } = require('./run');
 const { checkStatus } = require('./util');
 const fs = require('fs');
-// const isReachable = require("is-reachable")
 
 let tray;
 let logs = [];
 let workerProcess;
 
 function quit() {
-  workerProcess.kill();
   workerProcess.emit('exit');
-  app.quit();
 }
 
 function createWindow() {
@@ -39,7 +36,6 @@ function createWindow() {
       click: async () => {
         logs = [];
         win.webContents.send('restart');
-        workerProcess.kill();
         workerProcess.emit('exit');
         workerProcess = await start(app, logs, ipcMain);
         checkStatus(win);
