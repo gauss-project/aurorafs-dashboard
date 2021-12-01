@@ -1,11 +1,14 @@
 const os = require('os');
 const exec = require('child_process').exec;
 const { dialog } = require('electron');
+const kill = require('kill-port');
 
 async function start(app, logs) {
-  let system = os.type();
-  let cmdStr = './aurora --config=aurorafs.yaml start';
-  let cmdPath = './aurora/';
+  let cmdStr =
+    os.platform() === 'win32'
+      ? 'aurora.exe --config=aurora.yaml start'
+      : './aurora --config=aurora.yaml start';
+  let cmdPath = 'aurora';
 
   let workerProcess;
   await runExec(cmdStr);
@@ -14,12 +17,14 @@ async function start(app, logs) {
   async function runExec(cmdStr) {
     workerProcess = exec(cmdStr, { cwd: cmdPath });
 
-    workerProcess.on('exit', () => {
-      if (system !== 'windows') {
-        exec(`kill ${workerProcess.pid + 1}`, { cwd: cmdPath });
-      } else {
-        exec(`taskkill -pid ${workerProcess.pid + 1} -f`, { cwd: cmdPath });
+    workerProcess.on('exit', async () => {
+      try {
+        await kill(1635);
+      } catch (e) {
+        console.log(e);
       }
+      workerProcess.kill();
+      app.quit();
     });
 
     workerProcess.stdout.on('data', function (data) {
