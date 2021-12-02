@@ -169,7 +169,7 @@ const FilesList: React.FC = () => {
                     <div className={styles.name}>
                       FileName:&nbsp;&nbsp;<span>{record.name}</span>
                     </div>
-                    Rcid:&nbsp;&nbsp;<span>{record?.fileHash}</span>
+                    RCID:&nbsp;&nbsp;<span>{record?.fileHash}</span>
                   </div>
                 ),
                 okText: 'Yes',
@@ -236,7 +236,7 @@ const FilesList: React.FC = () => {
               <div className={styles.name}>
                 FileName:&nbsp;&nbsp;<span>{hashInfo?.name}</span>
               </div>
-              Rcid:&nbsp;&nbsp;<span>{hashInfo?.fileHash}</span>
+              RCID:&nbsp;&nbsp;<span>{hashInfo?.fileHash}</span>
             </div>
           </>
         }
