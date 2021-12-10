@@ -38,7 +38,6 @@ const Download: React.FC = () => {
           download(hash);
         }}
         className={styles.download}
-        disabled={!hash || hash.length !== 64}
       >
         open
       </Button>
