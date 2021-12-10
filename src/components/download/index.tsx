@@ -40,7 +40,7 @@ const Download: React.FC = () => {
         className={styles.download}
         disabled={!hash || hash.length !== 64}
       >
-        download
+        open
       </Button>
     </div>
   );
