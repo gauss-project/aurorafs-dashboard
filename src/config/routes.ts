@@ -20,6 +20,10 @@ const router = [
         component: '@/pages/peers',
       },
       {
+        path: '/accounting',
+        component: '@/pages/accounting',
+      },
+      {
         path: '/setting',
         component: '@/pages/setting',
       },
