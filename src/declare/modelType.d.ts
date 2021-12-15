@@ -3,6 +3,7 @@ import { State as GlobalState } from '@/models/global';
 import { State as PeersState } from '@/models/peers';
 import { State as InfoState } from '@/models/info';
 import { State as FilesState } from '@/models/files';
+import { State as AccountingState } from '@/models/accounting';
 
 export default interface ModelsType<T> {
   namespace?: string;
@@ -14,13 +15,14 @@ export default interface ModelsType<T> {
     [propName: string]: Effect;
   };
   subscriptions?: {
-    [propName: string]: Subscription
+    [propName: string]: Subscription;
   };
 }
 
 export interface Models {
-  global: GlobalState,
-  peers: PeersState,
-  info: InfoState,
-  files: FilesState,
+  global: GlobalState;
+  peers: PeersState;
+  info: InfoState;
+  files: FilesState;
+  accounting: AccountingState;
 }
