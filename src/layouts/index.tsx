@@ -11,6 +11,7 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
   FieldTimeOutlined,
+  MoneyCollectOutlined,
 } from '@ant-design/icons';
 
 import { Models } from '@/declare/modelType';
@@ -62,6 +63,11 @@ const Layouts: React.FC = (props) => {
       text: 'Log',
       router: '/log',
       icon: <FieldTimeOutlined />,
+    },
+    {
+      text: 'Accounting',
+      router: '/accounting',
+      icon: <MoneyCollectOutlined />,
     },
     {
       text: 'Settings',
