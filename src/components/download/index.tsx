@@ -31,12 +31,18 @@ const Download: React.FC = () => {
           onChange={(e) => {
             setHash(e.currentTarget.value);
           }}
+          onPressEnter={(e) => {
+            if (hash) {
+              download(hash);
+            }
+          }}
         />
       </div>
       <Button
         onClick={() => {
           download(hash);
         }}
+        disabled={!hash}
         className={styles.download}
       >
         open
