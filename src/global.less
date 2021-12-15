@@ -103,3 +103,24 @@ body {
 .font12 {
   font-size: 12px;
 }
+
+@keyframes king {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  width: 20px;
+  height: 20px;
+  border: 2px solid;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: king 1s linear infinite;
+}
