@@ -11,7 +11,6 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
   FieldTimeOutlined,
-  MoneyCollectOutlined,
 } from '@ant-design/icons';
 
 import { Models } from '@/declare/modelType';
@@ -23,6 +22,7 @@ import logoImg from '@/assets/img/logo.png';
 import { getSize } from '@/utils/util';
 import { speedTime } from '@/config/url';
 import semver from 'semver';
+import dollarTransferSvg from '@/assets/icon/dollar-transfer.svg';
 
 let ipcRenderer: any = null;
 if (isElectron) {
@@ -67,7 +67,7 @@ const Layouts: React.FC = (props) => {
     {
       text: 'Accounting',
       router: '/accounting',
-      icon: <MoneyCollectOutlined />,
+      icon: <img src={dollarTransferSvg} width={20} alt={''} />,
     },
     {
       text: 'Settings',
