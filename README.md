@@ -11,8 +11,8 @@ and by keeping an eye on the [releases tab](https://github.com/gauss-project/aur
 
 ![Info page](/ui_samples/info.png)
 
-| Node Info | Files  | Peers | Accounting | Settings |
-|-------|---------|----------|------|
+| Node Info                     | Files                           | Peers                           | Accounting                           | Settings                            |
+|-------------------------------|---------------------------------|---------------------------------|--------------------------------------|-------------------------------------|
 | ![Info](/ui_samples/info.png) | ![Files](/ui_samples/files.png) | ![Peers](/ui_samples/peers.png) | ![Peers](/ui_samples/accounting.png) | ![Setting](/ui_samples/setting.png) |
 
 ## Table of Contents
