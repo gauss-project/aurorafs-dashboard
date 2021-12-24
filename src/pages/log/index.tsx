@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import styles from './index.less';
 import { useHistory, useSelector } from 'umi';
@@ -16,15 +16,17 @@ const Main: React.FC = () => {
   const history = useHistory();
   const { electron } = useSelector((state: Models) => state.global);
   if (!electron) history.push('/404');
+  const ref = useRef<HTMLDivElement>(null);
   const [logs, setLogs] = useState([]);
   useEffect(() => {
     ipcRenderer.on('logs', (event: Event, data: []) => {
+      if (ref.current == null) return false;
       const isBottom =
-        document.documentElement.scrollHeight <=
-        document.body.clientHeight + document.documentElement.scrollTop;
+        ref.current?.scrollHeight <=
+        ref.current?.clientHeight + ref.current?.scrollTop;
       setLogs(data);
       if (isBottom) {
-        window.scrollTo(0, document.body.scrollHeight);
+        ref.current?.scrollTo(0, ref.current?.scrollHeight);
       }
     });
     ipcRenderer.send('logs');
@@ -37,11 +39,11 @@ const Main: React.FC = () => {
     };
   }, []);
   return (
-    <div className={styles.content}>
+    <div className={styles.content} ref={ref}>
       <div className={styles.text}>
         {logs.map((item, index) => {
           return (
-            <div key={index} style={{ marginTop: 10, fontSize: 12 }}>
+            <div key={index} style={{ marginBottom: 10, fontSize: 12 }}>
               {item}
             </div>
           );
