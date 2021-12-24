@@ -1,6 +1,6 @@
 {
   "name": "aufs_dashboard",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "author": {
     "name": "aufs.Lester",
     "email": "**"
@@ -75,6 +75,7 @@
     "@types/lodash": "^4.14.177",
     "axios": "^0.21.1",
     "classnames": "^2.3.1",
+    "ethers": "^5.5.2",
     "eventemitter3": "^4.0.7",
     "hls": "^0.0.1",
     "kill-port": "^1.6.1",
@@ -85,8 +86,7 @@
     "react-copy-to-clipboard": "^5.0.4",
     "react-dom": "17.x",
     "semver": "^7.3.5",
-    "umi": "^3.5.13",
-    "web3": "^1.6.1"
+    "umi": "^3.5.13"
   },
   "devDependencies": {
     "@types/antd": "^1.0.0",

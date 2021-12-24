@@ -119,3 +119,7 @@ export const throttle = function (func: Function, delay: number) {
     }
   };
 };
+
+export const trafficToBalance = (traffic: number): any => {
+  return (traffic / 10 ** 9).toFixed(9);
+};
