@@ -12,13 +12,21 @@ type Props = {
   cashOut: Function;
   visible: boolean;
   setVisible: Function;
+  confirmLoading: boolean;
+  setConfirmLoading: Function;
 };
 
 const CashOut: React.FC<Props> = (props) => {
-  const { data, cashOut, visible, setVisible } = props;
+  const {
+    data,
+    cashOut,
+    visible,
+    setVisible,
+    confirmLoading,
+    setConfirmLoading,
+  } = props;
   const clickHandle = (overlay: string): void => {
     cashOut(overlay);
-    setVisible(false);
   };
   const columns: ColumnsType<Cheque> = [
     {
@@ -85,6 +93,7 @@ const CashOut: React.FC<Props> = (props) => {
                   title="Title"
                   centered
                   visible={visible}
+                  confirmLoading={confirmLoading}
                   onOk={() => {
                     clickHandle(record.peer);
                   }}

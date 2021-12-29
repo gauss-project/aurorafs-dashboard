@@ -77,7 +77,7 @@ export default {
       const { url, overlay } = payload;
       try {
         yield call(cashOut, url, overlay);
-        message.success('cashOut submitted');
+        callback();
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       }

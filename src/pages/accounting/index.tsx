@@ -8,15 +8,19 @@ import CopyText from '@/components/copyText';
 import CashOut from '@/components/cashoOut';
 import { trafficToBalance } from '@/utils/util';
 import { ethers } from 'ethers';
+import { Modal, Button, Space, message } from 'antd';
+import debugApi, { getKey } from '@/api/debugApi';
+import QRCode from 'qrcode.react';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [balance, setBalance] = useState('');
-  const { api } = useSelector((state: Models) => state.global);
+  const { api, debugApi } = useSelector((state: Models) => state.global);
   const { account, trafficInfo, trafficCheques } = useSelector(
     (state: Models) => state.accounting,
   );
   const [visible, setVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const getData = async () => {
     const provider = new ethers.providers.JsonRpcProvider(api + '/chain');
     const accounts = await provider.listAccounts();
@@ -47,12 +51,58 @@ const Main: React.FC = () => {
     });
   }, []);
   const cashOut = (overlay: string): void => {
+    setConfirmLoading(true);
     dispatch({
       type: 'accounting/cashOut',
       payload: {
         url: api,
         overlay,
       },
+      callback: () => {
+        setTimeout(() => {
+          dispatch({
+            type: 'accounting/getTrafficInfo',
+            payload: {
+              url: api,
+            },
+          });
+          dispatch({
+            type: 'accounting/getTrafficCheques',
+            payload: {
+              url: api,
+            },
+          });
+          message.success('cashout successful');
+          setConfirmLoading(false);
+          setVisible(false);
+        }, 10 * 1000);
+      },
+    });
+  };
+  const getPrivateKey = async (): Promise<void> => {
+    const { data } = await getKey(debugApi);
+    const key = data.private_key;
+    Modal.info({
+      centered: true,
+      icon: <></>,
+      closable: true,
+      okButtonProps: { style: { display: 'none' } },
+      style: {
+        height: 'auto',
+      },
+      content: (
+        <div>
+          <div style={{ textAlign: 'center' }}>
+            <QRCode value={key} />,
+          </div>
+          <div className={styles.key}>
+            <span className={'greyColor'} style={{ marginRight: 5 }}>
+              {key}
+            </span>
+            <CopyText text={key} />
+          </div>
+        </div>
+      ),
     });
   };
   return (
@@ -98,9 +148,18 @@ const Main: React.FC = () => {
         <div className={styles.head}>Blockchain</div>
         <div className={styles.card}>
           <div className={styles.title}>Account Address:</div>
-          <div className={'font12 greyColor'} style={{ marginTop: 10 }}>
+          <div className={`font12 greyColor ${styles.account}`}>
             <span style={{ marginRight: 10, fontSize: 18 }}>{account}</span>
             <CopyText text={account} />
+            <Space wrap>
+              <Button
+                size={'small'}
+                className={styles.privateKey}
+                onClick={getPrivateKey}
+              >
+                Private Key
+              </Button>
+            </Space>
           </div>
         </div>
       </div>
@@ -111,6 +170,8 @@ const Main: React.FC = () => {
           cashOut={cashOut}
           visible={visible}
           setVisible={setVisible}
+          confirmLoading={confirmLoading}
+          setConfirmLoading={setConfirmLoading}
         />
       </div>
     </>

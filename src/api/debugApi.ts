@@ -51,6 +51,14 @@ export const connect = (
   });
 };
 
+export const getKey = (
+  url: string,
+): Promise<AxiosResponse<{ private_key: string }>> => {
+  return request({
+    url: url + '/privatekey',
+  });
+};
+
 export default {
   getHealth,
   getTopology,
@@ -59,4 +67,5 @@ export default {
   getMetrics,
   getChunkSource,
   connect,
+  getKey,
 };
