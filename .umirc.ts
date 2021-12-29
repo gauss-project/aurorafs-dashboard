@@ -22,11 +22,11 @@ export default defineConfig({
   nodeModulesTransform: { type: 'none' },
   fastRefresh: {},
   ignoreMomentLocale: true,
-  // webpack5: {},
+  webpack5: {},
   targets: {
     ie: 11,
   },
   dynamicImport: {},
   publicPath: './',
-  // mfsu: {},
+  mfsu: {},
 });
