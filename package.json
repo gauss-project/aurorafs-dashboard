@@ -1,6 +1,6 @@
 {
   "name": "aufs_dashboard",
-  "version": "1.1.5",
+  "version": "1.2.1",
   "author": {
     "name": "aufs.Lester",
     "email": "**"
@@ -73,20 +73,22 @@
     "@ant-design/pro-layout": "^6.5.0",
     "@antv/g2": "^4.1.34",
     "@types/lodash": "^4.14.177",
+    "@types/qrcode.react": "^1.0.2",
     "axios": "^0.21.1",
     "classnames": "^2.3.1",
+    "ethers": "^5.5.2",
     "eventemitter3": "^4.0.7",
     "hls": "^0.0.1",
     "kill-port": "^1.6.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "nprogress": "^0.2.0",
+    "qrcode.react": "^1.0.1",
     "react": "17.x",
     "react-copy-to-clipboard": "^5.0.4",
     "react-dom": "17.x",
     "semver": "^7.3.5",
-    "umi": "^3.5.13",
-    "web3": "^1.6.1"
+    "umi": "^3.5.13"
   },
   "devDependencies": {
     "@types/antd": "^1.0.0",

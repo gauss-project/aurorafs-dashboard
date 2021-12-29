@@ -90,6 +90,22 @@ export declare type FileAttr = {
   eOPen: string;
 };
 
+export declare type Cheque = {
+  peer: string;
+  outstandingTraffic: number;
+  sendTraffic: number;
+  receivedTraffic: number;
+  total: number;
+  unCashed: number;
+};
+
+export declare type TrafficInfo = {
+  balance: number;
+  availableBalance: number;
+  totalSendTraffic: number;
+  receivedTraffic: number;
+};
+
 export declare type ChunkSource = {
   pyramidSource?: string;
   chunkSource?:

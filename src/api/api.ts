@@ -1,6 +1,12 @@
 import request from '@/utils/request';
 import { AxiosResponse, AxiosRequestConfig } from 'axios';
-import { FileInfo, FileType, FileAttr } from '@/declare/api';
+import {
+  FileInfo,
+  FileType,
+  FileAttr,
+  TrafficInfo,
+  Cheque,
+} from '@/declare/api';
 import { encodeUnicode } from '@/utils/util';
 
 export const isConnected = (url: string): Promise<AxiosResponse<string>> => {
@@ -108,6 +114,32 @@ export const queryFile = (
   });
 };
 
+export const getTrafficInfo = (
+  url: string,
+): Promise<AxiosResponse<TrafficInfo>> => {
+  return request({
+    url: url + '/traffic/info',
+  });
+};
+
+export const getTrafficCheques = (
+  url: string,
+): Promise<AxiosResponse<Cheque[]>> => {
+  return request({
+    url: url + '/traffic/cheques',
+  });
+};
+
+export const cashOut = (
+  url: string,
+  overlay: string,
+): Promise<AxiosResponse<any>> => {
+  return request({
+    url: url + '/traffic/cash/' + overlay,
+    method: 'post',
+  });
+};
+
 export default {
   isConnected,
   uploadFile,
@@ -117,4 +149,7 @@ export default {
   deleteFile,
   downloadFile,
   queryFile,
+  getTrafficInfo,
+  getTrafficCheques,
+  cashOut,
 };
