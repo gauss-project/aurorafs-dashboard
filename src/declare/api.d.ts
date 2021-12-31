@@ -93,8 +93,8 @@ export declare type FileAttr = {
 export declare type Cheque = {
   peer: string;
   outstandingTraffic: number;
-  sendTraffic: number;
-  receivedTraffic: number;
+  sentSettlements: number;
+  receivedSettlements: number;
   total: number;
   unCashed: number;
 };
