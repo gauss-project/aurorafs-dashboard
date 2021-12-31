@@ -108,6 +108,8 @@ const FilesList: React.FC = () => {
             : getSize(record.fileSize * 256, 1)}
         </span>
       ),
+      align: 'center',
+      width: 150,
     },
     {
       title: <div className={styles.head}>Pin/UnPin</div>,
@@ -121,6 +123,7 @@ const FilesList: React.FC = () => {
               arrowPointAtCenter
             >
               <img
+                alt={'pinStatus'}
                 src={record.pinState ? pinSvg : unPinSvg}
                 width={25}
                 style={{ cursor: 'pointer' }}
@@ -133,6 +136,7 @@ const FilesList: React.FC = () => {
         </>
       ),
       align: 'center',
+      width: 150,
     },
     {
       title: <div className={styles.head}>Open</div>,
@@ -151,6 +155,7 @@ const FilesList: React.FC = () => {
         </div>
       ),
       align: 'center',
+      width: 150,
     },
     {
       title: <div className={styles.head}>Delete</div>,
@@ -186,6 +191,7 @@ const FilesList: React.FC = () => {
           />
         </>
       ),
+      width: 150,
       align: 'center',
     },
   ];
