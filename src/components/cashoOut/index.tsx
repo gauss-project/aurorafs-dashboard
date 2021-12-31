@@ -32,32 +32,39 @@ const CashOut: React.FC<Props> = (props) => {
     {
       title: 'Peers',
       dataIndex: 'peer',
-      width: 600,
+      width: 550,
     },
     {
-      title: 'Outstanding\nBalance',
+      title: (
+        <>
+          <div>Outstanding</div>
+          <div>Balance</div>
+        </>
+      ),
       render: (value, record, index) => {
         return trafficToBalance(record.outstandingTraffic);
       },
       align: 'center',
-      width: 150,
     },
     {
-      title: 'Settlements\nSent/Received',
+      title: (
+        <>
+          <div>Settlements</div>
+          <div>Sent/Received</div>
+        </>
+      ),
       render: (value, record, index) => {
         return (
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ paddingLeft: 15 }}>
-              {trafficToBalance(record.sendTraffic)}&nbsp;&nbsp;/
+          <div style={{ textAlign: 'left', position: 'relative', left: 15 }}>
+            <div>
+              <span>-</span>
+              {trafficToBalance(record.sentSettlements)}&nbsp;/
             </div>
-            <div style={{ paddingLeft: 15 }}>
-              {trafficToBalance(record.receivedTraffic)}
-            </div>
+            <div>{trafficToBalance(record.receivedSettlements)}</div>
           </div>
         );
       },
       align: 'center',
-      width: 150,
     },
     {
       title: 'Total',
@@ -65,15 +72,18 @@ const CashOut: React.FC<Props> = (props) => {
         return trafficToBalance(record.total);
       },
       align: 'center',
-      width: 150,
     },
     {
-      title: 'Uncashed\nAmount',
+      title: (
+        <>
+          <div>Uncashed</div>
+          <div>Amount</div>
+        </>
+      ),
       render: (value, record, index) => {
         return trafficToBalance(record.unCashed);
       },
       align: 'center',
-      width: 150,
     },
     {
       title: 'cashout',
@@ -111,7 +121,7 @@ const CashOut: React.FC<Props> = (props) => {
         );
       },
       align: 'center',
-      width: 150,
+      width: 120,
     },
   ];
   return (
