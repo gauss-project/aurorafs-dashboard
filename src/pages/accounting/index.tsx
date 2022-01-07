@@ -58,24 +58,29 @@ const Main: React.FC = () => {
         url: api,
         overlay,
       },
-      callback: () => {
-        setTimeout(() => {
-          dispatch({
-            type: 'accounting/getTrafficInfo',
-            payload: {
-              url: api,
-            },
-          });
-          dispatch({
-            type: 'accounting/getTrafficCheques',
-            payload: {
-              url: api,
-            },
-          });
-          message.success('cashout successful');
+      callback: (err: boolean = false) => {
+        if (err) {
           setConfirmLoading(false);
           setVisible(false);
-        }, 10 * 1000);
+        } else {
+          setTimeout(() => {
+            dispatch({
+              type: 'accounting/getTrafficInfo',
+              payload: {
+                url: api,
+              },
+            });
+            dispatch({
+              type: 'accounting/getTrafficCheques',
+              payload: {
+                url: api,
+              },
+            });
+            message.success('cashout successful');
+            setConfirmLoading(false);
+            setVisible(false);
+          }, 10 * 1000);
+        }
       },
     });
   };
