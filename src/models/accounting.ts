@@ -79,6 +79,7 @@ export default {
         yield call(cashOut, url, overlay);
         callback();
       } catch (e) {
+        callback(true);
         if (e instanceof Error) message.info(e.message);
       }
     },
