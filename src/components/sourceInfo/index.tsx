@@ -39,14 +39,16 @@ const SourceInfo: React.FC<Props> = (props) => {
   const [source, setSource] = useState<Data[] | null>(null);
   const changeData = (data: ChunkSource) => {
     let arr: Data[] = [];
+    let pyramidSource = false;
     data.chunkSource?.forEach((item, index) => {
       const binary = stringToBinary(item.chunkBit.b, item.chunkBit.len, 0);
       let downloadLen = getDownloadNumber(binary);
       if (item.overlay === data.pyramidSource) {
         downloadLen += len;
+        pyramidSource = true;
       }
       item.chunkBit.len += len;
-      let preIndex = index - 1;
+      // let preIndex = index - 1;
       let current = {
         ...item,
         chunkBit: {
@@ -55,11 +57,21 @@ const SourceInfo: React.FC<Props> = (props) => {
         },
         downloadLen,
       };
-      while (preIndex >= 0 && arr[preIndex].downloadLen < downloadLen) {
-        arr[preIndex + 1] = arr[preIndex];
-        preIndex--;
-      }
-      arr[preIndex + 1] = current;
+      arr.push(current);
+    });
+    if (!pyramidSource) {
+      let n = arr[0].chunkBit.len;
+      arr.push({
+        overlay: data.pyramidSource,
+        chunkBit: {
+          len: n,
+          b: '0'.repeat(n),
+        },
+        downloadLen: len,
+      });
+    }
+    arr.sort((a, b) => {
+      return b.downloadLen - a.downloadLen;
     });
     return arr;
   };
