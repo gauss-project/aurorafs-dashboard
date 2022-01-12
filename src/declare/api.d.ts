@@ -107,8 +107,8 @@ export declare type TrafficInfo = {
 };
 
 export declare type ChunkSource = {
-  pyramidSource?: string;
-  chunkSource?:
+  pyramidSource: string;
+  chunkSource:
     | {
         overlay: string;
         chunkBit: {
