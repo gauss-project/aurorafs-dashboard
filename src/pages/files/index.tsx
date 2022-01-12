@@ -13,7 +13,7 @@ const Main: React.FC = (props) => {
   let dispatch = useDispatch();
   const { uploadStatus } = useSelector((state: Models) => state.files);
   const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList, filesInfo } = useSelector(
+  const { filesList, downloadList } = useSelector(
     (state: Models) => state.files,
   );
   let timer = useRef<NodeJS.Timer | null>(null);
@@ -48,16 +48,6 @@ const Main: React.FC = (props) => {
         dispatch({
           type: 'files/addDLHash',
           payload: {
-            hash: item.fileHash,
-          },
-        });
-      }
-      // notInfoHash
-      if (!filesInfo[item.fileHash]) {
-        dispatch({
-          type: 'files/queryFile',
-          payload: {
-            url: api,
             hash: item.fileHash,
           },
         });

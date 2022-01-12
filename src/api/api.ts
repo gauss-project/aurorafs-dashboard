@@ -104,16 +104,6 @@ export const downloadFile = (url: string, hash: string): Promise<any> => {
   });
 };
 
-export const queryFile = (
-  url: string,
-  hash: string,
-): Promise<AxiosResponse<FileInfo>> => {
-  return request({
-    url: url + '/manifest/' + hash,
-    method: 'get',
-  });
-};
-
 export const getTrafficInfo = (
   url: string,
 ): Promise<AxiosResponse<TrafficInfo>> => {
@@ -140,6 +130,17 @@ export const cashOut = (
   });
 };
 
+export const updateFileRegister = (
+  url: string,
+  overlay: string,
+  bool: boolean,
+): Promise<AxiosResponse<{ hash: string }>> => {
+  return request({
+    url: url + '/fileRegister/' + overlay,
+    method: bool ? 'post' : 'delete',
+  });
+};
+
 export default {
   isConnected,
   uploadFile,
@@ -148,8 +149,8 @@ export default {
   getFilesList,
   deleteFile,
   downloadFile,
-  queryFile,
   getTrafficInfo,
   getTrafficCheques,
   cashOut,
+  updateFileRegister,
 };

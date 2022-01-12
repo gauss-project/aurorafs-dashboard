@@ -1,5 +1,5 @@
 import ModelsType from '@/declare/modelType';
-import { FileType, FileInfoMap, FileSub } from '@/declare/api';
+import { FileType } from '@/declare/api';
 
 import Api from '@/api/api';
 import { message } from 'antd';
@@ -10,7 +10,6 @@ export interface State {
   filesList: FileType[];
   uploadStatus: boolean;
   downloadList: string[];
-  filesInfo: FileInfoMap;
 }
 
 export default {
@@ -18,17 +17,8 @@ export default {
     uploadStatus: false,
     filesList: [],
     downloadList: [],
-    filesInfo: {},
   },
   reducers: {
-    addFilesInfo(state, { payload }) {
-      const filesInfo = _.cloneDeep(state).filesInfo;
-      const { fileInfo } = payload;
-      return {
-        ...state,
-        filesInfo: { ...filesInfo, ...fileInfo },
-      };
-    },
     deleteDLHash(state, { payload }) {
       const downloadList = state.downloadList.slice();
       const { hash } = payload;
@@ -126,32 +116,6 @@ export default {
         const { data } = yield call(Api.deleteFile, url, hash);
         message.success(data.message);
         yield put({ type: 'getFilesList', payload: { url } });
-      } catch (e) {
-        if (e instanceof Error) message.info(e.message);
-      }
-    },
-    *queryFile({ payload }, { call, put }) {
-      const { url, hash } = payload;
-      try {
-        let { data } = yield call(Api.queryFile, url, hash);
-        yield put({
-          type: 'addFilesInfo',
-          payload: {
-            fileInfo: {
-              [hash]: {
-                ...data,
-                isM3u8: mapQueryM3u8(data.sub),
-                manifestSize: Object.values(data.sub).reduce(
-                  (total, item: any) => {
-                    return total + item.size;
-                  },
-                  0,
-                ),
-              },
-            },
-          },
-        });
-        // message.success(data.message);
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       }
