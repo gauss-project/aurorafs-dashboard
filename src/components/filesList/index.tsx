@@ -75,9 +75,12 @@ const FilesList: React.FC = () => {
       setLoading(true);
       const { data } = await updateFileRegister(api, overlay, status);
       const provider = new ethers.providers.JsonRpcProvider(api + '/chain');
+      let lock = false;
       let timer = setInterval(async () => {
-        console.log(1);
+        if (lock) return;
+        lock = true;
         const res = await provider.getTransactionReceipt(data.hash);
+        lock = false;
         if (res) {
           clearInterval(timer);
           setLoading(false);
@@ -93,7 +96,7 @@ const FilesList: React.FC = () => {
             message.error('Failure');
           }
         }
-      }, 2000);
+      }, 1000);
     } catch (e) {
       setLoading(false);
       if (e instanceof Error) message.error(e.message);
@@ -177,15 +180,21 @@ const FilesList: React.FC = () => {
       render: (text, record) => (
         <>
           {/0/.test(record.bitVector.b) || (
-            <img
-              alt={'register'}
-              src={record.register ? regSvg : removeSvg}
-              width={25}
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                registerHandle(record.fileHash, !record.register);
-              }}
-            />
+            <Tooltip
+              placement="top"
+              title={record.register ? 'Unregister' : 'Register'}
+              arrowPointAtCenter
+            >
+              <img
+                alt={'register'}
+                src={record.register ? regSvg : removeSvg}
+                width={25}
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  registerHandle(record.fileHash, !record.register);
+                }}
+              />
+            </Tooltip>
           )}
         </>
       ),
