@@ -12,7 +12,7 @@ if (isElectron) {
   ipcRenderer = window.require('electron').ipcRenderer;
 }
 
-const Main: React.FC = () => {
+const Log: React.FC = () => {
   const history = useHistory();
   const { electron } = useSelector((state: Models) => state.global);
   if (!electron) history.push('/404');
@@ -53,8 +53,4 @@ const Main: React.FC = () => {
   );
 };
 
-const Log: React.FC = (props) => {
-  const { status } = useSelector((state: Models) => state.global);
-  return <>{status ? <Main /> : <NotConnected />}</>;
-};
 export default Log;

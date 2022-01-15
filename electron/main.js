@@ -2,20 +2,23 @@
 const { app, BrowserWindow, Menu, Tray } = require('electron');
 const path = require('path');
 const { ipcMain } = require('electron');
-const { start } = require('./run');
-const { checkStatus } = require('./util');
+const { run } = require('./utils');
 const fs = require('fs');
 
-let tray;
-let logs = [];
-let workerProcess;
+app.disableHardwareAcceleration();
 
-function quit() {
-  workerProcess.emit('exit', true);
+let tray;
+let workerProcess;
+let logs = [];
+
+function quit(status = true) {
+  workerProcess.kill();
+  if (status) app.quit();
 }
 
-function createWindow() {
+async function createWindow() {
   Menu.setApplicationMenu(null);
+
   // Create the browser window.
   let win = new BrowserWindow({
     show: false,
@@ -26,24 +29,27 @@ function createWindow() {
       webSecurity: false,
     },
   });
-  checkStatus(win);
+
+  workerProcess = await run({ win, logs });
+
   // Create the menu
   tray = new Tray('./public/logo.png'); // sets tray icon image
   const contextMenu = Menu.buildFromTemplate([
-    // define menu items
     {
       label: 'Restart',
       click: async () => {
+        quit(false);
         logs = [];
-        win.webContents.send('restart');
-        workerProcess.emit('exit');
-        workerProcess = await start(app, logs, ipcMain);
-        checkStatus(win);
+        win.webContents.send('logs', logs);
+        win.webContents.send('startLoading');
+        workerProcess = await run({ win, logs });
       }, // click event
     },
     {
       label: 'Exit',
-      click: () => quit(),
+      click: () => {
+        quit();
+      },
     },
   ]);
   tray.setContextMenu(contextMenu);
@@ -57,6 +63,9 @@ function createWindow() {
       event.preventDefault();
       let openWin = new BrowserWindow({
         webPreferences: {
+          contextIsolation: false,
+          nodeIntegration: true,
+          preload: path.join(__dirname, 'preload.js'),
           webSecurity: false,
         },
       });
@@ -86,28 +95,18 @@ app.whenReady().then(async () => {
   createWindow();
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-app.on('ready', async function () {
-  workerProcess = await start(app, logs, ipcMain);
-});
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') quit();
+  if (process.platform !== 'darwin') {
+    quit();
+  }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
 
 ipcMain.on('config', (event) => {
   fs.readFile('./aurora/aurora.yaml', 'utf-8', function (err, data) {
-    console.log(typeof data);
     event.reply('config', { err, data });
   });
 });

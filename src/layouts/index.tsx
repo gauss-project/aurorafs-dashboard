@@ -60,17 +60,17 @@ const Layouts: React.FC = (props) => {
       icon: <FileTextOutlined />,
     },
     {
-      text: 'Log',
-      router: '/log',
-      icon: <FieldTimeOutlined />,
-    },
-    {
       text: 'Accounting',
       router: '/accounting',
       icon: <DollarCircleOutlined />,
     },
     {
-      text: 'Settings',
+      text: 'Log',
+      router: '/log',
+      icon: <FieldTimeOutlined />,
+    },
+    {
+      text: electron ? 'Config' : 'Settings',
       router: '/setting',
       icon: <SettingOutlined />,
     },
@@ -103,17 +103,25 @@ const Layouts: React.FC = (props) => {
           },
         });
       });
-      ipcRenderer.on('restart', () => {
+      ipcRenderer.on('startLoading', () => {
+        dispatch({
+          type: 'global/setStatus',
+          payload: {
+            status: false,
+          },
+        });
         dispatch({
           type: 'global/setRefresh',
           payload: {
             refresh: true,
           },
         });
+      });
+      ipcRenderer.on('stopLoading', () => {
         dispatch({
-          type: 'global/setStatus',
+          type: 'global/setRefresh',
           payload: {
-            status: false,
+            refresh: false,
           },
         });
       });
@@ -125,13 +133,13 @@ const Layouts: React.FC = (props) => {
           debugApi,
         },
       });
+      dispatch({
+        type: 'global/setRefresh',
+        payload: {
+          refresh: true,
+        },
+      });
     }
-    dispatch({
-      type: 'global/setRefresh',
-      payload: {
-        refresh: true,
-      },
-    });
     eventEmitter.on('404', () => {
       dispatch({
         type: 'global/setStatus',

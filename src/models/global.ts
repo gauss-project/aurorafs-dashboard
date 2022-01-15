@@ -48,7 +48,7 @@ export interface State {
 
 export default {
   state: {
-    refresh: true,
+    refresh: false,
     status: false,
     api: checkSession(sessionStorageApi) || defaultApi,
     debugApi: checkSession(sessionStorageDebugApi) || defaultDebugApi,
