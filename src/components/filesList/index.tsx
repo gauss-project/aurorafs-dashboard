@@ -18,7 +18,7 @@ import { getSize, stringToBinary, getProgress } from '@/utils/util';
 import pinSvg from '@/assets/icon/pin.svg';
 import unPinSvg from '@/assets/icon/unPin.svg';
 import regSvg from '@/assets/icon/reg.svg';
-import removeSvg from '@/assets/icon/remove.svg';
+import unRegSvg from '@/assets/icon/unReg.svg';
 import Popup from '@/components/popup';
 import SourceInfo from '@/components/sourceInfo';
 import { updateFileRegister } from '@/api/api';
@@ -187,8 +187,8 @@ const FilesList: React.FC = () => {
             >
               <img
                 alt={'register'}
-                src={record.register ? regSvg : removeSvg}
-                width={25}
+                src={record.register ? regSvg : unRegSvg}
+                width={30}
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
                   registerHandle(record.fileHash, !record.register);

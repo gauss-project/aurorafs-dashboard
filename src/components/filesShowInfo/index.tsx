@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styles from './index.less';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import warningSvg from '@/assets/icon/warning.svg';
+import classNames from 'classnames';
 
 const FilesShowInfo: React.FC = () => {
   const dispatch = useDispatch();
+  const { addresses } = useSelector((state: Models) => state.info);
   const { debugApi, health, topology } = useSelector(
     (state: Models) => state.global,
   );
@@ -23,9 +25,13 @@ const FilesShowInfo: React.FC = () => {
       },
     });
   }, []);
-  const { addresses } = useSelector((state: Models) => state.info);
   return (
-    <div className={styles.content}>
+    <div
+      className={classNames({
+        [styles.content]: true,
+        [styles.lightNode]: health?.bootNodeMode ? false : !health?.fullNode,
+      })}
+    >
       <div>
         <span className={styles.key}>Overlay Address</span>:&nbsp;&nbsp;
         <span className={styles.value}>{addresses?.overlay}</span>
@@ -68,5 +74,4 @@ const FilesShowInfo: React.FC = () => {
     </div>
   );
 };
-
 export default FilesShowInfo;
