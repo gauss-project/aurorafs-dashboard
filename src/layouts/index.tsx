@@ -23,6 +23,7 @@ import logoImg from '@/assets/img/logo.png';
 import { getSize } from '@/utils/util';
 import { speedTime } from '@/config/url';
 import semver from 'semver';
+import { message } from 'antd';
 
 let ipcRenderer: any = null;
 if (isElectron) {
@@ -124,6 +125,8 @@ const Layouts: React.FC = (props) => {
             refresh: false,
           },
         });
+        history.push('/log');
+        message.info('The node is being started');
       });
     } else {
       dispatch({
@@ -133,13 +136,13 @@ const Layouts: React.FC = (props) => {
           debugApi,
         },
       });
-      dispatch({
-        type: 'global/setRefresh',
-        payload: {
-          refresh: true,
-        },
-      });
     }
+    dispatch({
+      type: 'global/setRefresh',
+      payload: {
+        refresh: true,
+      },
+    });
     eventEmitter.on('404', () => {
       dispatch({
         type: 'global/setStatus',
