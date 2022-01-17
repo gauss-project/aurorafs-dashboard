@@ -1,12 +1,13 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Menu, Tray } = require('electron');
+const { app, BrowserWindow, Menu, Tray, shell } = require('electron');
 const path = require('path');
 const { ipcMain } = require('electron');
 const { run } = require('./utils');
 const fs = require('fs');
 
-app.disableHardwareAcceleration();
+// app.disableHardwareAcceleration();
 
+let win;
 let tray;
 let workerProcess;
 let logs = [];
@@ -20,7 +21,7 @@ async function createWindow() {
   Menu.setApplicationMenu(null);
 
   // Create the browser window.
-  let win = new BrowserWindow({
+  win = new BrowserWindow({
     show: false,
     webPreferences: {
       contextIsolation: false,
@@ -28,6 +29,10 @@ async function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       webSecurity: false,
     },
+  });
+
+  win.webContents.on('did-finish-load', () => {
+    win.isStart = true;
   });
 
   workerProcess = await run({ win, logs });
@@ -61,6 +66,10 @@ async function createWindow() {
     'new-window',
     (event, url, frameName, disposition, options) => {
       event.preventDefault();
+      if (url === 'https://testnet.binance.org/faucet-smart') {
+        shell.openExternal(url);
+        return;
+      }
       let openWin = new BrowserWindow({
         webPreferences: {
           contextIsolation: false,
@@ -73,9 +82,7 @@ async function createWindow() {
       openWin.webContents.session.addListener(
         'will-download',
         (evt, item, webContents) => {
-          item.on('done', () => {
-            openWin.destroy();
-          });
+          openWin.destroy();
         },
       );
     },
@@ -85,7 +92,8 @@ async function createWindow() {
   win.show();
 
   // Open the DevTools.
-  // win.webContents.openDevTools();
+
+  process.env.TERGET_ENV && win.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -103,6 +111,14 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     quit();
   }
+});
+
+ipcMain.on('restart', async (event) => {
+  quit(false);
+  logs = [];
+  win.webContents.send('logs', logs);
+  win.webContents.send('startLoading');
+  workerProcess = await run({ win, logs });
 });
 
 ipcMain.on('config', (event) => {

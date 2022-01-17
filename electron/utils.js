@@ -14,7 +14,12 @@ async function run({ win, logs }) {
     let workerProcess = spawn(startCmd, ['--config=aurora.yaml', 'start'], {
       cwd: cmdPath,
     });
-    win.webContents.send('stopLoading');
+    let timer = setInterval(() => {
+      if (win.isStart) {
+        clearInterval(timer);
+        win.webContents.send('stopLoading');
+      }
+    }, 1000);
     let notStart = true;
     workerProcess.stdout.on('data', (data) => {
       let log = data.toString();
