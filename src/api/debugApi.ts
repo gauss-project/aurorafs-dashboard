@@ -51,11 +51,9 @@ export const connect = (
   });
 };
 
-export const getKey = (
-  url: string,
-): Promise<AxiosResponse<{ private_key: string }>> => {
+export const getKeystore = (url: string): Promise<AxiosResponse<any>> => {
   return request({
-    url: url + '/privatekey',
+    url: url + '/keystore',
   });
 };
 
@@ -67,5 +65,5 @@ export default {
   getMetrics,
   getChunkSource,
   connect,
-  getKey,
+  getKeystore,
 };
