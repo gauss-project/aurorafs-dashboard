@@ -53,6 +53,9 @@ const AuroraConfigEdit: React.FC = () => {
   const resetHandle = () => {
     ipcRenderer.send('reset');
   };
+  const restartHandle = () => {
+    ipcRenderer.send('restart');
+  };
   return (
     <div className={styles.content}>
       <div className={styles.header}>
@@ -75,6 +78,12 @@ const AuroraConfigEdit: React.FC = () => {
               id={'saveAuroraConfig'}
             >
               Save
+            </Button>
+            <Button
+              className={styles.btn}
+              onClick={throttle(restartHandle, 1000)}
+            >
+              Restart
             </Button>
           </div>
         </div>

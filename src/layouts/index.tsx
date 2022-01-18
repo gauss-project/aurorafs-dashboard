@@ -23,6 +23,7 @@ import logoImg from '@/assets/img/logo.png';
 import { getSize } from '@/utils/util';
 import { speedTime } from '@/config/url';
 import semver from 'semver';
+import { message } from 'antd';
 
 let ipcRenderer: any = null;
 if (isElectron) {
@@ -60,17 +61,17 @@ const Layouts: React.FC = (props) => {
       icon: <FileTextOutlined />,
     },
     {
-      text: 'Log',
-      router: '/log',
-      icon: <FieldTimeOutlined />,
-    },
-    {
       text: 'Accounting',
       router: '/accounting',
       icon: <DollarCircleOutlined />,
     },
     {
-      text: 'Settings',
+      text: 'Log',
+      router: '/log',
+      icon: <FieldTimeOutlined />,
+    },
+    {
+      text: electron ? 'Config' : 'Settings',
       router: '/setting',
       icon: <SettingOutlined />,
     },
@@ -103,19 +104,29 @@ const Layouts: React.FC = (props) => {
           },
         });
       });
-      ipcRenderer.on('restart', () => {
-        dispatch({
-          type: 'global/setRefresh',
-          payload: {
-            refresh: true,
-          },
-        });
+      ipcRenderer.on('startLoading', () => {
         dispatch({
           type: 'global/setStatus',
           payload: {
             status: false,
           },
         });
+        dispatch({
+          type: 'global/setRefresh',
+          payload: {
+            refresh: true,
+          },
+        });
+      });
+      ipcRenderer.on('stopLoading', () => {
+        dispatch({
+          type: 'global/setRefresh',
+          payload: {
+            refresh: false,
+          },
+        });
+        history.push('/log');
+        message.info('The node is being started');
       });
     } else {
       dispatch({
