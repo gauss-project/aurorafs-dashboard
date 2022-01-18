@@ -73,16 +73,6 @@ export default {
         if (e instanceof Error) message.info(e.message);
       }
     },
-    *cashOut({ payload, callback }, { call, put }) {
-      const { url, overlay } = payload;
-      try {
-        yield call(cashOut, url, overlay);
-        callback();
-      } catch (e) {
-        callback(true);
-        if (e instanceof Error) message.info(e.message);
-      }
-    },
   },
   subscriptions: {},
 } as ModelsType<State>;

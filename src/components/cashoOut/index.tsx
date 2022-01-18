@@ -100,7 +100,7 @@ const CashOut: React.FC<Props> = (props) => {
                   cashout
                 </Button>
                 <Modal
-                  title="Title"
+                  title="cashout"
                   centered
                   visible={visible}
                   confirmLoading={confirmLoading}
