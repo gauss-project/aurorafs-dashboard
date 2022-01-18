@@ -53,6 +53,8 @@ export declare type FileType = {
     len: number;
     b: string;
   };
+  register: boolean;
+  manifest: FileInfo;
 };
 
 export declare type FileSub = Record<
@@ -74,13 +76,10 @@ export declare type FileInfo = {
   sub: FileSub;
 };
 
-export declare type FileInfoMap = Record<
-  string,
-  FileInfo & { isM3u8?: boolean; manifestSize?: number }
->;
-
-export declare type AllFileInfo = FileType &
-  FileInfo & { isM3u8?: boolean; manifestSize?: number };
+export declare type AllFileInfo = FileType & {
+  isM3u8?: boolean;
+  manifestSize?: number;
+};
 
 export declare type FileAttr = {
   isTar: boolean;

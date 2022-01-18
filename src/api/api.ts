@@ -1,32 +1,11 @@
 import request from '@/utils/request';
 import { AxiosResponse, AxiosRequestConfig } from 'axios';
-import {
-  FileInfo,
-  FileType,
-  FileAttr,
-  TrafficInfo,
-  Cheque,
-} from '@/declare/api';
+import { FileType, FileAttr, TrafficInfo, Cheque } from '@/declare/api';
 import { encodeUnicode } from '@/utils/util';
 
 export const isConnected = (url: string): Promise<AxiosResponse<string>> => {
   return request({
     url,
-  });
-};
-
-export const uploadDir = (
-  url: string,
-  fileList: any,
-): Promise<AxiosResponse<string>> => {
-  return request({
-    url: url + '/aurora',
-    method: 'post',
-    data: fileList,
-    headers: {
-      'Aurora-Collection': true,
-    },
-    timeout: 0,
   });
 };
 
@@ -85,6 +64,7 @@ export const getFilesList = (
 ): Promise<AxiosResponse<FileType[]>> => {
   return request({
     url: url + '/aurora',
+    timeout: 30 * 1000,
   });
 };
 
@@ -101,16 +81,6 @@ export const downloadFile = (url: string, hash: string): Promise<any> => {
     url: url + '/aurora/' + hash,
     method: 'get',
     responseType: 'blob',
-  });
-};
-
-export const queryFile = (
-  url: string,
-  hash: string,
-): Promise<AxiosResponse<FileInfo>> => {
-  return request({
-    url: url + '/manifest/' + hash,
-    method: 'get',
   });
 };
 
@@ -140,6 +110,18 @@ export const cashOut = (
   });
 };
 
+export const updateFileRegister = (
+  url: string,
+  overlay: string,
+  bool: boolean,
+): Promise<AxiosResponse<{ hash: string }>> => {
+  return request({
+    url: url + '/fileRegister/' + overlay,
+    method: bool ? 'post' : 'delete',
+    timeout: 30 * 1000,
+  });
+};
+
 export default {
   isConnected,
   uploadFile,
@@ -148,8 +130,8 @@ export default {
   getFilesList,
   deleteFile,
   downloadFile,
-  queryFile,
   getTrafficInfo,
   getTrafficCheques,
   cashOut,
+  updateFileRegister,
 };

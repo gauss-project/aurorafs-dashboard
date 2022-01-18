@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Table, Tooltip, Popconfirm, Progress, Modal } from 'antd';
+import { Table, Tooltip, Popconfirm, Progress, Modal, message } from 'antd';
 
 const { confirm } = Modal;
 import { ColumnsType } from 'antd/es/table';
@@ -13,26 +13,31 @@ import {
 import CopyText from '@/components/copyText';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
-import ChunkTooltip from '@/components/chunkTooltip';
 import { getSize, stringToBinary, getProgress } from '@/utils/util';
 
 import pinSvg from '@/assets/icon/pin.svg';
 import unPinSvg from '@/assets/icon/unPin.svg';
-import { downloadFile } from '@/api/api';
+import regSvg from '@/assets/icon/reg.svg';
+import unRegSvg from '@/assets/icon/unReg.svg';
 import Popup from '@/components/popup';
 import SourceInfo from '@/components/sourceInfo';
+import { updateFileRegister } from '@/api/api';
+import { mapQueryM3u8 } from '@/utils/util';
+import Loading from '@/components/loading';
+import { ethers } from 'ethers';
 
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
   const ref = useRef<HTMLDivElement | null>(null);
 
   const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList, filesInfo } = useSelector(
+  const { filesList, downloadList } = useSelector(
     (state: Models) => state.files,
   );
 
   const [hashInfo, setHashInfo] = useState<AllFileInfo | null>(null);
 
+  const [loading, setLoading] = useState(false);
   const [top, setTop] = useState(0);
 
   const pinOrUnPin = (hash: string, pinState: boolean): void => {
@@ -65,6 +70,38 @@ const FilesList: React.FC = () => {
   const clickHandle = (hashInfo: AllFileInfo): void => {
     setHashInfo(hashInfo);
   };
+  const registerHandle = async (overlay: string, status: boolean) => {
+    try {
+      setLoading(true);
+      const { data } = await updateFileRegister(api, overlay, status);
+      const provider = new ethers.providers.JsonRpcProvider(api + '/chain');
+      let lock = false;
+      let timer = setInterval(async () => {
+        if (lock) return;
+        lock = true;
+        const res = await provider.getTransactionReceipt(data.hash);
+        lock = false;
+        if (res) {
+          clearInterval(timer);
+          setLoading(false);
+          if (res.status) {
+            dispatch({
+              type: 'files/getFilesList',
+              payload: {
+                url: api,
+              },
+            });
+            message.success('success');
+          } else {
+            message.error('Failure');
+          }
+        }
+      }, 1000);
+    } catch (e) {
+      setLoading(false);
+      if (e instanceof Error) message.error(e.message);
+    }
+  };
   // table field
   const columns: ColumnsType<AllFileInfo> = [
     {
@@ -73,7 +110,7 @@ const FilesList: React.FC = () => {
       render: (text, record) => (
         <>
           <div style={{ fontSize: 16 }} className={styles.fileName}>
-            {record.name}
+            {record.manifest.name}
           </div>
           <span style={{ marginRight: 5, color: '#666' }}>
             {record.fileHash}
@@ -96,7 +133,7 @@ const FilesList: React.FC = () => {
           )}
         </>
       ),
-      width: 600,
+      width: 650,
     },
     {
       title: <div className={styles.head}>Size</div>,
@@ -109,7 +146,7 @@ const FilesList: React.FC = () => {
         </span>
       ),
       align: 'center',
-      width: 150,
+      width: 100,
     },
     {
       title: <div className={styles.head}>Pin/UnPin</div>,
@@ -139,6 +176,32 @@ const FilesList: React.FC = () => {
       width: 150,
     },
     {
+      title: <div className={styles.head}>Register</div>,
+      render: (text, record) => (
+        <>
+          {/0/.test(record.bitVector.b) || (
+            <Tooltip
+              placement="top"
+              title={record.register ? 'Unregister' : 'Register'}
+              arrowPointAtCenter
+            >
+              <img
+                alt={'register'}
+                src={record.register ? regSvg : unRegSvg}
+                width={30}
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  registerHandle(record.fileHash, !record.register);
+                }}
+              />
+            </Tooltip>
+          )}
+        </>
+      ),
+      align: 'center',
+      width: 100,
+    },
+    {
       title: <div className={styles.head}>Open</div>,
       key: 'open',
       render: (text, record) => (
@@ -155,7 +218,7 @@ const FilesList: React.FC = () => {
         </div>
       ),
       align: 'center',
-      width: 150,
+      width: 100,
     },
     {
       title: <div className={styles.head}>Delete</div>,
@@ -172,7 +235,7 @@ const FilesList: React.FC = () => {
                       Are you sure to delete the file?
                     </div>
                     <div className={styles.name}>
-                      FileName:&nbsp;&nbsp;<span>{record.name}</span>
+                      FileName:&nbsp;&nbsp;<span>{record.manifest.name}</span>
                     </div>
                     RCID:&nbsp;&nbsp;<span>{record?.fileHash}</span>
                   </div>
@@ -191,7 +254,7 @@ const FilesList: React.FC = () => {
           />
         </>
       ),
-      width: 150,
+      width: 100,
       align: 'center',
     },
   ];
@@ -212,14 +275,20 @@ const FilesList: React.FC = () => {
     return filesList.map((item) => {
       return {
         ...item,
-        ...filesInfo[item.fileHash],
         bitVector: {
           ...item.bitVector,
           b: stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
         },
+        isM3u8: mapQueryM3u8(item.manifest.sub),
+        manifestSize: Object.values(item.manifest.sub).reduce(
+          (total, item: any) => {
+            return total + item.size;
+          },
+          0,
+        ),
       };
     });
-  }, [filesList, filesInfo]);
+  }, [filesList]);
   return (
     <div ref={ref}>
       <Table<AllFileInfo>
@@ -240,7 +309,7 @@ const FilesList: React.FC = () => {
           <>
             <div className={'info_content'}>
               <div className={styles.name}>
-                FileName:&nbsp;&nbsp;<span>{hashInfo?.name}</span>
+                FileName:&nbsp;&nbsp;<span>{hashInfo?.manifest.name}</span>
               </div>
               RCID:&nbsp;&nbsp;<span>{hashInfo?.fileHash}</span>
             </div>
@@ -249,6 +318,7 @@ const FilesList: React.FC = () => {
       >
         {hashInfo && <SourceInfo hashInfo={hashInfo} />}
       </Popup>
+      {loading && <Loading text={'Loading'} status={loading} />}
     </div>
   );
 };
