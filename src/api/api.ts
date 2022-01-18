@@ -103,10 +103,11 @@ export const getTrafficCheques = (
 export const cashOut = (
   url: string,
   overlay: string,
-): Promise<AxiosResponse<any>> => {
+): Promise<AxiosResponse<{ hash: string }>> => {
   return request({
     url: url + '/traffic/cash/' + overlay,
     method: 'post',
+    timeout: 30 * 1000,
   });
 };
 

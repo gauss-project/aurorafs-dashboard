@@ -15,7 +15,11 @@ const CopyText: React.FC<Props> = (props) => {
     <>
       <CopyToClipboard text={props.text} onCopy={copyHandle}>
         <Tooltip title="copy" key={'copy'}>
-          <CopyOutlined className={styles.iconColor} />
+          {props.children ? (
+            props.children
+          ) : (
+            <CopyOutlined className={styles.iconColor} />
+          )}
         </Tooltip>
       </CopyToClipboard>
     </>

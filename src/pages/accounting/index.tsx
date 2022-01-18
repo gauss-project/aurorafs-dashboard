@@ -9,8 +9,8 @@ import CashOut from '@/components/cashoOut';
 import { trafficToBalance } from '@/utils/util';
 import { ethers } from 'ethers';
 import { Modal, Button, Space, message } from 'antd';
-import debugApi, { getKey } from '@/api/debugApi';
-import QRCode from 'qrcode.react';
+import DebugApi from '@/api/debugApi';
+import Api from '@/api/api';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
@@ -50,43 +50,51 @@ const Main: React.FC = () => {
       },
     });
   }, []);
-  const cashOut = (overlay: string): void => {
+  const cashOut = async (overlay: string): Promise<void> => {
     setConfirmLoading(true);
-    dispatch({
-      type: 'accounting/cashOut',
-      payload: {
-        url: api,
-        overlay,
-      },
-      callback: (err: boolean = false) => {
-        if (err) {
-          setConfirmLoading(false);
-          setVisible(false);
-        } else {
+    try {
+      const { data } = await Api.cashOut(api, overlay);
+      const provider = new ethers.providers.JsonRpcProvider(api + '/chain');
+      let lock = false;
+      let timer = setInterval(async () => {
+        if (lock) return;
+        lock = true;
+        let res = await provider.getTransactionReceipt(data.hash);
+        if (res) {
+          clearInterval(timer);
           setTimeout(() => {
-            dispatch({
-              type: 'accounting/getTrafficInfo',
-              payload: {
-                url: api,
-              },
-            });
-            dispatch({
-              type: 'accounting/getTrafficCheques',
-              payload: {
-                url: api,
-              },
-            });
-            message.success('cashout successful');
             setConfirmLoading(false);
             setVisible(false);
-          }, 10 * 1000);
+            if (res.status) {
+              dispatch({
+                type: 'accounting/getTrafficInfo',
+                payload: {
+                  url: api,
+                },
+              });
+              dispatch({
+                type: 'accounting/getTrafficCheques',
+                payload: {
+                  url: api,
+                },
+              });
+              message.success('cashout successful');
+            } else {
+              message.error('cashout failure');
+            }
+          }, 3000);
         }
-      },
-    });
+        lock = false;
+      }, 1000);
+    } catch (e) {
+      setConfirmLoading(false);
+      setVisible(false);
+      if (e instanceof Error) message.error(e.message);
+    }
   };
-  const getPrivateKey = async (): Promise<void> => {
-    const { data } = await getKey(debugApi);
-    const key = data.private_key;
+  const getKeystore = async (): Promise<void> => {
+    const { data } = await DebugApi.getKeystore(debugApi);
+    let jsonStr = JSON.stringify(data);
     Modal.info({
       centered: true,
       icon: <></>,
@@ -95,16 +103,14 @@ const Main: React.FC = () => {
       style: {
         height: 'auto',
       },
+      width: 500,
       content: (
-        <div>
-          <div style={{ textAlign: 'center' }}>
-            <QRCode value={key} />,
-          </div>
-          <div className={styles.key}>
-            <span className={'greyColor'} style={{ marginRight: 5 }}>
-              {key}
-            </span>
-            <CopyText text={key} />
+        <div className={styles.key}>
+          <div>{jsonStr}</div>
+          <div className={styles.copyKeystore}>
+            <CopyText text={jsonStr}>
+              <Button>Copy Keystore</Button>
+            </CopyText>
           </div>
         </div>
       ),
@@ -158,11 +164,11 @@ const Main: React.FC = () => {
             <CopyText text={account} />
             <Space wrap>
               <Button
-                size={'small'}
+                // size={'small'}
                 className={styles.privateKey}
-                onClick={getPrivateKey}
+                onClick={getKeystore}
               >
-                Private Key
+                ExportKeystore
               </Button>
             </Space>
           </div>
