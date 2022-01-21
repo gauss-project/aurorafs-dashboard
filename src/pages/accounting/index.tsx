@@ -9,8 +9,10 @@ import CashOut from '@/components/cashoOut';
 import { trafficToBalance } from '@/utils/util';
 import { ethers } from 'ethers';
 import { Modal, Button, Space, message } from 'antd';
-import DebugApi from '@/api/debugApi';
 import Api from '@/api/api';
+// import DebugApi from '@/api/debugApi';
+// import Popup from '@/components/popup';
+import Keystore from '@/components/keystore';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
@@ -92,34 +94,35 @@ const Main: React.FC = () => {
       if (e instanceof Error) message.error(e.message);
     }
   };
-  const getKeystore = async (): Promise<void> => {
-    const { data } = await DebugApi.getKeystore(debugApi);
-    let jsonStr = JSON.stringify(data);
-    Modal.info({
-      centered: true,
-      icon: <></>,
-      closable: true,
-      okButtonProps: { style: { display: 'none' } },
-      style: {
-        height: 'auto',
-      },
-      width: 500,
-      content: (
-        <div className={styles.key}>
-          <div>{jsonStr}</div>
-          <div className={styles.copyKeystore}>
-            <CopyText text={jsonStr}>
-              <Button>Copy Keystore</Button>
-            </CopyText>
-          </div>
-        </div>
-      ),
-    });
-  };
+  // const getKeystore = async (): Promise<void> => {
+  //   setKV(true);
+  //   // const { data } = await DebugApi.getKeystore(debugApi);
+  //   // let jsonStr = JSON.stringify(data);
+  //   // Modal.info({
+  //   //   centered: true,
+  //   //   icon: <></>,
+  //   //   closable: true,
+  //   //   okButtonProps: { style: { display: 'none' } },
+  //   //   style: {
+  //   //     height: 'auto',
+  //   //   },
+  //   //   width: 500,
+  //   //   content: (
+  //   //     <div className={styles.key}>
+  //   //       <div>{jsonStr}</div>
+  //   //       <div className={styles.copyKeystore}>
+  //   //         <CopyText text={jsonStr}>
+  //   //           <Button>Copy Keystore</Button>
+  //   //         </CopyText>
+  //   //       </div>
+  //   //     </div>
+  //   //   ),
+  //   // });
+  // };
   return (
     <>
       <div>
-        <div className={styles.head}>Chequebook</div>
+        <div className={styles.head}>Chequebook (MB)</div>
         <div className={styles.balanceInfo}>
           <div className={styles.card} style={{ width: 250 }}>
             <div className={styles.title}>Total Balance</div>
@@ -162,15 +165,9 @@ const Main: React.FC = () => {
           <div className={`font12 greyColor ${styles.account}`}>
             <span style={{ marginRight: 10, fontSize: 18 }}>{account}</span>
             <CopyText text={account} />
-            <Space wrap>
-              <Button
-                // size={'small'}
-                className={styles.privateKey}
-                onClick={getKeystore}
-              >
-                ExportKeystore
-              </Button>
-            </Space>
+            <div style={{ marginLeft: 10 }}>
+              <Keystore />
+            </div>
           </div>
         </div>
       </div>

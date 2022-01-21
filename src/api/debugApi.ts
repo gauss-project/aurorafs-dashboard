@@ -51,9 +51,18 @@ export const connect = (
   });
 };
 
-export const getKeystore = (url: string): Promise<AxiosResponse<any>> => {
+export const getKeystore = (
+  url: string,
+  password: string,
+  type: 'keystore' | 'private',
+): Promise<AxiosResponse<any>> => {
   return request({
     url: url + '/keystore',
+    method: 'post',
+    data: {
+      password,
+      type,
+    },
   });
 };
 
