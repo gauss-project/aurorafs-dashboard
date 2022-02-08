@@ -25,6 +25,7 @@ const CashOut: React.FC<Props> = (props) => {
     confirmLoading,
     setConfirmLoading,
   } = props;
+  const [overlay, setOverlay] = useState('');
   const clickHandle = (overlay: string): void => {
     cashOut(overlay);
   };
@@ -94,25 +95,12 @@ const CashOut: React.FC<Props> = (props) => {
               <>
                 <Button
                   onClick={() => {
+                    setOverlay(record.peer);
                     setVisible(true);
                   }}
                 >
                   cashout
                 </Button>
-                <Modal
-                  title="cashout"
-                  centered
-                  visible={visible}
-                  confirmLoading={confirmLoading}
-                  onOk={() => {
-                    clickHandle(record.peer);
-                  }}
-                  onCancel={() => {
-                    setVisible(false);
-                  }}
-                >
-                  <div>Are you sure to cashout the coin?</div>
-                </Modal>
               </>
             ) : (
               <></>
@@ -125,14 +113,30 @@ const CashOut: React.FC<Props> = (props) => {
     },
   ];
   return (
-    <Table<Cheque>
-      className={styles.list}
-      dataSource={data}
-      columns={columns}
-      pagination={false}
-      rowKey={(item) => item.peer}
-      locale={{ emptyText: 'No Data' }}
-    />
+    <>
+      <Table<Cheque>
+        className={styles.list}
+        dataSource={data}
+        columns={columns}
+        pagination={false}
+        rowKey={(item) => item.peer}
+        locale={{ emptyText: 'No Data' }}
+      />
+      <Modal
+        title="cashout"
+        centered
+        visible={visible}
+        confirmLoading={confirmLoading}
+        onOk={(e) => {
+          clickHandle(overlay);
+        }}
+        onCancel={() => {
+          setVisible(false);
+        }}
+      >
+        <div>Are you sure to cashout the coin?</div>
+      </Modal>
+    </>
   );
 };
 
