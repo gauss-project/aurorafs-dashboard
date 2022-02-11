@@ -53,12 +53,6 @@ const FilesList: React.FC = () => {
   // delete
   const confirmDelete = (hash: string): void => {
     dispatch({
-      type: 'files/deleteDLHash',
-      payload: {
-        hash,
-      },
-    });
-    dispatch({
       type: 'files/deleteFile',
       payload: {
         url: api,

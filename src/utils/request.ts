@@ -89,9 +89,7 @@ request.interceptors.response.use(
       return Promise.reject(new Error('Connection Failed'));
     }
     return Promise.reject(
-      error.response?.data?.message
-        ? Error(error.response?.data.message)
-        : error,
+      error.response?.data ? Error(error.response.data) : error,
     );
   },
 );
