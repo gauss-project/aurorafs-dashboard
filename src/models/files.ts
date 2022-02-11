@@ -116,6 +116,7 @@ export default {
         const { data } = yield call(Api.deleteFile, url, hash);
         message.success(data.message);
         yield put({ type: 'getFilesList', payload: { url } });
+        yield put({ type: 'files/deleteDLHash', payload: { hash } });
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       }
