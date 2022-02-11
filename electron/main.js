@@ -66,14 +66,12 @@ async function createWindow() {
     'new-window',
     (event, url, frameName, disposition, options) => {
       event.preventDefault();
-      if (url === 'https://testnet.binance.org/faucet-smart') {
-        shell.openExternal(url);
-        return;
-      }
+      // if (url === 'https://testnet.binance.org/faucet-smart') {
+      //   shell.openExternal(url);
+      //   return;
+      // }
       let openWin = new BrowserWindow({
         webPreferences: {
-          contextIsolation: false,
-          nodeIntegration: true,
           preload: path.join(__dirname, 'preload.js'),
           webSecurity: false,
         },
