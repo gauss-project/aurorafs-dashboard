@@ -8,6 +8,11 @@ let cmdPath = 'aurora';
 
 async function run({ win, logs }) {
   let startCmd = os.platform() === 'win32' ? 'aurora.exe' : './aurora';
+
+  let config = fs.readFileSync('./aurora/aurora.yaml', { encoding: 'utf-8' });
+  let url = 'http://localhost:';
+  let api = url + config.match(/api-addr: :(\d*)/)[1];
+
   return runExec();
 
   async function runExec() {
@@ -24,9 +29,10 @@ async function run({ win, logs }) {
     workerProcess.stdout.on('data', (data) => {
       let log = data.toString();
       console.log('stdout:' + log);
-      if (notStart && /\Sapi address: \[\:\:\]\:/.test(log)) {
+      let re = /\Sapi address: http(s?):\/\/\[::]:(\d*)/;
+      if (notStart && re.test(log)) {
         notStart = false;
-        win.webContents.send('start');
+        win.webContents.send('start', { api });
       }
       let n = logs.push(log);
       if (n >= 300) logs.splice(0, 100);

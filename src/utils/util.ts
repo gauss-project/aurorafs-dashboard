@@ -108,18 +108,21 @@ export const initChartData = (n: number, speedTime: number = 5000): any[] => {
   return arr;
 };
 
-export const throttle = function (func: Function, delay: number) {
-  let timer: NodeJS.Timer | null = null;
-  return function () {
-    if (!timer) {
-      func.apply(this, arguments);
-      timer = setTimeout(() => {
-        timer = null;
-      }, delay);
-    }
-  };
-};
-
 export const trafficToBalance = (traffic: number): any => {
   return (traffic / 10 ** 3).toFixed(3);
+};
+
+export const splitUrl = (url: string): [string, string, string] => {
+  let i = new URL(url);
+  return [i.protocol, i.hostname, i.port];
+};
+
+export const isFullNode = (b: string): boolean => {
+  let value: string = '';
+  let uStr: string = window.atob(b);
+  for (let i: number = 0; i < uStr.length; i++) {
+    let char = uStr.charCodeAt(i).toString(2);
+    value += char;
+  }
+  return value.includes('1');
 };

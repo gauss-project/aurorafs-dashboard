@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'umi';
 import styles from './index.less';
 import SettingApi from '@/components/settingApi';
 import { Button } from 'antd';
-import { sessionStorageApi, sessionStorageDebugApi } from '@/config/url';
+import { sessionStorageApi } from '@/config/url';
 import { checkSession } from '@/utils/util';
 import { Models } from '@/declare/modelType';
 import AuroraConfigEdit from '@/components/auroraConfigEdit';
@@ -11,7 +11,7 @@ import AuroraConfigEdit from '@/components/auroraConfigEdit';
 const Setting: React.FC = (props) => {
   const dispatch = useDispatch();
 
-  const { api, debugApi, status, electron } = useSelector(
+  const { api, status, electron } = useSelector(
     (state: Models) => state.global,
   );
 
@@ -19,21 +19,13 @@ const Setting: React.FC = (props) => {
     checkSession(sessionStorageApi) || api || '',
   );
 
-  const [debugApiValue, setDebugApiValue] = useState<string>(
-    checkSession(sessionStorageDebugApi) || debugApi || '',
-  );
-
   const saveApi = (): void => {
     sessionStorage.setItem(sessionStorageApi, apiValue);
-    sessionStorage.setItem(sessionStorageDebugApi, debugApiValue);
-    if (!status || api !== apiValue || debugApi !== debugApiValue) {
-      //
-
+    if (!status || api !== apiValue) {
       dispatch({
         type: 'global/getStatus',
         payload: {
           api: apiValue,
-          debugApi: debugApiValue,
         },
       });
 
@@ -56,13 +48,6 @@ const Setting: React.FC = (props) => {
               value={apiValue}
               title={'API Endpoint'}
               fn={setApiValue}
-            />
-          </div>
-          <div className={styles.debug_api}>
-            <SettingApi
-              value={debugApiValue}
-              title={'Debug API Endpoint'}
-              fn={setDebugApiValue}
             />
           </div>
           <div style={{ marginTop: '50px' }}>

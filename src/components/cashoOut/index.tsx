@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styles from './index.less';
 import { Button, Table, Modal } from 'antd';
-
-const { confirm } = Modal;
 import { ColumnsType } from 'antd/es/table';
 import { Cheque } from '@/declare/api';
 import { trafficToBalance } from '@/utils/util';
@@ -10,25 +8,34 @@ import { trafficToBalance } from '@/utils/util';
 type Props = {
   data: Cheque[];
   cashOut: Function;
-  visible: boolean;
-  setVisible: Function;
-  confirmLoading: boolean;
-  setConfirmLoading: Function;
+  cashOutAll: Function;
 };
 
 const CashOut: React.FC<Props> = (props) => {
-  const {
-    data,
-    cashOut,
-    visible,
-    setVisible,
-    confirmLoading,
-    setConfirmLoading,
-  } = props;
-  const [overlay, setOverlay] = useState('');
+  const { data, cashOut, cashOutAll } = props;
+  let overlay = useRef('');
+
+  const [visible, setVisible] = useState(false);
+  const [isAll, setIsAll] = useState(false);
+
   const clickHandle = (overlay: string): void => {
+    setVisible(false);
     cashOut(overlay);
   };
+
+  const clickAllHandle = () => {
+    let arr = data
+      .filter((item) => item.unCashed > 0 && item.status === 0)
+      .map((item) => item.peer);
+    setVisible(false);
+    cashOutAll(arr);
+  };
+
+  const clickAllBtn = () => {
+    setVisible(true);
+    setIsAll(true);
+  };
+
   const columns: ColumnsType<Cheque> = [
     {
       title: 'Peers',
@@ -91,11 +98,11 @@ const CashOut: React.FC<Props> = (props) => {
       render: (value, record, index) => {
         return (
           <div>
-            {record.unCashed ? (
+            {record.unCashed && record.status === 0 ? (
               <>
                 <Button
                   onClick={() => {
-                    setOverlay(record.peer);
+                    overlay.current = record.peer;
                     setVisible(true);
                   }}
                 >
@@ -114,6 +121,9 @@ const CashOut: React.FC<Props> = (props) => {
   ];
   return (
     <>
+      <div style={{ textAlign: 'right', marginBottom: 10 }}>
+        <Button onClick={clickAllBtn}>cashout_all</Button>
+      </div>
       <Table<Cheque>
         className={styles.list}
         dataSource={data}
@@ -126,15 +136,14 @@ const CashOut: React.FC<Props> = (props) => {
         title="cashout"
         centered
         visible={visible}
-        confirmLoading={confirmLoading}
         onOk={(e) => {
-          clickHandle(overlay);
+          isAll ? clickAllHandle() : clickHandle(overlay.current);
         }}
         onCancel={() => {
           setVisible(false);
         }}
       >
-        <div>Are you sure to cashout the coin?</div>
+        <div>Are you sure to cashout {isAll ? 'all' : ''} the coin?</div>
       </Modal>
     </>
   );

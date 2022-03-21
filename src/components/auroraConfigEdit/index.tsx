@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './index.less';
 import { Button, Input, message } from 'antd';
 import { Event } from 'electron';
-import { throttle } from '@/utils/util';
+import { useThrottle } from '@/utils/hooks';
 import { isElectron } from '@/config/version';
 
 const { TextArea } = Input;
@@ -68,20 +68,20 @@ const AuroraConfigEdit: React.FC = () => {
           <div>
             <Button
               className={styles.btn}
-              onClick={throttle(resetHandle, 1000)}
+              onClick={useThrottle(resetHandle, 1000)}
             >
               Reset
             </Button>
             <Button
               className={styles.btn}
-              onClick={throttle(saveHandle, 1000)}
+              onClick={useThrottle(saveHandle, 1000)}
               id={'saveAuroraConfig'}
             >
               Save
             </Button>
             <Button
               className={styles.btn}
-              onClick={throttle(restartHandle, 1000)}
+              onClick={useThrottle(restartHandle, 1000)}
             >
               Restart
             </Button>

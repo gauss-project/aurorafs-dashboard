@@ -60,7 +60,11 @@ async function createWindow() {
   tray.setContextMenu(contextMenu);
 
   // and load the index.html of the app.
-  win.loadFile('./dist/index.html');
+  if (process.env.TERGET_ENV) {
+    win.loadURL('http://localhost:8000');
+  } else {
+    win.loadFile('./dist/index.html');
+  }
 
   win.webContents.addListener(
     'new-window',

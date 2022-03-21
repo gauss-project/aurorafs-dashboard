@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { useEffect, useRef } from 'react';
 import NotConnected from '@/components/notConnected';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
@@ -12,13 +6,76 @@ import Card from '@/components/card';
 import styles from './index.less';
 import { time } from '@/config/url';
 import Speed from '@/components/speed';
+import { message } from 'antd';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
-  const { debugApi, health, topology } = useSelector(
+  const { debugApi, health, topology, ws } = useSelector(
     (state: Models) => state.global,
   );
   const { addresses } = useSelector((state: Models) => state.info);
+
+  const subResult = useRef({
+    kad: {
+      id: 11,
+      result: '',
+    },
+  }).current;
+
+  const subKad = () => {
+    ws?.send(
+      {
+        id: subResult.kad.id,
+        jsonrpc: '2.0',
+        method: 'p2p_subscribe',
+        params: ['kadInfo'],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          message.error(err || res?.error);
+        }
+        subResult.kad.result = res?.result;
+        ws?.on(res?.result, (res) => {
+          console.log(res);
+          dispatch({
+            type: 'global/setTopology',
+            payload: {
+              topology: {
+                ...topology,
+                population: res.population,
+                depth: res.depth,
+                connected: res.connected.full_nodes,
+                bootNodes: {
+                  ...topology.bootNodes,
+                  connected: res.connected.boot_nodes,
+                },
+                lightNodes: {
+                  ...topology.lightNodes,
+                  connected: res.connected.light_nodes,
+                },
+              },
+            },
+          });
+        });
+      },
+    );
+  };
+
+  const unSub = () => {
+    Object.values(subResult).forEach((item) => {
+      ws?.send(
+        {
+          id: item.id,
+          jsonrpc: '2.0',
+          method: 'traffic_unsubscribe',
+          params: [item.result],
+        },
+        (err, res) => {
+          console.log(err, res);
+        },
+      );
+    });
+  };
 
   const getTopology = () => {
     dispatch({
@@ -36,10 +93,9 @@ const Main: React.FC = () => {
       },
     });
     getTopology();
-    let timer = setInterval(getTopology, time);
-
+    subKad();
     return () => {
-      clearInterval(timer);
+      unSub();
     };
   }, []);
   return (

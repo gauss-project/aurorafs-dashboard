@@ -273,13 +273,12 @@ const FilesList: React.FC = () => {
           ...item.bitVector,
           b: stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
         },
-        isM3u8: mapQueryM3u8(item.manifest.sub),
-        manifestSize: Object.values(item.manifest.sub).reduce(
-          (total, item: any) => {
-            return total + item.size;
-          },
-          0,
-        ),
+        isM3u8: item.manifest.sub ? mapQueryM3u8(item.manifest.sub) : false,
+        manifestSize: item.manifest.sub
+          ? Object.values(item.manifest.sub).reduce((total, item: any) => {
+              return total + item.size;
+            }, 0)
+          : item.size * 256 * 1024,
       };
     });
   }, [filesList]);

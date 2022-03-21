@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './index.less';
 import NotConnected from '@/components/notConnected';
 import { useDispatch, useSelector } from 'umi';
@@ -9,14 +9,81 @@ import { time } from '@/config/url';
 import classNames from 'classnames';
 import { Button, Input, message, Modal } from 'antd';
 import { connect } from '@/api/debugApi';
+import _ from 'lodash';
+import { isFullNode } from '@/utils/util';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [peersList, setPeersList] = useState('full');
-  const { debugApi, topology } = useSelector((state: Models) => state.global);
+  const { debugApi, topology, ws } = useSelector(
+    (state: Models) => state.global,
+  );
   const { peers } = useSelector((state: Models) => state.peers);
   const [visible, setVisible] = useState(false);
   const [connectValue, setConnectValue] = React.useState('');
+
+  const subResult = useRef({
+    kad: {
+      id: 21,
+      result: '',
+    },
+  }).current;
+
+  const subKad = () => {
+    ws?.send(
+      {
+        id: subResult.kad.id,
+        jsonrpc: '2.0',
+        method: 'p2p_subscribe',
+        params: ['kadInfo'],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          message.error(err || res?.error);
+        }
+        subResult.kad.result = res?.result;
+        ws?.on(res?.result, (res) => {
+          console.log(res);
+          dispatch({
+            type: 'global/setTopology',
+            payload: {
+              topology: {
+                ...topology,
+                population: res.population,
+                depth: res.depth,
+                connected: res.connected.full_nodes,
+                bootNodes: {
+                  ...topology.bootNodes,
+                  connected: res.connected.boot_nodes,
+                },
+                lightNodes: {
+                  ...topology.lightNodes,
+                  connected: res.connected.light_nodes,
+                },
+              },
+            },
+          });
+        });
+      },
+    );
+  };
+
+  const unSub = () => {
+    Object.values(subResult).forEach((item) => {
+      ws?.send(
+        {
+          id: item.id,
+          jsonrpc: '2.0',
+          method: 'traffic_unsubscribe',
+          params: [item.result],
+        },
+        (err, res) => {
+          console.log(err, res);
+        },
+      );
+    });
+  };
+
   const getInfo = () => {
     dispatch({
       type: 'global/getTopology',
@@ -39,9 +106,9 @@ const Main: React.FC = () => {
       },
     });
     getInfo();
-    let timer = setInterval(getInfo, time);
+    subKad();
     return () => {
-      clearInterval(timer);
+      unSub();
     };
   }, []);
   const cancel = (): void => {
@@ -71,7 +138,7 @@ const Main: React.FC = () => {
             title={'Discovered Full Peers'}
             text={
               (topology?.population || 0) +
-              (topology?.bootNodes?.connected || 0)
+              (topology?.bootNodes?.population || 0)
             }
             style={{ flex: 1, marginRight: '50px' }}
           />

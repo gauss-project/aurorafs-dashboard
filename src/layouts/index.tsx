@@ -16,7 +16,6 @@ import {
 
 import { Models } from '@/declare/modelType';
 import Loading from '@/components/loading';
-
 import { version, isElectron } from '@/config/version';
 import { eventEmitter } from '@/utils/request';
 import logoImg from '@/assets/img/logo.png';
@@ -24,6 +23,7 @@ import { getSize } from '@/utils/util';
 import { speedTime } from '@/config/url';
 import semver from 'semver';
 import { message } from 'antd';
+import Web3 from 'web3';
 
 let ipcRenderer: any = null;
 if (isElectron) {
@@ -39,7 +39,7 @@ type ClickHandle = (path: string) => void;
 
 const Layouts: React.FC = (props) => {
   const dispatch = useDispatch();
-  const { status, metrics, api, debugApi, refresh, health, electron } =
+  const { status, metrics, api, debugApi, refresh, health, electron, wsApi } =
     useSelector((state: Models) => state.global);
   const history = useHistory();
   const path = useLocation().pathname;
@@ -95,12 +95,11 @@ const Layouts: React.FC = (props) => {
   }, [path]);
   useEffect(() => {
     if (electron) {
-      ipcRenderer.on('start', () => {
+      ipcRenderer.on('start', (event: any, message: any) => {
         dispatch({
           type: 'global/getStatus',
           payload: {
-            api,
-            debugApi,
+            api: message.api,
           },
         });
       });
@@ -133,7 +132,6 @@ const Layouts: React.FC = (props) => {
         type: 'global/getStatus',
         payload: {
           api,
-          debugApi,
         },
       });
     }
@@ -157,8 +155,26 @@ const Layouts: React.FC = (props) => {
       timer.current = setInterval(() => {
         getMetrics(debugApi);
       }, speedTime);
+      let ws: any = new Web3.providers.WebsocketProvider(wsApi);
+      ws.on(ws.DATA, (res: any) => {
+        ws.emit(res.params.subscription, res.params.result);
+      });
+      (ws.connection as WebSocket).addEventListener('close', (res) => {
+        dispatch({
+          type: 'global/setStatus',
+          payload: {
+            status: false,
+          },
+        });
+      });
+      dispatch({
+        type: 'global/setWs',
+        payload: {
+          ws,
+        },
+      });
     }
-  }, [status, debugApi, api]);
+  }, [status, api]);
   return (
     <>
       <div className={styles.app}>

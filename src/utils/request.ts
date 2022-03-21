@@ -79,8 +79,10 @@ request.interceptors.response.use(
     return response;
   },
   (error) => {
-    responseIndex = requestIndex = 0;
-    NProgress.done();
+    responseIndex++;
+    if (responseIndex === requestIndex) {
+      NProgress.done();
+    }
     if (axios.isCancel(error)) {
       return new Promise(() => {});
     }

@@ -44,35 +44,6 @@ export default {
       };
     },
   },
-  effects: {
-    *getTrafficInfo({ payload }, { call, put }) {
-      const { url } = payload;
-      try {
-        const { data } = yield call(getTrafficInfo, url);
-        yield put({
-          type: 'setTrafficInfo',
-          payload: {
-            trafficInfo: data,
-          },
-        });
-      } catch (e) {
-        if (e instanceof Error) message.info(e.message);
-      }
-    },
-    *getTrafficCheques({ payload }, { call, put }) {
-      const { url } = payload;
-      try {
-        const { data } = yield call(getTrafficCheques, url);
-        yield put({
-          type: 'setTrafficCheques',
-          payload: {
-            trafficCheques: data,
-          },
-        });
-      } catch (e) {
-        if (e instanceof Error) message.info(e.message);
-      }
-    },
-  },
+  effects: {},
   subscriptions: {},
 } as ModelsType<State>;

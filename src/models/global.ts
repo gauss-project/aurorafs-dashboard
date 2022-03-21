@@ -1,20 +1,21 @@
 import ModelsType, { Models } from '@/declare/modelType';
-import {
-  defaultDebugApi,
-  defaultApi,
-  sessionStorageDebugApi,
-  sessionStorageApi,
-} from '@/config/url';
+import { defaultApi, sessionStorageApi } from '@/config/url';
 import { checkSession, initChartData } from '@/utils/util';
 import { isStatus } from '@/api/common';
-import { message, Button } from 'antd';
-import { Topology } from '@/declare/api';
+import { message } from 'antd';
+import { Topology, ApiPort } from '@/declare/api';
+import Api from '@/api/api';
 import DebugApi from '@/api/debugApi';
 import { getConfirmation } from '@/utils/request';
 import semver from 'semver';
 import { auroraVersion } from '@/config/version';
 import { speedTime } from '@/config/url';
 import moment from 'moment';
+import { splitUrl } from '@/utils/util';
+import { WebsocketProvider } from 'web3-core';
+import EventEmitter from 'eventemitter3';
+
+export type WebsocketType = WebsocketProvider & EventEmitter & { DATA: string };
 
 export type ErrorType = 'apiError' | 'versionError';
 
@@ -28,6 +29,8 @@ export interface State {
   status: boolean;
   api: string;
   debugApi: string;
+  wsApi: string;
+  ws: null | WebsocketType;
   refresh: boolean;
   health: {
     status?: string;
@@ -51,7 +54,9 @@ export default {
     refresh: false,
     status: false,
     api: checkSession(sessionStorageApi) || defaultApi,
-    debugApi: checkSession(sessionStorageDebugApi) || defaultDebugApi,
+    debugApi: '',
+    wsApi: '',
+    ws: null,
     health: {},
     topology: {},
     metrics: {
@@ -66,11 +71,12 @@ export default {
   },
   reducers: {
     setApi(state, { payload }) {
-      const { api, debugApi } = payload;
+      const { api, debugApi, wsApi } = payload;
       return {
         ...state,
         api,
         debugApi,
+        wsApi,
       };
     },
     setStatus(state, { payload }) {
@@ -134,37 +140,53 @@ export default {
         chartData: [],
       };
     },
+    setWs(state, { payload }) {
+      let { ws } = payload;
+      return {
+        ...state,
+        ws,
+      };
+    },
   },
   effects: {
     *getStatus({ payload }, { call, put }) {
-      const { api, debugApi } = payload;
+      const { api } = payload;
       try {
-        const data = yield call(isStatus, api, debugApi);
-        yield put({ type: 'setApi', payload: { api, debugApi } });
+        const apiPort = yield call(Api.getPort, api);
+        let { debugApiPort, rpcWsPort }: ApiPort = apiPort.data;
+        if (!debugApiPort || !rpcWsPort)
+          throw new Error('debugApi or ws is not enabled');
+
+        let [protocol, hostname] = splitUrl(api);
+        let debugApi = `${protocol}//${hostname}:${debugApiPort}`;
+        let wsApi = `${
+          protocol === 'http:' ? 'ws' : 'wss'
+        }://${hostname}:${rpcWsPort}`;
+        yield put({ type: 'setApi', payload: { api, debugApi, wsApi } });
+
+        const health = yield call(DebugApi.getHealth, debugApi);
         const aurora = semver.satisfies(
-          semver.coerce(data[1].data.version)?.version as string,
+          semver.coerce(health.data.version)?.version as string,
           `>=${auroraVersion}`,
         );
-        const status = data[0].data && data[1].data.status === 'ok' && aurora;
-        yield put({
-          type: 'setStatus',
-          payload: {
-            status,
-          },
-        });
+        const status = health.data.status === 'ok' && aurora;
+        yield put({ type: 'setStatus', payload: { status } });
         if (status) {
           message.success('Connection succeeded');
           yield put({
             type: 'setHealth',
             payload: {
-              health: data[1].data,
+              health: health.data,
             },
           });
         } else if (!aurora) {
-          message.error('Please upgrade the node version');
+          throw new Error(
+            'Node version is too low, please upgrade to ' + auroraVersion,
+          );
         }
-      } catch (err) {
-        if (err instanceof Error) message.info(err.message);
+        return 1;
+      } catch (e) {
+        if (e instanceof Error) message.info(e.message);
         yield put({
           type: 'setStatus',
           payload: {

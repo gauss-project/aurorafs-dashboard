@@ -1,11 +1,23 @@
 import request from '@/utils/request';
 import { AxiosResponse, AxiosRequestConfig } from 'axios';
-import { FileType, FileAttr, TrafficInfo, Cheque } from '@/declare/api';
+import {
+  FileType,
+  FileAttr,
+  TrafficInfo,
+  Cheque,
+  ApiPort,
+} from '@/declare/api';
 import { encodeUnicode } from '@/utils/util';
 
 export const isConnected = (url: string): Promise<AxiosResponse<string>> => {
   return request({
     url,
+  });
+};
+
+export const getPort = (url: string): Promise<AxiosResponse<ApiPort>> => {
+  return request({
+    url: url + '/apiPort',
   });
 };
 
@@ -135,4 +147,5 @@ export default {
   getTrafficCheques,
   cashOut,
   updateFileRegister,
+  getPort,
 };

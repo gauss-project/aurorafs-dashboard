@@ -1,29 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.less';
 import NotConnected from '@/components/notConnected';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
-
 import CopyText from '@/components/copyText';
 import CashOut from '@/components/cashoOut';
 import { trafficToBalance } from '@/utils/util';
 import { ethers } from 'ethers';
-import { Modal, Button, Space, message } from 'antd';
+import { message } from 'antd';
 import Api from '@/api/api';
-// import DebugApi from '@/api/debugApi';
-// import Popup from '@/components/popup';
+
 import Keystore from '@/components/keystore';
+import _ from 'lodash';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [balance, setBalance] = useState('');
-  const { api, debugApi } = useSelector((state: Models) => state.global);
+  const { api, ws, refresh } = useSelector((state: Models) => state.global);
   const { account, trafficInfo, trafficCheques } = useSelector(
     (state: Models) => state.accounting,
   );
-  const [visible, setVisible] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const getData = async () => {
+
+  const subResult = useRef({
+    info: {
+      id: 41,
+      result: '',
+    },
+    cheques: {
+      id: 42,
+      result: '',
+    },
+    cashOut: {
+      id: 43,
+      result: '',
+    },
+  }).current;
+
+  const getBalance = async () => {
     const provider = new ethers.providers.JsonRpcProvider(api + '/chain');
     const accounts = await provider.listAccounts();
     const account = accounts[0];
@@ -37,88 +50,183 @@ const Main: React.FC = () => {
     const bnb = ethers.utils.formatEther(balance);
     setBalance(bnb);
   };
-  useEffect(() => {
-    getData();
+  const getTrafficCheques = async (status: boolean = false) => {
+    const { data } = await Api.getTrafficCheques(api);
     dispatch({
-      type: 'accounting/getTrafficInfo',
+      type: 'accounting/setTrafficCheques',
       payload: {
-        url: api,
+        trafficCheques: data,
       },
     });
+    if (status && data) {
+      let arr = data.map((item) => item.peer);
+      subCheques(arr);
+      subCashOut(arr);
+    }
+  };
+
+  const getTrafficInfo = async () => {
+    const { data } = await Api.getTrafficInfo(api);
     dispatch({
-      type: 'accounting/getTrafficCheques',
+      type: 'accounting/setTrafficInfo',
       payload: {
-        url: api,
+        trafficInfo: data,
       },
     });
-  }, []);
-  const cashOut = async (overlay: string): Promise<void> => {
-    setConfirmLoading(true);
-    try {
-      const { data } = await Api.cashOut(api, overlay);
-      const provider = new ethers.providers.JsonRpcProvider(api + '/chain');
-      let lock = false;
-      let timer = setInterval(async () => {
-        if (lock) return;
-        lock = true;
-        let res = await provider.getTransactionReceipt(data.hash);
-        if (res) {
-          clearInterval(timer);
-          setTimeout(() => {
-            setConfirmLoading(false);
-            setVisible(false);
-            if (res.status) {
-              dispatch({
-                type: 'accounting/getTrafficInfo',
-                payload: {
-                  url: api,
-                },
-              });
-              dispatch({
-                type: 'accounting/getTrafficCheques',
-                payload: {
-                  url: api,
-                },
-              });
-              message.success('cashout successful');
-            } else {
-              message.error('cashout failure');
-            }
-          }, 3000);
+  };
+  const subInfo = () => {
+    ws?.send(
+      {
+        id: subResult.info.id,
+        jsonrpc: '2.0',
+        method: 'traffic_subscribe',
+        params: ['header'],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          message.error(err || res?.error);
         }
-        lock = false;
-      }, 1000);
+        subResult.info.result = res?.result;
+        ws?.on(res?.result, (res) => {
+          console.log(res);
+          dispatch({
+            type: 'accounting/setTrafficInfo',
+            payload: {
+              trafficInfo: res,
+            },
+          });
+        });
+      },
+    );
+  };
+  const subCheques = (arr: string[]) => {
+    ws?.send(
+      {
+        id: subResult.cheques.id,
+        jsonrpc: '2.0',
+        method: 'traffic_subscribe',
+        params: ['trafficCheque', arr],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          message.error(err || res?.error);
+        }
+        subResult.cheques.result = res?.result;
+        ws?.on(res?.result, (res) => {
+          console.log(res);
+          dispatch({
+            type: 'accounting/setTrafficCheques',
+            payload: {
+              trafficCheques: _.unionWith(
+                res,
+                trafficCheques,
+                (a, b) => a.peer === b.peer,
+              ),
+            },
+          });
+        });
+      },
+    );
+  };
+
+  const subCashOut = (arr: string[]) => {
+    ws?.send(
+      {
+        id: subResult.cashOut.id,
+        jsonrpc: '2.0',
+        method: 'traffic_subscribe',
+        params: ['cashOut', arr],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          message.error(err || res?.error);
+        }
+        subResult.cashOut.result = res?.result;
+        ws?.on(res?.result, (res: { overlay: string; status: boolean }[]) => {
+          console.log(res);
+          res.forEach((item) => {
+            if (item.status) {
+              message.success(item.overlay + ' ' + 'cashout success');
+            } else {
+              message.error(item.overlay + ' ' + 'cashout failed');
+              cashOutList = [];
+            }
+          });
+          listenCashOutList();
+        });
+      },
+    );
+  };
+
+  let cashOutList = useRef<string[]>([]).current;
+
+  const listenCashOutList = async () => {
+    console.log(cashOutList);
+    if (cashOutList.length) {
+      if (!refresh) {
+        dispatch({
+          type: 'global/setRefresh',
+          payload: {
+            refresh: true,
+          },
+        });
+      }
+      let overlay = cashOutList.shift();
+      // @ts-ignore
+      await Api.cashOut(api, overlay);
+    } else {
+      dispatch({
+        type: 'global/setRefresh',
+        payload: {
+          refresh: false,
+        },
+      });
+    }
+  };
+  const unSub = () => {
+    Object.values(subResult).forEach((item) => {
+      ws?.send(
+        {
+          id: item.id,
+          jsonrpc: '2.0',
+          method: 'traffic_unsubscribe',
+          params: [item.result],
+        },
+        (err, res) => {
+          console.log(err, res);
+        },
+      );
+    });
+  };
+
+  useEffect(() => {
+    subInfo();
+    getTrafficCheques(true);
+    getBalance();
+    getTrafficInfo();
+    return () => {
+      unSub();
+    };
+  }, []);
+
+  const cashOut = async (overlay: string): Promise<void> => {
+    try {
+      cashOutList.push(overlay);
+      await listenCashOutList();
     } catch (e) {
-      setConfirmLoading(false);
-      setVisible(false);
       if (e instanceof Error) message.error(e.message);
     }
   };
-  // const getKeystore = async (): Promise<void> => {
-  //   setKV(true);
-  //   // const { data } = await DebugApi.getKeystore(debugApi);
-  //   // let jsonStr = JSON.stringify(data);
-  //   // Modal.info({
-  //   //   centered: true,
-  //   //   icon: <></>,
-  //   //   closable: true,
-  //   //   okButtonProps: { style: { display: 'none' } },
-  //   //   style: {
-  //   //     height: 'auto',
-  //   //   },
-  //   //   width: 500,
-  //   //   content: (
-  //   //     <div className={styles.key}>
-  //   //       <div>{jsonStr}</div>
-  //   //       <div className={styles.copyKeystore}>
-  //   //         <CopyText text={jsonStr}>
-  //   //           <Button>Copy Keystore</Button>
-  //   //         </CopyText>
-  //   //       </div>
-  //   //     </div>
-  //   //   ),
-  //   // });
-  // };
+
+  const cashOutAll = async (overlayArr: string[]): Promise<void> => {
+    try {
+      cashOutList.push(...overlayArr);
+      await listenCashOutList();
+    } catch (e) {
+      if (e instanceof Error) message.error(e.message);
+    }
+  };
+
   return (
     <>
       <div>
@@ -176,10 +284,7 @@ const Main: React.FC = () => {
         <CashOut
           data={trafficCheques}
           cashOut={cashOut}
-          visible={visible}
-          setVisible={setVisible}
-          confirmLoading={confirmLoading}
-          setConfirmLoading={setConfirmLoading}
+          cashOutAll={cashOutAll}
         />
       </div>
     </>

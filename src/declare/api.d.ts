@@ -96,6 +96,7 @@ export declare type Cheque = {
   receivedSettlements: number;
   total: number;
   unCashed: number;
+  status: number;
 };
 
 export declare type TrafficInfo = {
@@ -116,4 +117,9 @@ export declare type ChunkSource = {
         };
       }[]
     | null;
+};
+
+export declare type ApiPort = {
+  debugApiPort: string;
+  rpcWsPort: string;
 };
