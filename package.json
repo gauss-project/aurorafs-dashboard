@@ -16,6 +16,7 @@
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
     "test": "umi-test",
     "test:coverage": "umi-test --coverage",
+    "electron": "cross-env electron .",
     "electron:dev": "cross-env TERGET_ENV=development electron .",
     "electron:win32": "electron-builder --win  --ia32",
     "electron:win64": "electron-builder --win  --x64",

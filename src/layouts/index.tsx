@@ -76,6 +76,16 @@ const Layouts: React.FC = (props) => {
       icon: <SettingOutlined />,
     },
   ];
+  const subResult = useRef({
+    chunkInfo: {
+      id: 12,
+      result: '',
+    },
+    retrieval: {
+      id: 13,
+      result: '',
+    },
+  }).current;
   let timer = useRef<null | NodeJS.Timer>(null);
 
   const getMetrics = (url: string, init: boolean = false) => {
@@ -153,7 +163,10 @@ const Layouts: React.FC = (props) => {
     if (status) {
       getMetrics(debugApi, true);
       timer.current = setInterval(() => {
-        getMetrics(debugApi);
+        dispatch({
+          type: 'global/updateChart',
+          payload: {},
+        });
       }, speedTime);
       let ws: any = new Web3.providers.WebsocketProvider(wsApi);
       ws.on(ws.DATA, (res: any) => {
@@ -167,6 +180,52 @@ const Layouts: React.FC = (props) => {
           },
         });
       });
+      ws?.send(
+        {
+          id: subResult.chunkInfo.id,
+          jsonrpc: '2.0',
+          method: 'chunkInfo_subscribe',
+          params: ['metrics'],
+        },
+        (err: Error, res) => {
+          if (err || res?.error) {
+            message.error(err || res?.error);
+          }
+          subResult.chunkInfo.result = res?.result;
+          ws?.on(res?.result, (res) => {
+            dispatch({
+              type: 'global/updateChunkOrRetrieval',
+              payload: {
+                chunkInfoUpload: res.aurora_chunkinfo_total_transferred,
+                chunkInfoDownload: res.aurora_chunkinfo_total_retrieved,
+              },
+            });
+          });
+        },
+      );
+      ws?.send(
+        {
+          id: subResult.retrieval.id,
+          jsonrpc: '2.0',
+          method: 'retrieval_subscribe',
+          params: ['metrics'],
+        },
+        (err: Error, res) => {
+          if (err || res?.error) {
+            message.error(err || res?.error);
+          }
+          subResult.retrieval.result = res?.result;
+          ws?.on(res?.result, (res) => {
+            dispatch({
+              type: 'global/updateChunkOrRetrieval',
+              payload: {
+                retrievalUpload: res.aurora_retrieval_total_transferred,
+                retrievalDownload: res.aurora_retrieval_total_retrieved,
+              },
+            });
+          });
+        },
+      );
       dispatch({
         type: 'global/setWs',
         payload: {

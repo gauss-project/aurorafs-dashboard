@@ -11,11 +11,12 @@ import { message } from 'antd';
 import Api from '@/api/api';
 
 import Keystore from '@/components/keystore';
-import _ from 'lodash';
+import _, { values } from 'lodash';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [balance, setBalance] = useState('');
+  let [trafficChequesObj] = useState({});
   const { api, ws, refresh } = useSelector((state: Models) => state.global);
   const { account, trafficInfo, trafficCheques } = useSelector(
     (state: Models) => state.accounting,
@@ -52,6 +53,10 @@ const Main: React.FC = () => {
   };
   const getTrafficCheques = async (status: boolean = false) => {
     const { data } = await Api.getTrafficCheques(api);
+    console.log('data', data);
+    if (data) {
+      data.map((item, index) => (trafficChequesObj[item.peer] = item));
+    }
     dispatch({
       type: 'accounting/setTrafficCheques',
       payload: {
@@ -117,16 +122,28 @@ const Main: React.FC = () => {
           dispatch({
             type: 'accounting/setTrafficCheques',
             payload: {
-              trafficCheques: _.unionWith(
-                res,
-                trafficCheques,
-                (a, b) => a.peer === b.peer,
-              ),
+              // trafficCheques: _.unionWith(
+              //   res,
+              //   trafficCheques,
+              //   (a, b) => a.peer === b.peer,
+              // ),
+              trafficCheques: mergetrafficData(res, trafficChequesObj),
             },
           });
         });
       },
     );
+  };
+
+  const mergetrafficData = (res, initObj) => {
+    let tem = [];
+    res.forEach((item) => {
+      initObj[item.peer] = item;
+    });
+    for (let key in initObj) {
+      tem.push(initObj[key]);
+    }
+    return tem;
   };
 
   const subCashOut = (arr: string[]) => {

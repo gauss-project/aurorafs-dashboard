@@ -62,6 +62,12 @@ export default {
     metrics: {
       downloadTotal: 0,
       uploadTotal: 0,
+      newDownloadTotal: 0,
+      newUploadTotal: 0,
+      newUpChunk: 0,
+      newUpRetrval: 0,
+      newDownChunk: 0,
+      newDownRetrval: 0,
       downloadSpeed: 0,
       uploadSpeed: 0,
     },
@@ -134,6 +140,12 @@ export default {
         metrics: {
           downloadTotal: 0,
           uploadTotal: 0,
+          newDownloadTotal: 0,
+          newUploadTotal: 0,
+          newUpChunk: 0,
+          newUpRetrval: 0,
+          newDownChunk: 0,
+          newDownRetrval: 0,
           downloadSpeed: 0,
           uploadSpeed: 0,
         },
@@ -145,6 +157,14 @@ export default {
       return {
         ...state,
         ws,
+      };
+    },
+    resetTotal(state, { payload }) {
+      const { metrics } = payload;
+      console.log('resetTotal');
+      return {
+        ...state,
+        metrics,
       };
     },
   },
@@ -217,7 +237,7 @@ export default {
       }
     },
     *getMetrics({ payload }, { call, put, select }) {
-      const { url, init } = payload;
+      const { url } = payload;
       try {
         const { data } = yield call(DebugApi.getMetrics, url);
         const { metrics, chartData } = yield select(
@@ -241,66 +261,113 @@ export default {
           ) ?? 0;
         const retrievedTotal = retrievalDownload + chunkInfoDownload;
         const transferredTotal = retrievalUpload + chunkInfoUpload;
-        if (init) {
-          yield put({
-            type: 'setMetrics',
-            payload: {
-              metrics: {
-                downloadTotal: retrievedTotal,
-                uploadTotal: transferredTotal,
-                downloadSpeed: 0,
-                uploadSpeed: 0,
-              },
+
+        yield put({
+          type: 'setMetrics',
+          payload: {
+            metrics: {
+              downloadTotal: retrievedTotal,
+              uploadTotal: transferredTotal,
+              newDownloadTotal: retrievedTotal,
+              newUploadTotal: transferredTotal,
+              newUpChunk: chunkInfoUpload,
+              newUpRetrval: retrievalUpload,
+              newDownChunk: chunkInfoDownload,
+              newDownRetrval: retrievalDownload,
+              downloadSpeed: 0,
+              uploadSpeed: 0,
             },
-          });
-          yield put({
-            type: 'setChartData',
-            payload: {
-              chartData: initChartData(120, speedTime),
-            },
-          });
-        } else {
-          yield put({
-            type: 'setMetrics',
-            payload: {
-              metrics: {
-                ...metrics,
-                downloadTotal: retrievedTotal,
-                uploadTotal: transferredTotal,
-                downloadSpeed: retrievedTotal - metrics.downloadTotal,
-                uploadSpeed: transferredTotal - metrics.uploadTotal,
-              },
-            },
-          });
-          yield put({
-            type: 'setChartData',
-            payload: {
-              chartData: chartData
-                .concat([
-                  {
-                    time: moment().utcOffset(480).format('HH.mm.ss'),
-                    category: 'retrieved',
-                    speed:
-                      ((retrievedTotal - metrics.downloadTotal) * 256) /
-                      1024 /
-                      (speedTime / 1000),
-                  },
-                  {
-                    time: moment().utcOffset(480).format('HH.mm.ss'),
-                    category: 'transferred',
-                    speed:
-                      ((transferredTotal - metrics.uploadTotal) * 256) /
-                      1024 /
-                      (speedTime / 1000),
-                  },
-                ])
-                .slice(2),
-            },
-          });
-        }
+          },
+        });
+        yield put({
+          type: 'setChartData',
+          payload: {
+            chartData: initChartData(120, speedTime),
+          },
+        });
       } catch (e) {
         console.log(e);
       }
+    },
+    *updateChunkOrRetrieval({ payload }, { call, put, select }) {
+      const { metrics } = yield select((state: Models) => state.global);
+      console.log('ws info');
+      const {
+        chunkInfoUpload,
+        chunkInfoDownload,
+        retrievalUpload,
+        retrievalDownload,
+      } = payload;
+
+      if (chunkInfoUpload !== undefined && chunkInfoDownload !== undefined) {
+        yield put({
+          type: 'setMetrics',
+          payload: {
+            metrics: {
+              ...metrics,
+              newUpChunk: chunkInfoUpload,
+              newDownChunk: chunkInfoDownload,
+            },
+          },
+        });
+      }
+
+      if (retrievalUpload !== undefined && retrievalDownload !== undefined) {
+        yield put({
+          type: 'setMetrics',
+          payload: {
+            metrics: {
+              ...metrics,
+              newUpRetrval: retrievalUpload,
+              newDownRetrval: retrievalDownload,
+            },
+          },
+        });
+      }
+    },
+    *updateChart({ payload }, { call, put, select }) {
+      const { metrics, chartData } = yield select(
+        (state: Models) => state.global,
+      );
+      const retrievedTotal = metrics.newDownChunk + metrics.newDownRetrval;
+      const transferredTotal = metrics.newUpChunk + metrics.newUpRetrval;
+      const downloadSpeed = retrievedTotal - metrics.downloadTotal;
+      const uploadSpeed = transferredTotal - metrics.uploadTotal;
+
+      yield put({
+        type: 'setMetrics',
+        payload: {
+          metrics: {
+            ...metrics,
+            downloadTotal: retrievedTotal,
+            uploadTotal: transferredTotal,
+            newDownloadTotal: retrievedTotal,
+            newUploadTotal: transferredTotal,
+            downloadSpeed: downloadSpeed,
+            uploadSpeed: uploadSpeed,
+          },
+        },
+      });
+
+      yield put({
+        type: 'setChartData',
+        payload: {
+          chartData: chartData
+            .concat([
+              {
+                time: moment().utcOffset(480).format('HH.mm.ss'),
+                category: 'retrieved',
+                speed: (downloadSpeed * 256) / 1024 / (speedTime / 1000),
+              },
+              {
+                time: moment().utcOffset(480).format('HH.mm.ss'),
+                category: 'transferred',
+                speed: (uploadSpeed * 256) / 1024 / (speedTime / 1000),
+              },
+            ])
+            .slice(2),
+        },
+      });
     },
   },
   subscriptions: {
