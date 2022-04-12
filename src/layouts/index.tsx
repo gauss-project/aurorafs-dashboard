@@ -168,11 +168,16 @@ const Layouts: React.FC = (props) => {
           payload: {},
         });
       }, speedTime);
-      let ws: any = new Web3.providers.WebsocketProvider(wsApi);
+      let ws: any = new Web3.providers.WebsocketProvider(wsApi, {
+        reconnect: {
+          auto: true,
+        },
+      });
       ws.on(ws.DATA, (res: any) => {
         ws.emit(res.params.subscription, res.params.result);
       });
       (ws.connection as WebSocket).addEventListener('close', (res) => {
+        console.log('WS Close');
         dispatch({
           type: 'global/setStatus',
           payload: {
