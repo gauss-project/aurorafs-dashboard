@@ -7,17 +7,28 @@ import FileUpload from '@/components/fileUpload';
 import Download from '@/components/download';
 import FilesList from '@/components/filesList';
 import Loading from '@/components/loading';
-import { stringToBinary } from '@/utils/util';
+import { stringToBinary, getProgress } from '@/utils/util';
+import { message } from 'antd';
 
 const Main: React.FC = (props) => {
   let dispatch = useDispatch();
   const { uploadStatus } = useSelector((state: Models) => state.files);
-  const { api } = useSelector((state: Models) => state.global);
+  const { api, ws } = useSelector((state: Models) => state.global);
   const { filesList, downloadList } = useSelector(
     (state: Models) => state.files,
   );
-  let timer = useRef<NodeJS.Timer | null>(null);
-  let count = useRef(0);
+
+  const subResult = useRef({
+    rootCidStatus: {
+      id: 31,
+      result: '',
+    },
+    rootCidList: {
+      id: 32,
+      result: ''
+    }
+  }).current;
+
   const getFilesList = (): void => {
     dispatch({
       type: 'files/getFilesList',
@@ -26,21 +37,114 @@ const Main: React.FC = (props) => {
       },
     });
   };
+
+  const subStatus = () => {
+    ws?.send(
+      {
+        id: subResult.rootCidStatus.id,
+        jsonrpc: '2.0',
+        method: 'chunkInfo_subscribe',
+        params: ["rootCidStatus"],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          message.error(err || res?.error);
+        }
+        subResult.rootCidStatus.result = res?.result;
+        ws?.on(res?.result, (res) => {
+          getFilesList()
+        })
+      }
+    )
+  }
+
+  const subDownloadProgress = (rootCidList) => {
+    return new Promise((resolve, reject) => {
+      ws?.send(
+        {
+          id: subResult.rootCidList.id,
+          jsonrpc: '2.0',
+          method: 'chunkInfo_subscribe',
+          params: ["downloadProgress",rootCidList],
+        },
+        (err, res) => {
+          resolve({
+            err,
+            res,
+          });
+      })
+    })
+  }
+
+  const unSubDownloadProgress = () => {
+    return new Promise((resolve, reject) => {
+      ws?.send(
+        {
+          id: subResult.rootCidList.id,
+          jsonrpc: '2.0',
+          method: 'chunkInfo_unsubscribe',
+          params: [subResult.rootCidList.result],
+        },
+        (err, res) => {
+          resolve(res);
+        }
+      )
+    })
+  }
+
+  const observeProgress = async () => {
+    if (subResult.rootCidList.result !== '') {
+      const unSubRes = await unSubDownloadProgress();
+      if (unSubRes?.result) {
+        subResult.rootCidList.result = '';
+      }
+    }
+    if (filesList.length) {
+      let newArr = filesList.filter(item => {
+        return /0/.test(stringToBinary(item.bitVector.b, item.bitVector.len, item.size))
+      });
+      let rootCidList = newArr.map(item => {
+        return item.rootCid;
+      })
+      if (rootCidList.length) {
+        const {err, res} = await subDownloadProgress(rootCidList);
+        if (err || res?.error) {
+          message.error(err || res?.error);
+        }
+        subResult.rootCidList.result = res?.result;
+        ws?.on(res?.result, (res) => {
+          let newList = res;
+          let oldList = JSON.parse(JSON.stringify(filesList));
+          for (let i = 0; i < newList.length; i++) {
+            for (let j = 0; j < oldList.length; j++) {
+              if (oldList[j].rootCid === newList[i].RootCid) {
+                oldList[j].bitVector = newList[i].Bitvector;
+              }
+            }
+          }
+          dispatch({
+            type: 'files/setFilesList',
+            payload: {
+              filesList: oldList
+            }
+          })
+        })
+      }
+    }
+  }
+
   useEffect(() => {
-    let notFoundError = true;
-    // let notInfoHash: string[] = [];
     filesList.forEach((item, index) => {
-      const i = downloadList.indexOf(item.fileHash);
+      const i = downloadList.indexOf(item.rootCid);
       const status = !/0/.test(
         stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
       );
       if (i !== -1) {
-        notFoundError = false;
         if (status) {
           setTimeout(() => {
             dispatch({
               type: 'files/deleteDLHash',
-              payload: { hash: item.fileHash },
+              payload: { hash: item.rootCid },
             });
           }, 2000);
         }
@@ -48,41 +152,41 @@ const Main: React.FC = (props) => {
         dispatch({
           type: 'files/addDLHash',
           payload: {
-            hash: item.fileHash,
+            hash: item.rootCid,
           },
         });
       }
     });
-    if (downloadList.length && count.current >= 10 && notFoundError) {
-      dispatch({
-        type: 'files/setDownloadList',
-        payload: { downloadList: [] },
-      });
-    }
+    observeProgress();
   }, [filesList]);
-  useEffect(() => {
-    if (downloadList.length) {
-      if (timer.current) clearInterval(timer.current);
-      count.current = 0;
-      timer.current = setInterval(() => {
-        count.current++;
-        getFilesList();
-      }, 3000);
-    } else if (timer.current) {
-      clearInterval(timer.current);
-      timer.current = null;
-    }
-  }, [downloadList]);
+
+  const unSub = () => {
+    Object.values(subResult).forEach((item) => {
+      ws?.send(
+        {
+          id: item.id,
+          jsonrpc: '2.0',
+          method: 'chunkInfo_unsubscribe',
+          params: [item.result],
+        },
+        (err, res) => {
+          console.log(err, res);
+        },
+      );
+    });
+  };
+
   useEffect(() => {
     getFilesList();
+    subStatus();
     return () => {
-      if (timer.current) clearInterval(timer.current);
       dispatch({
         type: 'files/setDownloadList',
         payload: {
           downloadList: [],
         },
       });
+      unSub();
     };
   }, []);
   return (

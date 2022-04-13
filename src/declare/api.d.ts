@@ -45,7 +45,7 @@ export declare type Addresses = {
 };
 
 export declare type FileType = {
-  fileHash: string;
+  rootCid: string;
   fileSize: number;
   size: number;
   pinState: boolean;

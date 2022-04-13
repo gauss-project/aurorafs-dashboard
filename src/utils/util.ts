@@ -126,3 +126,16 @@ export const isFullNode = (b: string): boolean => {
   }
   return value.includes('1');
 };
+
+
+
+export const query = (params) => {
+  let newParams = {
+    page: JSON.stringify(params.page||{}),
+    sort: JSON.stringify(params.sort||{}),
+    filter: JSON.stringify(params.filter||[]),
+}
+return Object.keys(newParams)
+  .map(key => [key, newParams[key]].map(encodeURIComponent).join('='))
+  .join('&');
+};

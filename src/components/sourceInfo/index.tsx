@@ -33,7 +33,7 @@ export const colorArr = [
 ];
 
 const SourceInfo: React.FC<Props> = (props) => {
-  const { fileHash: hash, size: len } = props.hashInfo;
+  const { rootCid: hash, size: len } = props.hashInfo;
   const { debugApi } = useSelector((state: Models) => state.global);
   const [showLimit, setShowLimit] = useState(true);
   const [source, setSource] = useState<Data[] | null>(null);
@@ -73,12 +73,14 @@ const SourceInfo: React.FC<Props> = (props) => {
     arr.sort((a, b) => {
       return b.downloadLen - a.downloadLen;
     });
+    // console.log('arr', arr);
     return arr;
   };
 
   const getChunkArr = (data: Data[]) => {
     let chunkArr: number[] = [];
     let n = props.hashInfo.bitVector.len;
+    // console.log('n', n);
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < data.length; j++) {
         chunkArr[i] = 0;
@@ -92,6 +94,7 @@ const SourceInfo: React.FC<Props> = (props) => {
         }
       }
     }
+    // console.log('chunkArr', chunkArr,props.hashInfo.size);
     return new Array(len).fill(1).concat(chunkArr);
   };
 

@@ -1,15 +1,35 @@
-import ModelsType from '@/declare/modelType';
+import ModelsType, {Models} from '@/declare/modelType';
 import { FileType } from '@/declare/api';
 
 import Api from '@/api/api';
 import { message } from 'antd';
-import { mapQueryM3u8 } from '@/utils/util';
+import { mapQueryM3u8, query } from '@/utils/util';
 import _ from 'lodash';
+
+interface queryType {
+  page: {
+    pageNum: number,
+    pageSize: number,
+  };
+  sort: {
+    key: string,
+    order: string,
+  }
+  filter: filterType[]
+}
+
+interface filterType {
+  key: string,
+  value: string,
+  term: string,
+}
 
 export interface State {
   filesList: FileType[];
   uploadStatus: boolean;
   downloadList: string[];
+  filesTotal: number;
+  queryData: queryType;
 }
 
 export default {
@@ -17,6 +37,18 @@ export default {
     uploadStatus: false,
     filesList: [],
     downloadList: [],
+    filesTotal: 0,
+    queryData: {
+      page: {
+        pageNum: 1,
+        pageSize: 10,
+      },
+      sort: {
+        key: '',
+        order: ''
+      },
+      filter: []
+    },
   },
   reducers: {
     deleteDLHash(state, { payload }) {
@@ -44,10 +76,11 @@ export default {
       };
     },
     setFilesList(state, { payload }) {
-      const { filesList } = payload;
+      const { filesList, filesTotal } = payload;
       return {
         ...state,
-        filesList,
+        filesList: filesList ? filesList : state.filesList,
+        filesTotal: filesTotal ? filesTotal : state.filesTotal,
       };
     },
     setUploadStatus(state, { payload }) {
@@ -63,6 +96,17 @@ export default {
         ...state,
         downloadList,
       };
+    },
+    setQueryData(state, { payload }) {
+      const { page, sort, filter } = payload;
+      return {
+        ...state,
+        queryData: {
+          page: page ? page : state.queryData.page,
+          sort: sort ? sort : state.queryData.sort,
+          filter: filter ? filter : state.queryData.filter,
+        }
+      }
     },
   },
   effects: {
@@ -82,14 +126,22 @@ export default {
         });
       }
     },
-    *getFilesList({ payload }, { call, put }) {
+    *getFilesList({ payload }, { call, put, select }) {
       const { url } = payload;
+      const { queryData } = yield select(
+        (state: Models) => state.files,
+      );
+      let temData = JSON.parse(JSON.stringify(queryData));
+      if (temData.sort.key === '') delete temData.sort;
+      if (temData.filter.length === 0) delete temData.filter;
+      // console.log('temData', temData);
       try {
-        const { data } = yield call(Api.getFilesList, url);
+        const { data } = yield call(Api.getFilesList, url, query(temData));
         yield put({
           type: 'setFilesList',
           payload: {
-            filesList: data,
+            filesList: data.list,
+            filesTotal: data.total,
           },
         });
       } catch (e) {
@@ -120,6 +172,19 @@ export default {
       } catch (e) {
         if (e instanceof Error) message.info(e.message);
       }
+    },
+    *changeQuery( { payload }, {call, put, select}) {
+      yield put({
+        type: 'setQueryData',
+        payload: payload.options
+      })
+
+      yield put({
+        type: 'getFilesList',
+        payload: {
+          url: payload.url,
+        }
+      })
     },
   },
   subscriptions: {},
