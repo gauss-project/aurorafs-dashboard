@@ -13,7 +13,7 @@ const Download: React.FC = () => {
   const download = (hashValue: string): void => {
     hashValue = hashValue.trim();
     window.open(api + '/aurora/' + hashValue);
-    if (filesList.findIndex((item) => item.fileHash === hashValue) === -1) {
+    if (filesList.findIndex((item) => item.rootCid === hashValue) === -1) {
       dispatch({
         type: 'files/addDLHash',
         payload: {

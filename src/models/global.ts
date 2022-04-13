@@ -161,7 +161,6 @@ export default {
     },
     resetTotal(state, { payload }) {
       const { metrics } = payload;
-      console.log('resetTotal');
       return {
         ...state,
         metrics,

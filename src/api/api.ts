@@ -73,10 +73,12 @@ export const unPin = (
 
 export const getFilesList = (
   url: string,
+  data: string
 ): Promise<AxiosResponse<FileType[]>> => {
   return request({
-    url: url + '/aurora',
+    url: url + '/aurora?' + data,
     timeout: 30 * 1000,
+    method: 'get',
   });
 };
 

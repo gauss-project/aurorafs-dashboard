@@ -53,7 +53,7 @@ const Main: React.FC = () => {
   };
   const getTrafficCheques = async (status: boolean = false) => {
     const { data } = await Api.getTrafficCheques(api);
-    console.log('data', data);
+    // console.log('data', data);
     if (data) {
       data.map((item, index) => (trafficChequesObj[item.peer] = item));
     }

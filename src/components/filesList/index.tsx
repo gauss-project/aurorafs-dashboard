@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Table, Tooltip, Popconfirm, Progress, Modal, message } from 'antd';
+import { Table, Tooltip, Popconfirm, Progress, Modal, message, Input, Button } from 'antd';
 
 const { confirm } = Modal;
 import { ColumnsType } from 'antd/es/table';
@@ -30,8 +30,8 @@ const FilesList: React.FC = () => {
   const dispatch = useDispatch();
   const ref = useRef<HTMLDivElement | null>(null);
 
-  const { api } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList } = useSelector(
+  const { api, ws } = useSelector((state: Models) => state.global);
+  const { filesList, oldFilesList, downloadList, filesTotal, queryData } = useSelector(
     (state: Models) => state.files,
   );
 
@@ -39,6 +39,98 @@ const FilesList: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [top, setTop] = useState(0);
+
+  const pageSizeOption = [10,20,50,100];
+
+  let [fileNameValue,setFileNameValue] = useState('');
+  let [fileHashValue, setFileHashValue] = useState('');
+
+  const tableChange = (pagination, filters, sorter, extra) => {
+    console.log('onchange', extra);
+    if (extra.action === 'paginate') {
+      paginationChange(pagination);
+    } else if (extra.action === 'sort') {
+      sortChange(sorter);
+    } else {
+      // filters
+    }
+  }
+
+  const paginationChange = (p) => {
+    dispatch({
+      type: 'files/changeQuery',
+      payload: {
+        url: api,
+        options: {
+          page: {
+            pageNum: p.current,
+            pageSize: p.pageSize,
+          },
+        },
+      }
+    })
+  }
+
+  const sortChange = (s) => {
+    if (s.order === undefined) return;
+    let keyStr = 'rootCid';
+    if (s.columnKey === 'hash') {
+      keyStr = 'rootCid';
+    } else if (s.columnKey === 'size') {
+      keyStr = 'fileSize';
+    } else if (s.columnKey === 'pin') {
+      keyStr = 'pinState';
+    }
+    dispatch({
+      type: 'files/changeQuery',
+      payload: {
+        url: api,
+        options: {
+          sort: {
+            key: keyStr,
+            order: s.order === 'ascend' ? 'asc' : 'desc'
+          }
+        }
+      }
+    })
+  }
+
+  const fileNameChange = (e) => {
+    setFileNameValue(e.target.value);
+  }
+
+  const fileHashChange = (e) => {
+    setFileHashValue(e.target.value);
+  }
+
+  const searchHandel = () => {
+    let temArr = [{
+      key: 'manifest.name', 
+      value: fileNameValue
+    }, {
+      key: 'rootCid', 
+      value: fileHashValue
+    }];
+    let filterArr = [];
+    temArr.forEach(item => {
+      if (item.value) {
+        filterArr.push({
+          key: item.key,
+          value: item.value,
+          term: 'cn',
+        })
+      }
+    })
+    dispatch({
+      type: 'files/changeQuery',
+      payload: {
+        url: api,
+        options: {
+          filter: filterArr
+        }
+      }
+    })
+  }
 
   const pinOrUnPin = (hash: string, pinState: boolean): void => {
     dispatch({
@@ -107,9 +199,9 @@ const FilesList: React.FC = () => {
             {record.manifest.name}
           </div>
           <span style={{ marginRight: 5, color: '#666' }}>
-            {record.fileHash}
+            {record.rootCid}
           </span>
-          <CopyText text={record.fileHash} />{' '}
+          <CopyText text={record.rootCid} />{' '}
           <ExclamationCircleOutlined
             style={{ cursor: 'pointer' }}
             onClick={() => {
@@ -117,7 +209,7 @@ const FilesList: React.FC = () => {
             }}
             className={'mainColor'}
           />
-          {downloadList.indexOf(record.fileHash) !== -1 && (
+          {downloadList.indexOf(record.rootCid) !== -1 && (
             <div style={{ width: '70%', display: 'flex' }}>
               <Progress
                 percent={getProgress(record.bitVector.b)}
@@ -128,6 +220,7 @@ const FilesList: React.FC = () => {
         </>
       ),
       width: 650,
+      sorter: true
     },
     {
       title: <div className={styles.head}>Size</div>,
@@ -141,6 +234,7 @@ const FilesList: React.FC = () => {
       ),
       align: 'center',
       width: 100,
+      sorter: true,
     },
     {
       title: <div className={styles.head}>Pin/UnPin</div>,
@@ -159,7 +253,7 @@ const FilesList: React.FC = () => {
                 width={25}
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  pinOrUnPin(record.fileHash, record.pinState);
+                  pinOrUnPin(record.rootCid, record.pinState);
                 }}
               />
             </Tooltip>
@@ -168,6 +262,7 @@ const FilesList: React.FC = () => {
       ),
       align: 'center',
       width: 150,
+      sorter: true,
     },
     {
       title: <div className={styles.head}>Register</div>,
@@ -185,7 +280,7 @@ const FilesList: React.FC = () => {
                 width={30}
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  registerHandle(record.fileHash, !record.register);
+                  registerHandle(record.rootCid, !record.register);
                 }}
               />
             </Tooltip>
@@ -202,9 +297,9 @@ const FilesList: React.FC = () => {
         <div
           onClick={() => {
             if (record.isM3u8) {
-              window.open(`#/video/${record.fileHash}`);
+              window.open(`#/video/${record.rootCid}`);
             } else {
-              window.open(`${api}/aurora/${record.fileHash}`);
+              window.open(`${api}/aurora/${record.rootCid}`);
             }
           }}
         >
@@ -231,7 +326,7 @@ const FilesList: React.FC = () => {
                     <div className={styles.name}>
                       FileName:&nbsp;&nbsp;<span>{record.manifest.name}</span>
                     </div>
-                    RCID:&nbsp;&nbsp;<span>{record?.fileHash}</span>
+                    RCID:&nbsp;&nbsp;<span>{record?.rootCid}</span>
                   </div>
                 ),
                 okText: 'Yes',
@@ -241,7 +336,7 @@ const FilesList: React.FC = () => {
                 centered: true,
                 cancelText: 'No',
                 onOk() {
-                  confirmDelete(record.fileHash);
+                  confirmDelete(record.rootCid);
                 },
               });
             }}
@@ -252,6 +347,7 @@ const FilesList: React.FC = () => {
       align: 'center',
     },
   ];
+
   useEffect(() => {
     setTop(
       document
@@ -259,6 +355,7 @@ const FilesList: React.FC = () => {
         .getBoundingClientRect().top,
     );
   }, []);
+
   const scrollY = useMemo(() => {
     let h = document.body.clientHeight - top - 30;
     if (h < 200) return 200;
@@ -282,14 +379,46 @@ const FilesList: React.FC = () => {
       };
     });
   }, [filesList]);
+
   return (
     <div ref={ref}>
+      <div className={styles.searchBox}>
+        <div style={{width: '40vw'}}>
+          <Input 
+            placeholder="input search filename" 
+            size="large"
+            allowClear
+            onChange={fileNameChange}
+          />
+        </div>
+        <div style={{width: '40vw',marginLeft: '50px'}}>
+          <Input 
+            placeholder="input search filehash" 
+            size="large"
+            allowClear
+            onChange={fileHashChange}
+          />
+        </div>
+        <Button style={{marginLeft: '20px'}} type="primary" size={'large'} onClick={searchHandel}>
+          Search
+        </Button>
+      </div>
       <Table<AllFileInfo>
         className={styles.filesList}
         dataSource={data}
         columns={columns}
-        rowKey={(item) => item.fileHash}
-        pagination={false}
+        rowKey={(item) => item.rootCid}
+        pagination={{
+          position: ['bottomRight'],
+          responsive: true,
+          showTitle: false,
+          showSizeChanger: true,
+          pageSizeOptions: pageSizeOption,
+          current: queryData.page.pageNum,
+          pageSize: queryData.page.pageSize,
+          total: filesTotal,
+        }}
+        onChange={tableChange}
         locale={{ emptyText: 'No Data' }}
         scroll={data.length > scrollY / 80 ? { y: scrollY } : {}}
       />
@@ -304,7 +433,7 @@ const FilesList: React.FC = () => {
               <div className={styles.name}>
                 FileName:&nbsp;&nbsp;<span>{hashInfo?.manifest.name}</span>
               </div>
-              RCID:&nbsp;&nbsp;<span>{hashInfo?.fileHash}</span>
+              RCID:&nbsp;&nbsp;<span>{hashInfo?.rootCid}</span>
             </div>
           </>
         }
