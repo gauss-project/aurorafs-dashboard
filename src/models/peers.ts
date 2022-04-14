@@ -51,7 +51,7 @@ export default {
         yield put({
           type:"setBlockList",
           payload:{
-            blockList:data.peers,
+            blockList:data.peers || [],
           }
         })
       }

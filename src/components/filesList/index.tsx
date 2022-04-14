@@ -389,6 +389,7 @@ const FilesList: React.FC = () => {
             size="large"
             allowClear
             onChange={fileNameChange}
+            onPressEnter={searchHandel}
           />
         </div>
         <div style={{width: '40vw',marginLeft: '50px'}}>
@@ -397,6 +398,7 @@ const FilesList: React.FC = () => {
             size="large"
             allowClear
             onChange={fileHashChange}
+            onPressEnter={searchHandel}
           />
         </div>
         <Button style={{marginLeft: '20px'}} type="primary" size={'large'} onClick={searchHandel}>

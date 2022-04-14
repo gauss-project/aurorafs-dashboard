@@ -20,12 +20,12 @@ const Setting: React.FC = (props) => {
   );
 
   const saveApi = (): void => {
-    sessionStorage.setItem(sessionStorageApi, apiValue);
-    if (!status || api !== apiValue) {
+    sessionStorage.setItem(sessionStorageApi, apiValue.trim());
+    if (!status || api !== apiValue.trim()) {
       dispatch({
         type: 'global/getStatus',
         payload: {
-          api: apiValue,
+          api: apiValue.trim(),
         },
       });
 
@@ -45,7 +45,7 @@ const Setting: React.FC = (props) => {
         <>
           <div className={styles.api}>
             <SettingApi
-              value={apiValue}
+              value={apiValue.trim()}
               title={'API Endpoint'}
               fn={setApiValue}
             />

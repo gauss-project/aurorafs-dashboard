@@ -108,6 +108,13 @@ export default {
         }
       }
     },
+    initQueryData(state, { payload }) {
+      const { queryData } = payload;
+      return {
+        ...state,
+        queryData,
+      }
+    }
   },
   effects: {
     *upload({ payload }, { call, put }) {

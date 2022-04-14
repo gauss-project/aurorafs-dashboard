@@ -186,6 +186,22 @@ const Main: React.FC = (props) => {
           downloadList: [],
         },
       });
+      dispatch({
+        type: 'files/initQueryData',
+        payload: {
+          queryData: {
+            page: {
+              pageNum: 1,
+              pageSize: 10,
+            },
+            sort: {
+              key: '',
+              order: ''
+            },
+            filter: []
+          },
+        },
+      });
       unSub();
     };
   }, []);
