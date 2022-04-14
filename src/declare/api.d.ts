@@ -29,7 +29,7 @@ export declare type Topology = {
     population: number;
   };
 };
-export declare type Peer = { address: string; fullNode: boolean };
+export declare type Peer = { address: string; fullNode: boolean; direction: string };
 export declare type Peers = Peer[];
 
 export declare type Addresses = {

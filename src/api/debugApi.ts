@@ -20,6 +20,29 @@ export const getPeers = (url: string): Promise<AxiosResponse<Peers>> => {
   });
 };
 
+export const getBlockList = (url: string): Promise<AxiosResponse<Peers>> => {
+  return request({
+    url: url + '/blocklist',
+  });
+};
+
+export const addBlock = (url: string, address: string): Promise<AxiosResponse<{message: string;code: number}>> => {
+  return request({
+    url: url + '/blocklist/' + address,
+    method: 'post',
+    params: {
+      timeout: '1h'
+    }
+  });
+};
+
+export const deleteBlock = (url: string, address: string): Promise<AxiosResponse<{message: string;code: number}>> => {
+  return request({
+    url: url + '/blocklist/' + address,
+    method: 'delete',
+  });
+};
+
 export const getAddresses = (url: string): Promise<AxiosResponse<Peers>> => {
   return request({
     url: url + '/addresses',
@@ -70,6 +93,9 @@ export default {
   getHealth,
   getTopology,
   getPeers,
+  getBlockList,
+  addBlock,
+  deleteBlock,
   getAddresses,
   getMetrics,
   getChunkSource,

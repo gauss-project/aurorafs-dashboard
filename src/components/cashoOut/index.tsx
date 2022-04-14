@@ -38,6 +38,12 @@ const CashOut: React.FC<Props> = (props) => {
 
   const columns: ColumnsType<Cheque> = [
     {
+      title: <div className={styles.head}>Index</div>,
+      key: 'Index',
+      render: (text, record, index) => index + 1,
+      width: 50,
+    },
+    {
       title: 'Peers',
       dataIndex: 'peer',
       width: 550,

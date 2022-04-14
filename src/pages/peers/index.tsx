@@ -15,10 +15,11 @@ import { isFullNode } from '@/utils/util';
 const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [peersList, setPeersList] = useState('full');
+  const [isBlockList, setIsBlockList] = useState(false);
   const { debugApi, topology, ws } = useSelector(
     (state: Models) => state.global,
   );
-  const { peers } = useSelector((state: Models) => state.peers);
+  const { peers, blockList } = useSelector((state: Models) => state.peers);
   const [visible, setVisible] = useState(false);
   const [connectValue, setConnectValue] = React.useState('');
 
@@ -97,6 +98,13 @@ const Main: React.FC = () => {
         url: debugApi,
       },
     });
+    dispatch({
+      type: 'peers/getBlockList',
+      payload: {
+        url: debugApi,
+        // url: 'http://183.221.217.71:1701'
+      },
+    })
   };
   useEffect(() => {
     dispatch({
@@ -169,6 +177,7 @@ const Main: React.FC = () => {
               })}
               onClick={() => {
                 setPeersList('full');
+                setIsBlockList(false);
               }}
             >
               Full Peers
@@ -180,9 +189,22 @@ const Main: React.FC = () => {
               })}
               onClick={() => {
                 setPeersList('light');
+                setIsBlockList(false);
               }}
             >
               Light Peers
+            </h3>
+            <h3
+              className={classNames({
+                [styles.peersList]: true,
+                [styles.peersListSelect]: peersList === 'block',
+              })}
+              onClick={() => {
+                setPeersList('block');
+                setIsBlockList(true);
+              }}
+            >
+              Block List
             </h3>
             <div className={styles.addConnection}>
               <Button
@@ -234,9 +256,10 @@ const Main: React.FC = () => {
             </div>
           </div>
           <PeersList
-            peers={peers.filter(
+            peers={isBlockList ? blockList : peers.filter(
               (item) => item.fullNode === (peersList === 'full'),
             )}
+            isBlockList={isBlockList}
           />
         </div>
       </div>
