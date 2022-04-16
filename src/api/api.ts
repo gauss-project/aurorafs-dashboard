@@ -77,7 +77,7 @@ export const getFilesList = (
 ): Promise<AxiosResponse<FileType[]>> => {
   return request({
     url: url + '/aurora?' + data,
-    timeout: 30 * 1000,
+    timeout: 60 * 1000,
     method: 'get',
   });
 };
@@ -86,7 +86,7 @@ export const deleteFile = (url: string, hash: string): Promise<any> => {
   return request({
     url: url + '/aurora/' + hash,
     method: 'delete',
-    timeout: 30 * 1000,
+    timeout: 60 * 1000,
   });
 };
 
@@ -121,7 +121,7 @@ export const cashOut = (
   return request({
     url: url + '/traffic/cash/' + overlay,
     method: 'post',
-    timeout: 30 * 1000,
+    timeout: 60 * 1000,
   });
 };
 

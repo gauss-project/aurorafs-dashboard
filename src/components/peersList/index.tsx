@@ -36,7 +36,7 @@ const PeersList: React.FC<Props> = (props) => {
       title: <div className={styles.head}>Expiration Date</div>,
       key: 'Expiration time',
       render: (value, record, index) => {
-        return (moment(record.timestamp).add(record.duration).format('MMMM Do YYYY, HH:mm:ss'))
+        return (moment(record.timestamp).add(record.duration * 1000).format('MMMM Do YYYY, HH:mm:ss'))
       }
     },{
       title: 'Remove From List',
