@@ -150,7 +150,7 @@ const FileUpload: React.FC = () => {
           upload
         </Button>
       </div>
-      <FilesShowInfo />
+      {/* <FilesShowInfo /> */}
     </div>
   );
 };

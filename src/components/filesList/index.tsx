@@ -386,7 +386,6 @@ const FilesList: React.FC = () => {
         <div style={{width: '40vw'}}>
           <Input 
             placeholder="input search filename" 
-            size="large"
             allowClear
             onChange={fileNameChange}
             onPressEnter={searchHandel}
@@ -395,13 +394,12 @@ const FilesList: React.FC = () => {
         <div style={{width: '40vw',marginLeft: '50px'}}>
           <Input 
             placeholder="input search filehash" 
-            size="large"
             allowClear
             onChange={fileHashChange}
             onPressEnter={searchHandel}
           />
         </div>
-        <Button style={{marginLeft: '20px'}} type="primary" size={'large'} onClick={searchHandel}>
+        <Button style={{marginLeft: '20px'}} type="primary" onClick={searchHandel}>
           Search
         </Button>
       </div>
