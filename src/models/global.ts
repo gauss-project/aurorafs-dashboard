@@ -330,8 +330,10 @@ export default {
       );
       const retrievedTotal = metrics.newDownChunk + metrics.newDownRetrval;
       const transferredTotal = metrics.newUpChunk + metrics.newUpRetrval;
-      const downloadSpeed = retrievedTotal - metrics.downloadTotal;
-      const uploadSpeed = transferredTotal - metrics.uploadTotal;
+      // const downloadSpeed = retrievedTotal - metrics.downloadTotal;
+      // const uploadSpeed = transferredTotal - metrics.uploadTotal;
+      const downloadSpeed = metrics.downloadTotal === 0 ? 0 : (retrievedTotal - metrics.downloadTotal);
+      const uploadSpeed = metrics.uploadTotal === 0 ? 0 : (transferredTotal - metrics.uploadTotal);
 
       yield put({
         type: 'setMetrics',

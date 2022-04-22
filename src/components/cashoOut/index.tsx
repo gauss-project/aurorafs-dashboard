@@ -1,24 +1,47 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './index.less';
-import { Button, Table, Modal } from 'antd';
+import { useSelector, useDispatch } from 'umi';
+import { Models } from '@/declare/modelType';
+import { Button, Table, Modal, message } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Cheque } from '@/declare/api';
 import { trafficToBalance } from '@/utils/util';
+import Api from '@/api/api';
 
 type Props = {
   data: Cheque[];
-  cashOut: Function;
-  cashOutAll: Function;
 };
 
 const CashOut: React.FC<Props> = (props) => {
-  const { data, cashOut, cashOutAll } = props;
-  let overlay = useRef('');
+  const { data } = props;
+  const dispatch = useDispatch();
+  const [overlay, setOverlay] = useState<Cheque>({
+    peer: '',
+    outstandingTraffic: 0,
+    sentSettlements: 0,
+    receivedSettlements: 0,
+    total: 0,
+    unCashed: 0,
+    status: 0,
+    cashLoad: false,
+    index: 0
+  });
+  const { ws, api } = useSelector((state: Models) => state.global);
 
   const [visible, setVisible] = useState(false);
   const [isAll, setIsAll] = useState(false);
+  const [cashOutAllDisabled, setCashOutAllDisabled] = useState(false);
+  const [cashOutDisabled, setCashOutDisabled] = useState(false);
+  let cashOutList = useRef<Cheque[]>([]).current;
 
-  const clickHandle = (overlay: string): void => {
+  const subResult = useRef({
+    cashOut: {
+      id: 43,
+      result: '',
+    },
+  }).current;
+
+  const clickHandle = (overlay: Cheque): void => {
     setVisible(false);
     cashOut(overlay);
   };
@@ -26,7 +49,7 @@ const CashOut: React.FC<Props> = (props) => {
   const clickAllHandle = () => {
     let arr = data
       .filter((item) => item.unCashed > 0 && item.status === 0)
-      .map((item) => item.peer);
+      // .map((item) => item.peer);
     setVisible(false);
     cashOutAll(arr);
   };
@@ -34,6 +57,131 @@ const CashOut: React.FC<Props> = (props) => {
   const clickAllBtn = () => {
     setVisible(true);
     setIsAll(true);
+  };
+
+  const cashOut = (overlay: Cheque) => {
+    cashOutList = [];
+    cashOutList.push(overlay);
+    listenCashOutList();
+  };
+
+  const cashOutAll = (overlayArr: Cheque[]) => {
+    cashOutList = [];
+    cashOutList.push(...overlayArr);
+    listenCashOutList();
+  };
+
+  const listenCashOutList = async () => {
+    // console.log('listenCashOutList', cashOutList);
+
+    if (cashOutList.length) {
+      // if (isAll) {
+      //   setCashOutDisabled(true);
+      // } else {
+      //   setCashOutDisabled(true);
+      //   setCashOutAllDisabled(true);
+      // }
+      setCashOutDisabled(true);
+      setCashOutAllDisabled(true);
+      try {
+        let option = cashOutList.shift();
+        let overlay = option?.peer;
+        let index = option?.index;
+        // if (subResult.cashOut.result) {
+        //   await unSubCashOut();
+        // }
+        await subCashOut(overlay, index);
+        await Api.cashOut(api, overlay);
+        await dispatch({
+          type: 'accounting/setSingleCashLoad',
+          payload: {
+            index,
+            status: true
+          }
+        })
+      } catch(e: any) {
+        // console.log(e);
+        restoreCashOutState();
+        message.error({
+          content:JSON.stringify(e),
+          duration: 2
+        })
+      }
+    } else {
+      restoreCashOutState();
+      setIsAll(false);
+    }
+  };
+
+  const subCashOut = (overlay: any, idx: any) => {
+    return new Promise((resolve, reject) => {
+      ws?.send({
+        id: subResult.cashOut.id,
+        jsonrpc: '2.0',
+        method: 'traffic_subscribe',
+        params: ['cashOut', [overlay]],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          // message.error(err || res?.error);
+          reject(err || res?.error);
+        }
+        subResult.cashOut.result = res?.result;
+        ws?.on(res?.result, async (res: { overlay: string; status: boolean }[]) => {
+          // console.log(res);
+          res.forEach(async (item) => {
+            if (item.status) {
+              message.success({
+                content:item.overlay + ' ' + 'cashout success',
+                duration: 2
+              })
+              await dispatch({
+                type: 'accounting/setSingleCashLoad',
+                payload: {
+                  index: idx,
+                  status: false
+                }
+              })
+            } else {
+              message.error({
+                content: item.overlay + ' ' + 'cashout failed',
+                duration: 2
+              })
+              // cashOutList = [];
+              restoreCashOutState();
+            }
+          });
+          await unSubCashOut();
+          listenCashOutList()
+        })
+        resolve(res)
+      })
+    })
+  };
+
+  const unSubCashOut = () => {
+    return new Promise((resolve, reject) => {
+      ws?.send({
+        id: subResult.cashOut.id,
+        jsonrpc: '2.0',
+        method: 'traffic_unsubscribe',
+        params: [subResult.cashOut.result],
+      },
+      (err, res) => {
+        // console.log(err, res);
+        if (err || res?.error) {
+          reject(err || res?.error);
+        } else {
+          resolve(res);
+        }
+      })
+    })
+  };
+
+  const restoreCashOutState = () => {
+    cashOutList = [];
+    setCashOutAllDisabled(false);
+    setCashOutDisabled(false);
   };
 
   const columns: ColumnsType<Cheque> = [
@@ -108,9 +256,14 @@ const CashOut: React.FC<Props> = (props) => {
               <>
                 <Button
                   onClick={() => {
-                    overlay.current = record.peer;
+                    // overlay = record;
+                    setOverlay(record);
+                    // console.log('record', record);
                     setVisible(true);
+                    setIsAll(false);
                   }}
+                  loading={record.cashLoad}
+                  disabled={cashOutDisabled}
                 >
                   cashout
                 </Button>
@@ -128,7 +281,7 @@ const CashOut: React.FC<Props> = (props) => {
   return (
     <>
       <div style={{ textAlign: 'right', marginBottom: 10 }}>
-        <Button onClick={clickAllBtn}>cashout_all</Button>
+        <Button onClick={clickAllBtn} disabled={cashOutAllDisabled}>{'cashout_all'}</Button>
       </div>
       <Table<Cheque>
         className={styles.list}
@@ -143,7 +296,7 @@ const CashOut: React.FC<Props> = (props) => {
         centered
         visible={visible}
         onOk={(e) => {
-          isAll ? clickAllHandle() : clickHandle(overlay.current);
+          isAll ? clickAllHandle() : clickHandle(overlay);
         }}
         onCancel={() => {
           setVisible(false);

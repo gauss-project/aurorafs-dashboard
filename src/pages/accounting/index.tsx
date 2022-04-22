@@ -5,13 +5,13 @@ import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import CopyText from '@/components/copyText';
 import CashOut from '@/components/cashoOut';
-import { trafficToBalance } from '@/utils/util';
+import { trafficToBalance, attributeCount } from '@/utils/util';
 import { ethers } from 'ethers';
 import { message } from 'antd';
 import Api from '@/api/api';
 
 import Keystore from '@/components/keystore';
-import _, { values } from 'lodash';
+import _, { over, reject, values } from 'lodash';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
@@ -30,11 +30,7 @@ const Main: React.FC = () => {
     cheques: {
       id: 42,
       result: '',
-    },
-    cashOut: {
-      id: 43,
-      result: '',
-    },
+    }
   }).current;
 
   const getBalance = async () => {
@@ -55,7 +51,13 @@ const Main: React.FC = () => {
     const { data } = await Api.getTrafficCheques(api);
     // console.log('data', data);
     if (data) {
+      // console.log('data', data, trafficChequesObj);
+      data.forEach((item, index) => {
+        item.cashLoad = false;
+        item.index = index;
+      });
       data.map((item, index) => (trafficChequesObj[item.peer] = item));
+      // console.log('obj',trafficChequesObj);
     }
     dispatch({
       type: 'accounting/setTrafficCheques',
@@ -66,7 +68,7 @@ const Main: React.FC = () => {
     if (status && data) {
       let arr = data.map((item) => item.peer);
       subCheques(arr);
-      subCashOut(arr);
+      // subCashOut(arr);
     }
   };
 
@@ -137,42 +139,23 @@ const Main: React.FC = () => {
 
   const mergetrafficData = (res, initObj) => {
     let tem = [];
-    res.forEach((item) => {
-      initObj[item.peer] = item;
+    let initObjSize = attributeCount(initObj);
+    res.forEach((item: any, index: number) => {
+      if (initObj[item.peer]) {
+        let option = initObj[item.peer];
+        initObj[item.peer] = {...option, ...item};
+      } else {
+        initObj[item.peer] = {
+          ...item,
+          cashLoad: false,
+          index: initObjSize + index
+        }
+      }
     });
     for (let key in initObj) {
       tem.push(initObj[key]);
     }
     return tem;
-  };
-
-  const subCashOut = (arr: string[]) => {
-    ws?.send(
-      {
-        id: subResult.cashOut.id,
-        jsonrpc: '2.0',
-        method: 'traffic_subscribe',
-        params: ['cashOut', arr],
-      },
-      (err, res) => {
-        if (err || res?.error) {
-          message.error(err || res?.error);
-        }
-        subResult.cashOut.result = res?.result;
-        ws?.on(res?.result, (res: { overlay: string; status: boolean }[]) => {
-          console.log(res);
-          res.forEach((item) => {
-            if (item.status) {
-              message.success(item.overlay + ' ' + 'cashout success');
-            } else {
-              message.error(item.overlay + ' ' + 'cashout failed');
-              cashOutList = [];
-            }
-          });
-          listenCashOutList();
-        });
-      },
-    );
   };
 
   let cashOutList = useRef<string[]>([]).current;
@@ -225,24 +208,6 @@ const Main: React.FC = () => {
       unSub();
     };
   }, []);
-
-  const cashOut = async (overlay: string): Promise<void> => {
-    try {
-      cashOutList.push(overlay);
-      await listenCashOutList();
-    } catch (e) {
-      if (e instanceof Error) message.error(e.message);
-    }
-  };
-
-  const cashOutAll = async (overlayArr: string[]): Promise<void> => {
-    try {
-      cashOutList.push(...overlayArr);
-      await listenCashOutList();
-    } catch (e) {
-      if (e instanceof Error) message.error(e.message);
-    }
-  };
 
   return (
     <>
@@ -300,8 +265,6 @@ const Main: React.FC = () => {
         <div className={styles.head}>Peers</div>
         <CashOut
           data={trafficCheques}
-          cashOut={cashOut}
-          cashOutAll={cashOutAll}
         />
       </div>
     </>

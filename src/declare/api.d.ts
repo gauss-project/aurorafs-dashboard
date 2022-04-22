@@ -97,6 +97,8 @@ export declare type Cheque = {
   total: number;
   unCashed: number;
   status: number;
+  cashLoad: boolean;
+  index: number;
 };
 
 export declare type TrafficInfo = {

@@ -88,8 +88,8 @@ const Layouts: React.FC = (props) => {
   }).current;
   let timer = useRef<null | NodeJS.Timer>(null);
 
-  const getMetrics = (url: string, init: boolean = false) => {
-    dispatch({
+  const getMetrics = async (url: string, init: boolean = false) => {
+    await dispatch({
       type: 'global/getMetrics',
       payload: { url, init },
     });

@@ -1,4 +1,4 @@
-import ModelsType from '@/declare/modelType';
+import ModelsType, {Models} from '@/declare/modelType';
 import { Cheque, TrafficInfo } from '@/declare/api';
 import { getTrafficInfo, getTrafficCheques, cashOut } from '@/api/api';
 import { message } from 'antd';
@@ -44,6 +44,22 @@ export default {
       };
     },
   },
-  effects: {},
+  effects: {
+    *setSingleCashLoad({ payload }, {put, select}) {
+      const { index, status } = payload;
+      const { trafficCheques } = yield select(
+        (state: Models) => state.accounting,
+      );
+      let tem = JSON.parse(JSON.stringify(trafficCheques));
+      tem[index].cashLoad = status;
+
+      yield put({
+        type: 'setTrafficCheques',
+        payload: {
+          trafficCheques: tem
+        }
+      })
+    }
+  },
   subscriptions: {},
 } as ModelsType<State>;

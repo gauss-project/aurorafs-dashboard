@@ -137,6 +137,13 @@ export const updateFileRegister = (
   });
 };
 
+export const getChain = (url: string) => {
+  return request({
+    url: url + '/chain',
+    method: 'get'
+  })
+}
+
 export default {
   isConnected,
   uploadFile,
@@ -150,4 +157,5 @@ export default {
   cashOut,
   updateFileRegister,
   getPort,
+  getChain,
 };
