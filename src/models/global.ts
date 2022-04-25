@@ -71,6 +71,7 @@ export default {
       downloadSpeed: 0,
       uploadSpeed: 0,
     },
+    isInitMetrics: true,
     chartData: [],
     electron:
       window.navigator.userAgent.toLowerCase().indexOf('electron') !== -1,
@@ -260,6 +261,7 @@ export default {
           ) ?? 0;
         const retrievedTotal = retrievalDownload + chunkInfoDownload;
         const transferredTotal = retrievalUpload + chunkInfoUpload;
+        // console.log('--------', retrievedTotal, transferredTotal);
 
         yield put({
           type: 'setMetrics',
@@ -328,12 +330,11 @@ export default {
       const { metrics, chartData } = yield select(
         (state: Models) => state.global,
       );
+
       const retrievedTotal = metrics.newDownChunk + metrics.newDownRetrval;
       const transferredTotal = metrics.newUpChunk + metrics.newUpRetrval;
-      // const downloadSpeed = retrievedTotal - metrics.downloadTotal;
-      // const uploadSpeed = transferredTotal - metrics.uploadTotal;
-      const downloadSpeed = metrics.downloadTotal === 0 ? 0 : (retrievedTotal - metrics.downloadTotal);
-      const uploadSpeed = metrics.uploadTotal === 0 ? 0 : (transferredTotal - metrics.uploadTotal);
+      const downloadSpeed = metrics.downloadTotal === 0 ? 0 : (retrievedTotal === 0 ? 0 : retrievedTotal - metrics.downloadTotal);
+      const uploadSpeed = metrics.uploadTotal === 0 ? 0 : (transferredTotal === 0 ? 0 : transferredTotal - metrics.uploadTotal);
 
       yield put({
         type: 'setMetrics',
