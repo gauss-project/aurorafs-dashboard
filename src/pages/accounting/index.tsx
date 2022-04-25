@@ -48,9 +48,10 @@ const Main: React.FC = () => {
     setBalance(bnb);
   };
   const getTrafficCheques = async (status: boolean = false) => {
-    const { data } = await Api.getTrafficCheques(api);
+    let { data } = await Api.getTrafficCheques(api);
     // console.log('data', data);
-    if (data) {
+    if (_.isArray(data)) {
+      data = data.splice(0,500);
       // console.log('data', data, trafficChequesObj);
       data.forEach((item, index) => {
         item.cashLoad = false;
@@ -95,7 +96,7 @@ const Main: React.FC = () => {
         }
         subResult.info.result = res?.result;
         ws?.on(res?.result, (res) => {
-          console.log(res);
+          // console.log(res);
           dispatch({
             type: 'accounting/setTrafficInfo',
             payload: {
@@ -120,7 +121,7 @@ const Main: React.FC = () => {
         }
         subResult.cheques.result = res?.result;
         ws?.on(res?.result, (res) => {
-          console.log(res);
+          // console.log(res);
           dispatch({
             type: 'accounting/setTrafficCheques',
             payload: {
@@ -158,31 +159,6 @@ const Main: React.FC = () => {
     return tem;
   };
 
-  let cashOutList = useRef<string[]>([]).current;
-
-  const listenCashOutList = async () => {
-    console.log(cashOutList);
-    if (cashOutList.length) {
-      if (!refresh) {
-        dispatch({
-          type: 'global/setRefresh',
-          payload: {
-            refresh: true,
-          },
-        });
-      }
-      let overlay = cashOutList.shift();
-      // @ts-ignore
-      await Api.cashOut(api, overlay);
-    } else {
-      dispatch({
-        type: 'global/setRefresh',
-        payload: {
-          refresh: false,
-        },
-      });
-    }
-  };
   const unSub = () => {
     Object.values(subResult).forEach((item) => {
       ws?.send(

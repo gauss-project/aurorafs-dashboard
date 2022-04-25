@@ -290,7 +290,7 @@ export default {
     },
     *updateChunkOrRetrieval({ payload }, { call, put, select }) {
       const { metrics } = yield select((state: Models) => state.global);
-      console.log('ws info');
+      // console.log('ws info');
       const {
         chunkInfoUpload,
         chunkInfoDownload,

@@ -48,6 +48,7 @@ const Setting: React.FC = (props) => {
               value={apiValue.trim()}
               title={'API Endpoint'}
               fn={setApiValue}
+              saveApi={saveApi}
             />
           </div>
           <div style={{ marginTop: '50px' }}>

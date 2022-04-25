@@ -91,7 +91,7 @@ request.interceptors.response.use(
       return Promise.reject(new Error('Connection Failed'));
     }
     return Promise.reject(
-      error.response?.data ? Error(error.response.data) : error,
+      error.response?.data ? Error(JSON.stringify(error.response.data)) : error,
     );
   },
 );

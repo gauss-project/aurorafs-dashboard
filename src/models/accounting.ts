@@ -8,6 +8,7 @@ export interface State {
   account: string;
   trafficInfo: TrafficInfo;
   trafficCheques: Cheque[];
+  cashOutList: Cheque[];
 }
 
 export default {
@@ -20,6 +21,7 @@ export default {
       receivedTraffic: 0,
     },
     trafficCheques: [],
+    cashOutList: [],
   },
   reducers: {
     setAccount(state, { payload }) {
@@ -43,6 +45,13 @@ export default {
         trafficCheques,
       };
     },
+    setCashOutList(state, { payload }) {
+      const { cashOutList } = payload;
+      return {
+        ...state,
+        cashOutList,
+      }
+    },
   },
   effects: {
     *setSingleCashLoad({ payload }, {put, select}) {
@@ -59,7 +68,7 @@ export default {
           trafficCheques: tem
         }
       })
-    }
+    },
   },
   subscriptions: {},
 } as ModelsType<State>;
