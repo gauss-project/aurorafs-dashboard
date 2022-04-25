@@ -68,7 +68,7 @@ const Main: React.FC = () => {
     });
     if (status && data) {
       let arr = data.map((item) => item.peer);
-      subCheques(arr);
+      // subCheques(arr);
       // subCashOut(arr);
     }
   };
@@ -121,7 +121,7 @@ const Main: React.FC = () => {
         }
         subResult.cheques.result = res?.result;
         ws?.on(res?.result, (res) => {
-          // console.log(res);
+          console.log('res subCheques');
           dispatch({
             type: 'accounting/setTrafficCheques',
             payload: {
@@ -143,15 +143,17 @@ const Main: React.FC = () => {
     let initObjSize = attributeCount(initObj);
     res.forEach((item: any, index: number) => {
       if (initObj[item.peer]) {
+        console.log('item',{...item});
         let option = initObj[item.peer];
         initObj[item.peer] = {...option, ...item};
-      } else {
-        initObj[item.peer] = {
-          ...item,
-          cashLoad: false,
-          index: initObjSize + index
-        }
-      }
+      } 
+      // else {
+      //   initObj[item.peer] = {
+      //     ...item,
+      //     cashLoad: false,
+      //     index: initObjSize + index
+      //   }
+      // }
     });
     for (let key in initObj) {
       tem.push(initObj[key]);

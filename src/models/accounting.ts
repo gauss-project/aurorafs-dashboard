@@ -61,7 +61,21 @@ export default {
       );
       let tem = JSON.parse(JSON.stringify(trafficCheques));
       tem[index].cashLoad = status;
-
+      tem[index].un
+      yield put({
+        type: 'setTrafficCheques',
+        payload: {
+          trafficCheques: tem
+        }
+      })
+    },
+    *resetUnCashed({ payload }, {put, select}) {
+      const { index } = payload;
+      const { trafficCheques } = yield select(
+        (state: Models) => state.accounting,
+      );
+      let tem = JSON.parse(JSON.stringify(trafficCheques));
+      tem[index].unCashed = 0;
       yield put({
         type: 'setTrafficCheques',
         payload: {
