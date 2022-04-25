@@ -11,7 +11,7 @@ import AuroraConfigEdit from '@/components/auroraConfigEdit';
 const Setting: React.FC = (props) => {
   const dispatch = useDispatch();
 
-  const { api, status, electron } = useSelector(
+  const { api, status, electron, ws } = useSelector(
     (state: Models) => state.global,
   );
 
@@ -22,6 +22,8 @@ const Setting: React.FC = (props) => {
   const saveApi = (): void => {
     sessionStorage.setItem(sessionStorageApi, apiValue.trim());
     if (!status || api !== apiValue.trim()) {
+      ws.disconnect();
+
       dispatch({
         type: 'global/getStatus',
         payload: {

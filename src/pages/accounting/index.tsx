@@ -51,7 +51,7 @@ const Main: React.FC = () => {
     let { data } = await Api.getTrafficCheques(api);
     // console.log('data', data);
     if (_.isArray(data)) {
-      data = data.splice(0,500);
+      data = data.splice(0,300);
       // console.log('data', data, trafficChequesObj);
       data.forEach((item, index) => {
         item.cashLoad = false;

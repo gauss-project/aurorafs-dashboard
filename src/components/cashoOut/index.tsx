@@ -128,7 +128,7 @@ const CashOut: React.FC<Props> = (props) => {
   const subCashOut = (overlay: any, idx: any) => {
     return new Promise((resolve, reject) => {
       ws?.send({
-        id: subResult.cashOut.id,
+        id: subResult.cashOut.id+overlay,
         jsonrpc: '2.0',
         method: 'traffic_subscribe',
         params: ['cashOut', [overlay]],
@@ -141,33 +141,33 @@ const CashOut: React.FC<Props> = (props) => {
         subResult.cashOut.result = res?.result;
         ws?.once(res?.result, async (res: { overlay: string; status: boolean }[]) => {
           // console.log(res);
-          await unSubCashOut();
+          unSubCashOut(subResult.cashOut.id+overlay);
           res.forEach(async (item) => {
             if (item.status) {
-              await message.success({
+              message.success({
                 content:item.overlay + ' ' + 'cashout success',
                 duration: 2
               })
-              await dispatch({
+              let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
+              dispatch({
+                type: 'accounting/setCashOutList',
+                payload: {
+                  cashOutList: deepCloneTem.splice(1)
+                }
+              })
+              dispatch({
                 type: 'accounting/setSingleCashLoad',
                 payload: {
                   index: idx,
                   status: false
                 }
               })
-              let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
-              await dispatch({
-                type: 'accounting/setCashOutList',
-                payload: {
-                  cashOutList: deepCloneTem.splice(1)
-                }
-              })
             } else {
-              await message.error({
+              message.error({
                 content: item.overlay + ' ' + 'cashout failed',
                 duration: 2
               })
-              await dispatch({
+              dispatch({
                 type: 'accounting/setSingleCashLoad',
                 payload: {
                   index: idx,
@@ -183,10 +183,10 @@ const CashOut: React.FC<Props> = (props) => {
     })
   };
 
-  const unSubCashOut = () => {
+  const unSubCashOut = (id) => {
     return new Promise((resolve, reject) => {
       ws?.send({
-        id: subResult.cashOut.id,
+        id: id,
         jsonrpc: '2.0',
         method: 'traffic_unsubscribe',
         params: [subResult.cashOut.result],
