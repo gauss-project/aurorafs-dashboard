@@ -22,7 +22,7 @@ const Setting: React.FC = (props) => {
   const saveApi = (): void => {
     sessionStorage.setItem(sessionStorageApi, apiValue.trim());
     if (!status || api !== apiValue.trim()) {
-      ws.disconnect();
+      ws?.disconnect();
 
       dispatch({
         type: 'global/getStatus',

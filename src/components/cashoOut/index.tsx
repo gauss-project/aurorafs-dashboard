@@ -24,7 +24,7 @@ const CashOut: React.FC<Props> = (props) => {
     unCashed: 0,
     status: 0,
     cashLoad: false,
-    index: 0
+    index: 0,
   });
   const { ws, api } = useSelector((state: Models) => state.global);
   const { cashOutList } = useSelector((state: Models) => state.accounting);
@@ -49,8 +49,7 @@ const CashOut: React.FC<Props> = (props) => {
   };
 
   const clickAllHandle = () => {
-    let arr = data
-      .filter((item) => item.unCashed > 0 && item.status === 0)
+    let arr = data.filter((item) => item.unCashed > 0 && item.status === 0);
     setVisible(false);
     setIsCancel(true);
     cashOutAll(arr);
@@ -73,9 +72,9 @@ const CashOut: React.FC<Props> = (props) => {
     await dispatch({
       type: 'accounting/setCashOutList',
       payload: {
-        cashOutList: [overlay]
-      }
-    })
+        cashOutList: [overlay],
+      },
+    });
   };
 
   const cashOutAll = async (overlayArr: Cheque[]) => {
@@ -83,9 +82,9 @@ const CashOut: React.FC<Props> = (props) => {
     await dispatch({
       type: 'accounting/setCashOutList',
       payload: {
-        cashOutList:overlayArr
-      }
-    })
+        cashOutList: overlayArr,
+      },
+    });
   };
 
   const listenCashOutList = async () => {
@@ -103,34 +102,32 @@ const CashOut: React.FC<Props> = (props) => {
         let option = cashOutList[0];
         let overlay = option?.peer;
         let index = option?.index;
-        
+
         await dispatch({
           type: 'accounting/setSingleCashLoad',
           payload: {
             index,
-            status: true
-          }
-        })
+            status: true,
+          },
+        });
         await subCashOut(overlay, index);
         await Api.cashOut(api, overlay);
-      } catch(e: any) {
+      } catch (e: any) {
         let err = e?.message ? JSON.parse(e.message).message : e;
         // restoreCashOutState();
         message.error({
-          content:JSON.stringify(err),
-          duration: 4
-        })
-        setTimeout(()=>{
+          content: JSON.stringify(err),
+          duration: 4,
+        });
+        setTimeout(() => {
           let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
           dispatch({
             type: 'accounting/setCashOutList',
             payload: {
-              cashOutList: deepCloneTem.splice(1)
-            }
-          })
-        },5000)
-        
-
+              cashOutList: deepCloneTem.splice(1),
+            },
+          });
+        }, 5000);
       }
     } else {
       restoreCashOutState();
@@ -139,95 +136,122 @@ const CashOut: React.FC<Props> = (props) => {
 
   const subCashOut = (overlay: any, idx: any) => {
     return new Promise((resolve, reject) => {
-      ws?.send({
-        id: subResult.cashOut.id+overlay,
-        jsonrpc: '2.0',
-        method: 'traffic_subscribe',
-        params: ['cashOut', [overlay]],
-      },
-      (err, res) => {
-        if (err || res?.error) {
-          // message.error(err || res?.error);
-          reject(err || res?.error);
-        }
-        console.log('start sub overlay');
-        subResult.cashOut.result = res?.result;
-        ws?.once(res?.result, async (res: { overlay: string; status: boolean }[]) => {
-          console.log(res);
-          unSubCashOut(subResult.cashOut.id+overlay);
-          res.forEach(async (item) => {
-            if (item.status) {
-              message.success({
-                content:item.overlay + ' ' + 'cashout success',
-                duration: 2
-              })
-              let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
-              dispatch({
-                type: 'accounting/setCashOutList',
-                payload: {
-                  cashOutList: deepCloneTem.splice(1)
-                }
-              })
-              dispatch({
-                type: 'accounting/setSingleCashLoad',
-                payload: {
-                  index: idx,
-                  status: false
-                }
-              })
-              dispatch({
-                type: 'accounting/resetUnCashed',
-                payload: {
-                  index: idx,
-                }
-              })
-            } else {
-              message.error({
-                content: item.overlay + ' ' + 'cashout failed',
-                duration: 2
-              })
-              dispatch({
-                type: 'accounting/setSingleCashLoad',
-                payload: {
-                  index: idx,
-                  status: false
-                }
-              })
+      ws?.send(
+        {
+          id: subResult.cashOut.id + overlay,
+          jsonrpc: '2.0',
+          method: 'traffic_subscribe',
+          params: ['cashOut', [overlay]],
+        },
+        (err, res) => {
+          if (err || res?.error) {
+            // message.error(err || res?.error);
+            reject(err || res?.error);
+          }
+          console.log('start sub overlay');
+          subResult.cashOut.result = res?.result;
 
-              setTimeout(()=>{
-                let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
-                dispatch({
-                  type: 'accounting/setCashOutList',
-                  payload: {
-                    cashOutList: deepCloneTem.splice(1)
-                  }
-                })
-              },5000)
-            }
-          });
-        })
-        resolve(res)
-      })
-    })
+          // let setT = setTimeout(()=>{
+          //   unSubCashOut(subResult.cashOut.id+overlay);
+          //   dispatch({
+          //     type: 'accounting/setSingleCashLoad',
+          //     payload: {
+          //       index: idx,
+          //       status: false
+          //     }
+          //   })
+          //   let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
+          //   dispatch({
+          //     type: 'accounting/setCashOutList',
+          //     payload: {
+          //       cashOutList: deepCloneTem.splice(1)
+          //     }
+          //   })
+          // },60000)
+
+          ws?.once(
+            res?.result,
+            async (res: { overlay: string; status: boolean }[]) => {
+              console.log(res);
+              // clearTimeout(setT);
+              // unSubCashOut(subResult.cashOut.id+overlay);
+              res.forEach(async (item) => {
+                if (item.status) {
+                  message.success({
+                    content: item.overlay + ' ' + 'cashout success',
+                    duration: 2,
+                  });
+                  let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
+                  dispatch({
+                    type: 'accounting/setCashOutList',
+                    payload: {
+                      cashOutList: deepCloneTem.splice(1),
+                    },
+                  });
+                  // dispatch({
+                  //   type: 'accounting/setSingleCashLoad',
+                  //   payload: {
+                  //     index: idx,
+                  //     status: false
+                  //   }
+                  // })
+                  dispatch({
+                    type: 'accounting/resetUnCashed',
+                    payload: {
+                      index: idx,
+                    },
+                  });
+                } else {
+                  message.error({
+                    content: item.overlay + ' ' + 'cashout failed',
+                    duration: 2,
+                  });
+                  dispatch({
+                    type: 'accounting/setSingleCashLoad',
+                    payload: {
+                      index: idx,
+                      status: false,
+                    },
+                  });
+
+                  setTimeout(() => {
+                    let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
+                    dispatch({
+                      type: 'accounting/setCashOutList',
+                      payload: {
+                        cashOutList: deepCloneTem.splice(1),
+                      },
+                    });
+                  }, 5000);
+                }
+              });
+            },
+          );
+          resolve(res);
+        },
+      );
+    });
   };
 
   const unSubCashOut = (id) => {
     return new Promise((resolve, reject) => {
-      ws?.send({
-        id: id,
-        jsonrpc: '2.0',
-        method: 'traffic_unsubscribe',
-        params: [subResult.cashOut.result],
-      },
-      (err, res) => {
-        // console.log(err, res);
-        if (err || res?.error) {
-          reject(err || res?.error);
-        } else {
-          resolve(res);
-        }
-      })
-    })
+      ws?.send(
+        {
+          id: id,
+          jsonrpc: '2.0',
+          method: 'traffic_unsubscribe',
+          params: [subResult.cashOut.result],
+        },
+        (err, res) => {
+          // console.log(err, res);
+          if (err || res?.error) {
+            reject(err || res?.error);
+          } else {
+            resolve(res);
+          }
+        },
+      );
+    });
   };
 
   const restoreCashOutState = async () => {
@@ -244,7 +268,7 @@ const CashOut: React.FC<Props> = (props) => {
     return () => {
       setCashOutStatus(false);
       console.log('leave cashout');
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -346,7 +370,9 @@ const CashOut: React.FC<Props> = (props) => {
   return (
     <>
       <div style={{ textAlign: 'right', marginBottom: 10 }}>
-        <Button onClick={clickAllBtn} disabled={cashOutAllDisabled}>{isCancel ? 'cancel' : 'cashout_all'}</Button>
+        <Button onClick={clickAllBtn} disabled={cashOutAllDisabled}>
+          {isCancel ? 'cancel' : 'cashout_all'}
+        </Button>
       </div>
       <Table<Cheque>
         className={styles.list}

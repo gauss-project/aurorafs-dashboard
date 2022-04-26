@@ -1,4 +1,4 @@
-import ModelsType, {Models} from '@/declare/modelType';
+import ModelsType, { Models } from '@/declare/modelType';
 import { Cheque, TrafficInfo } from '@/declare/api';
 import { getTrafficInfo, getTrafficCheques, cashOut } from '@/api/api';
 import { message } from 'antd';
@@ -50,38 +50,38 @@ export default {
       return {
         ...state,
         cashOutList,
-      }
+      };
     },
   },
   effects: {
-    *setSingleCashLoad({ payload }, {put, select}) {
+    *setSingleCashLoad({ payload }, { put, select }) {
       const { index, status } = payload;
       const { trafficCheques } = yield select(
         (state: Models) => state.accounting,
       );
       let tem = JSON.parse(JSON.stringify(trafficCheques));
       tem[index].cashLoad = status;
-      tem[index].un
       yield put({
         type: 'setTrafficCheques',
         payload: {
-          trafficCheques: tem
-        }
-      })
+          trafficCheques: tem,
+        },
+      });
     },
-    *resetUnCashed({ payload }, {put, select}) {
+    *resetUnCashed({ payload }, { put, select }) {
       const { index } = payload;
       const { trafficCheques } = yield select(
         (state: Models) => state.accounting,
       );
       let tem = JSON.parse(JSON.stringify(trafficCheques));
       tem[index].unCashed = 0;
+      tem[index].cashLoad = false;
       yield put({
         type: 'setTrafficCheques',
         payload: {
-          trafficCheques: tem
-        }
-      })
+          trafficCheques: tem,
+        },
+      });
     },
   },
   subscriptions: {},
