@@ -15,6 +15,13 @@ async function run({ win, logs }) {
 
   return runExec();
 
+  let writeLog = (log) => {
+    let fileName = 'aurora__' + moment().format('YYYY_MM_DD') + '.log';
+    fs.appendFile(path.join(cmdPath, fileName), log, (err) => {
+      console.log(err);
+    });
+  };
+
   async function runExec() {
     let workerProcess = spawn(startCmd, ['--config=aurora.yaml', 'start'], {
       cwd: cmdPath,
@@ -34,7 +41,9 @@ async function run({ win, logs }) {
         notStart = false;
         win.webContents.send('start', { api });
       }
+      writeLog(log);
       let n = logs.push(log);
+
       if (n >= 300) logs.splice(0, 100);
     });
 
@@ -42,11 +51,7 @@ async function run({ win, logs }) {
       let log = data.toString();
       console.log('stdout:' + log);
       logs.push(log);
-      let fileName =
-        'aurora__' + moment().format('YYYY_MM_DD_HH-mm-ss') + '.log';
-      fs.writeFile(path.join(cmdPath, fileName), logs.join(''), (err) => {
-        console.log(err);
-      });
+      writeLog(log);
     });
 
     workerProcess.on('close', function (code) {
