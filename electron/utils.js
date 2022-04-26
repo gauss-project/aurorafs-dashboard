@@ -6,6 +6,13 @@ const moment = require('moment');
 
 let cmdPath = 'aurora';
 
+let writeLog = (log) => {
+  let fileName = 'aurora__' + moment().format('YYYY_MM_DD') + '.log';
+  fs.appendFile(path.join(cmdPath, fileName), log, (err) => {
+    console.log(err);
+  });
+};
+
 async function run({ win, logs }) {
   let startCmd = os.platform() === 'win32' ? 'aurora.exe' : './aurora';
 
@@ -14,13 +21,6 @@ async function run({ win, logs }) {
   let api = url + config.match(/api-addr: :(\d*)/)[1];
 
   return runExec();
-
-  let writeLog = (log) => {
-    let fileName = 'aurora__' + moment().format('YYYY_MM_DD') + '.log';
-    fs.appendFile(path.join(cmdPath, fileName), log, (err) => {
-      console.log(err);
-    });
-  };
 
   async function runExec() {
     let workerProcess = spawn(startCmd, ['--config=aurora.yaml', 'start'], {
