@@ -49,7 +49,7 @@ async function createWindow() {
     const choice = dialog.showMessageBoxSync(win, {
       message: 'Are you sure you want to quit?',
       type: 'info',
-      buttons: ['Cancel', 'Confirm'],
+      buttons: ['Cancel', 'Ok'],
     });
     if (choice === 0 && e) {
       e.preventDefault();
