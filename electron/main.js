@@ -1,7 +1,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, Menu, Tray, shell } = require('electron');
 const path = require('path');
-const { ipcMain } = require('electron');
+const { ipcMain, dialog } = require('electron');
 const { run } = require('./utils');
 const fs = require('fs');
 
@@ -9,12 +9,25 @@ const fs = require('fs');
 
 let win;
 let tray;
-let workerProcess;
 let logs = [];
 
+let menuExit = false;
+
 function quit(status = true) {
-  workerProcess.kill();
+  win.emit('kill');
   if (status) app.quit();
+}
+
+function start() {
+  run({ win, logs });
+}
+
+function reStart() {
+  quit(false);
+  logs = [];
+  win.webContents.send('logs', logs);
+  win.webContents.send('startLoading');
+  start();
 }
 
 async function createWindow() {
@@ -31,11 +44,19 @@ async function createWindow() {
     },
   });
 
-  win.webContents.on('did-finish-load', () => {
-    win.isStart = true;
+  win.on('close', (e) => {
+    if (menuExit) return;
+    const choice = dialog.showMessageBoxSync(win, {
+      message: 'Are you sure you want to quit?',
+      type: 'info',
+      buttons: ['Cancel', 'Confirm'],
+    });
+    if (choice === 0 && e) {
+      e.preventDefault();
+    }
   });
 
-  workerProcess = await run({ win, logs });
+  start();
 
   // Create the menu
   tray = new Tray('./public/logo.png'); // sets tray icon image
@@ -43,16 +64,13 @@ async function createWindow() {
     {
       label: 'Restart',
       click: async () => {
-        quit(false);
-        logs = [];
-        win.webContents.send('logs', logs);
-        win.webContents.send('startLoading');
-        workerProcess = await run({ win, logs });
+        reStart();
       }, // click event
     },
     {
       label: 'Exit',
       click: () => {
+        menuExit = true;
         quit();
       },
     },
@@ -70,10 +88,6 @@ async function createWindow() {
     'new-window',
     (event, url, frameName, disposition, options) => {
       event.preventDefault();
-      // if (url === 'https://testnet.binance.org/faucet-smart') {
-      //   shell.openExternal(url);
-      //   return;
-      // }
       let openWin = new BrowserWindow({
         webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
@@ -116,11 +130,7 @@ app.on('window-all-closed', function () {
 });
 
 ipcMain.on('restart', async (event) => {
-  quit(false);
-  logs = [];
-  win.webContents.send('logs', logs);
-  win.webContents.send('startLoading');
-  workerProcess = await run({ win, logs });
+  reStart();
 });
 
 ipcMain.on('config', (event) => {
