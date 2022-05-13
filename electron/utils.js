@@ -7,6 +7,8 @@ const moment = require('moment');
 let cmdPath = 'aurora';
 let workerProcess;
 
+let winStart = false;
+
 function run({ win, logs }) {
   let startCmd = os.platform() === 'win32' ? 'aurora.exe' : './aurora';
   let config = fs.readFileSync('./aurora/aurora.yaml', { encoding: 'utf-8' });
@@ -25,8 +27,13 @@ function run({ win, logs }) {
     });
 
     win.webContents.once('did-finish-load', () => {
+      winStart = true;
       win.webContents.send('stopLoading');
     });
+    if (winStart) {
+      win.webContents.send('stopLoading');
+    }
+
     let notStart = true;
 
     let writeLog = (log) => {

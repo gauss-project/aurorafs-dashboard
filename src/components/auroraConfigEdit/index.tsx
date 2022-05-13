@@ -4,6 +4,7 @@ import { Button, Input, message } from 'antd';
 import { Event } from 'electron';
 import { useThrottle } from '@/utils/hooks';
 import { isElectron } from '@/config/version';
+import { useHistory } from 'umi';
 
 const { TextArea } = Input;
 let ipcRenderer: any = null;
@@ -12,6 +13,7 @@ if (isElectron) {
 }
 
 const AuroraConfigEdit: React.FC = () => {
+  const history = useHistory();
   const [auroraConfig, setAuroraConfig] = useState('');
   useEffect(() => {
     ipcRenderer.on('config', (event: Event, data: any) => {
@@ -54,6 +56,7 @@ const AuroraConfigEdit: React.FC = () => {
     ipcRenderer.send('reset');
   };
   const restartHandle = () => {
+    history.push('/log');
     ipcRenderer.send('restart');
   };
   return (
