@@ -192,12 +192,12 @@ const Layouts: React.FC = (props) => {
           method: 'chunkInfo_subscribe',
           params: ['metrics'],
         },
-        (err: Error, res) => {
+        (err: Error, res: any) => {
           if (err || res?.error) {
             message.error(err || res?.error);
           }
           subResult.chunkInfo.result = res?.result;
-          ws?.on(res?.result, (res) => {
+          ws?.on(res?.result, (res: any) => {
             dispatch({
               type: 'global/updateChunkOrRetrieval',
               payload: {
@@ -215,12 +215,12 @@ const Layouts: React.FC = (props) => {
           method: 'retrieval_subscribe',
           params: ['metrics'],
         },
-        (err: Error, res) => {
+        (err: Error, res: any) => {
           if (err || res?.error) {
             message.error(err || res?.error);
           }
           subResult.retrieval.result = res?.result;
-          ws?.on(res?.result, (res) => {
+          ws?.on(res?.result, (res: any) => {
             dispatch({
               type: 'global/updateChunkOrRetrieval',
               payload: {
@@ -302,7 +302,7 @@ const Layouts: React.FC = (props) => {
               </div>
               <div>
                 Version:{version}
-                {status && `(${semver.coerce(health?.version)})`}
+                {status && `(${health?.version})`}
               </div>
             </div>
           </div>
