@@ -30,7 +30,7 @@ const Main: React.FC = () => {
     cheques: {
       id: 42,
       result: '',
-    }
+    },
   }).current;
 
   const getBalance = async () => {
@@ -51,7 +51,7 @@ const Main: React.FC = () => {
     let { data } = await Api.getTrafficCheques(api);
     // console.log('data', data);
     if (_.isArray(data)) {
-      data = data.splice(0,300);
+      data = data.splice(0, 500);
       // console.log('data', data, trafficChequesObj);
       data.forEach((item, index) => {
         item.cashLoad = false;
@@ -143,10 +143,10 @@ const Main: React.FC = () => {
     let initObjSize = attributeCount(initObj);
     res.forEach((item: any, index: number) => {
       if (initObj[item.peer]) {
-        console.log('item',{...item});
+        console.log('item', { ...item });
         let option = initObj[item.peer];
-        initObj[item.peer] = {...option, ...item};
-      } 
+        initObj[item.peer] = { ...option, ...item };
+      }
       // else {
       //   initObj[item.peer] = {
       //     ...item,
@@ -241,9 +241,7 @@ const Main: React.FC = () => {
       </div>
       <div style={{ marginTop: 10 }}>
         <div className={styles.head}>Peers</div>
-        <CashOut
-          data={trafficCheques}
-        />
+        <CashOut data={trafficCheques} />
       </div>
     </>
   );
