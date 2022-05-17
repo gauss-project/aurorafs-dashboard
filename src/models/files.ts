@@ -6,6 +6,18 @@ import { message } from 'antd';
 import { mapQueryM3u8, query } from '@/utils/util';
 import _ from 'lodash';
 
+const queryData = {
+  page: {
+    pageNum: 1,
+    pageSize: 10,
+  },
+  sort: {
+    key: 'rootCid',
+    order: 'asc'
+  },
+  filter: []
+};
+
 interface queryType {
   page: {
     pageNum: number,
@@ -38,17 +50,7 @@ export default {
     filesList: [],
     downloadList: [],
     filesTotal: 0,
-    queryData: {
-      page: {
-        pageNum: 1,
-        pageSize: 10,
-      },
-      sort: {
-        key: '',
-        order: ''
-      },
-      filter: []
-    },
+    queryData,
   },
   reducers: {
     deleteDLHash(state, { payload }) {
@@ -108,8 +110,7 @@ export default {
         }
       }
     },
-    initQueryData(state, { payload }) {
-      const { queryData } = payload;
+    initQueryData(state) {
       return {
         ...state,
         queryData,
