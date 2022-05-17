@@ -72,14 +72,18 @@ const FilesList: React.FC = () => {
   }
 
   const sortChange = (s) => {
-    if (s.order === undefined) return;
+    console.log('s', s);
     let keyStr = 'rootCid';
-    if (s.columnKey === 'hash') {
+    if (s.order === undefined) {
       keyStr = 'rootCid';
-    } else if (s.columnKey === 'size') {
-      keyStr = 'fileSize';
-    } else if (s.columnKey === 'pin') {
-      keyStr = 'pinState';
+    } else {
+      if (s.columnKey === 'hash') {
+        keyStr = 'rootCid';
+      } else if (s.columnKey === 'size') {
+        keyStr = 'fileSize';
+      } else if (s.columnKey === 'pin') {
+        keyStr = 'pinState';
+      }
     }
     dispatch({
       type: 'files/changeQuery',
@@ -88,7 +92,7 @@ const FilesList: React.FC = () => {
         options: {
           sort: {
             key: keyStr,
-            order: s.order === 'ascend' ? 'asc' : 'desc'
+            order: s.order === undefined ? 'asc' : (s.order === 'ascend' ? 'asc' : 'desc')
           }
         }
       }
@@ -219,7 +223,7 @@ const FilesList: React.FC = () => {
           )}
         </>
       ),
-      width: 650,
+      width: 600,
       sorter: true
     },
     {
