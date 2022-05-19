@@ -42,6 +42,10 @@ export interface State {
   metrics: {
     downloadTotal: number;
     uploadTotal: number;
+    retrievalDownload: number;
+    retrievalUpload: number;
+    chunkInfoDownload: number;
+    chunkInfoUpload: number;
     downloadSpeed: number;
     uploadSpeed: number;
   };
@@ -62,12 +66,10 @@ export default {
     metrics: {
       downloadTotal: 0,
       uploadTotal: 0,
-      newDownloadTotal: 0,
-      newUploadTotal: 0,
-      newUpChunk: 0,
-      newUpRetrval: 0,
-      newDownChunk: 0,
-      newDownRetrval: 0,
+      retrievalDownload: 0,
+      retrievalUpload: 0,
+      chunkInfoDownload: 0,
+      chunkInfoUpload: 0,
       downloadSpeed: 0,
       uploadSpeed: 0,
     },
@@ -121,13 +123,6 @@ export default {
         metrics,
       };
     },
-    setSpeed(state, { payload }) {
-      const { speed } = payload;
-      return {
-        ...state,
-        speed,
-      };
-    },
     setChartData(state, { payload }) {
       const { chartData } = payload;
       return {
@@ -141,12 +136,10 @@ export default {
         metrics: {
           downloadTotal: 0,
           uploadTotal: 0,
-          newDownloadTotal: 0,
-          newUploadTotal: 0,
-          newUpChunk: 0,
-          newUpRetrval: 0,
-          newDownChunk: 0,
-          newDownRetrval: 0,
+          retrievalDownload: 0,
+          retrievalUpload: 0,
+          chunkInfoDownload: 0,
+          chunkInfoUpload: 0,
           downloadSpeed: 0,
           uploadSpeed: 0,
         },
@@ -240,9 +233,7 @@ export default {
       const { url } = payload;
       try {
         const { data } = yield call(DebugApi.getMetrics, url);
-        const { metrics, chartData } = yield select(
-          (state: Models) => state.global,
-        );
+        const { metrics } = yield select((state: Models) => state.global);
         const retrievalDownload =
           Number(
             data.match(/\baurora_retrieval_total_retrieved\b\s(\d+)/)?.[1],
@@ -269,12 +260,10 @@ export default {
             metrics: {
               downloadTotal: retrievedTotal,
               uploadTotal: transferredTotal,
-              newDownloadTotal: retrievedTotal,
-              newUploadTotal: transferredTotal,
-              newUpChunk: chunkInfoUpload,
-              newUpRetrval: retrievalUpload,
-              newDownChunk: chunkInfoDownload,
-              newDownRetrval: retrievalDownload,
+              retrievalDownload,
+              retrievalUpload,
+              chunkInfoDownload,
+              chunkInfoUpload,
               downloadSpeed: 0,
               uploadSpeed: 0,
             },
@@ -292,65 +281,75 @@ export default {
     },
     *updateChunkOrRetrieval({ payload }, { call, put, select }) {
       const { metrics } = yield select((state: Models) => state.global);
+      yield put({
+        type: 'setMetrics',
+        payload: {
+          metrics: {
+            ...metrics,
+            ...payload,
+          },
+        },
+      });
       // console.log('ws info');
-      const {
-        chunkInfoUpload,
-        chunkInfoDownload,
-        retrievalUpload,
-        retrievalDownload,
-      } = payload;
+      // const {
+      //   chunkInfoUpload,
+      //   chunkInfoDownload,
+      //   retrievalUpload,
+      //   retrievalDownload,
+      // } = payload;
 
-      if (chunkInfoUpload !== undefined && chunkInfoDownload !== undefined) {
-        yield put({
-          type: 'setMetrics',
-          payload: {
-            metrics: {
-              ...metrics,
-              newUpChunk: chunkInfoUpload,
-              newDownChunk: chunkInfoDownload,
-            },
-          },
-        });
-      }
+      // let obj = {...metrics,...payload};
+      // console.log(obj);
 
-      if (retrievalUpload !== undefined && retrievalDownload !== undefined) {
-        yield put({
-          type: 'setMetrics',
-          payload: {
-            metrics: {
-              ...metrics,
-              newUpRetrval: retrievalUpload,
-              newDownRetrval: retrievalDownload,
-            },
-          },
-        });
-      }
+      // if (chunkInfoUpload !== undefined && chunkInfoDownload !== undefined) {
+      //   yield put({
+      //     type: 'setMetrics',
+      //     payload: {
+      //       metrics: {
+      //         ...metrics,
+      //         newUpChunk: chunkInfoUpload,
+      //         newDownChunk: chunkInfoDownload,
+      //       },
+      //     },
+      //   });
+      // }
+      //
+      // if (retrievalUpload !== undefined && retrievalDownload !== undefined) {
+      //   yield put({
+      //     type: 'setMetrics',
+      //     payload: {
+      //       metrics: {
+      //         ...metrics,
+      //         newUpRetrval: retrievalUpload,
+      //         newDownRetrval: retrievalDownload,
+      //       },
+      //     },
+      //   });
+      // }
     },
     *updateChart({ payload }, { call, put, select }) {
       const { metrics, chartData } = yield select(
         (state: Models) => state.global,
       );
 
-      const retrievedTotal = metrics.newDownChunk + metrics.newDownRetrval;
-      const transferredTotal = metrics.newUpChunk + metrics.newUpRetrval;
-      const downloadSpeed = metrics.downloadTotal === 0 ? 0 : (retrievedTotal === 0 ? 0 : retrievedTotal - metrics.downloadTotal);
-      const uploadSpeed = metrics.uploadTotal === 0 ? 0 : (transferredTotal === 0 ? 0 : transferredTotal - metrics.uploadTotal);
+      const downloadTotal =
+        metrics.retrievalDownload + metrics.chunkInfoDownload;
+      const uploadTotal = metrics.retrievalUpload + metrics.chunkInfoUpload;
+      const downloadSpeed = downloadTotal - metrics.downloadTotal;
+      const uploadSpeed = uploadTotal - metrics.uploadTotal;
 
       yield put({
         type: 'setMetrics',
         payload: {
           metrics: {
             ...metrics,
-            downloadTotal: retrievedTotal,
-            uploadTotal: transferredTotal,
-            newDownloadTotal: retrievedTotal,
-            newUploadTotal: transferredTotal,
+            downloadTotal,
+            uploadTotal,
             downloadSpeed: downloadSpeed,
             uploadSpeed: uploadSpeed,
           },
         },
       });
-
       yield put({
         type: 'setChartData',
         payload: {

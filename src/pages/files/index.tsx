@@ -7,16 +7,16 @@ import FileUpload from '@/components/fileUpload';
 import Download from '@/components/download';
 import FilesList from '@/components/filesList';
 import Loading from '@/components/loading';
-import { stringToBinary, getProgress } from '@/utils/util';
+import { stringToBinary } from '@/utils/util';
 import { message } from 'antd';
+
+import { FileType, PascalCasedProps } from '@/declare/api';
 
 const Main: React.FC = (props) => {
   let dispatch = useDispatch();
   const { uploadStatus } = useSelector((state: Models) => state.files);
   const { api, ws } = useSelector((state: Models) => state.global);
-  const { filesList, downloadList } = useSelector(
-    (state: Models) => state.files,
-  );
+  const { filesList } = useSelector((state: Models) => state.files);
 
   const subResult = useRef({
     rootCidStatus: {
@@ -25,8 +25,8 @@ const Main: React.FC = (props) => {
     },
     rootCidList: {
       id: 32,
-      result: ''
-    }
+      result: '',
+    },
   }).current;
 
   const getFilesList = (): void => {
@@ -44,7 +44,7 @@ const Main: React.FC = (props) => {
         id: subResult.rootCidStatus.id,
         jsonrpc: '2.0',
         method: 'chunkInfo_subscribe',
-        params: ["rootCidStatus"],
+        params: ['rootCidStatus'],
       },
       (err, res) => {
         if (err || res?.error) {
@@ -52,111 +52,115 @@ const Main: React.FC = (props) => {
         }
         subResult.rootCidStatus.result = res?.result;
         ws?.on(res?.result, (res) => {
-          getFilesList()
-        })
-      }
-    )
-  }
+          getFilesList();
+        });
+      },
+    );
+  };
 
-  const subDownloadProgress = (rootCidList) => {
-    return new Promise((resolve, reject) => {
-      ws?.send(
-        {
-          id: subResult.rootCidList.id,
-          jsonrpc: '2.0',
-          method: 'chunkInfo_subscribe',
-          params: ["downloadProgress",rootCidList],
-        },
-        (err, res) => {
-          resolve({
-            err,
-            res,
+  const subDownloadProgress = (rootCidList: string[]) => {
+    ws?.send(
+      {
+        id: subResult.rootCidList.id,
+        jsonrpc: '2.0',
+        method: 'chunkInfo_subscribe',
+        params: ['downloadProgress', rootCidList],
+      },
+      (err, res) => {
+        if (err && res?.error) {
+          subDownloadProgress(rootCidList);
+        } else {
+          subResult.rootCidList.result = res?.result;
+          ws?.on(res?.result, (res: PascalCasedProps<FileType>[]) => {
+            // let newList = res;
+            // let oldList = JSON.parse(JSON.stringify(filesList));
+            // for (let i = 0; i < newList.length; i++) {
+            //   for (let j = 0; j < oldList.length; j++) {
+            //     if (oldList[j].rootCid === newList[i].RootCid) {
+            //       oldList[j].bitVector = newList[i].Bitvector;
+            //     }
+            //   }
+            // }
+            let list = filesList.map((item) => {
+              let data = res.find((i) => i.RootCid === item.rootCid);
+              return {
+                ...item,
+                bitVector: data ? data.Bitvector : item.bitVector,
+              };
+            });
+            dispatch({
+              type: 'files/setFilesList',
+              payload: {
+                filesList: list,
+              },
+            });
           });
-      })
-    })
-  }
+        }
+      },
+    );
+  };
 
   const unSubDownloadProgress = () => {
-    return new Promise((resolve, reject) => {
-      ws?.send(
-        {
-          id: subResult.rootCidList.id,
-          jsonrpc: '2.0',
-          method: 'chunkInfo_unsubscribe',
-          params: [subResult.rootCidList.result],
-        },
-        (err, res) => {
-          resolve(res);
+    ws?.send(
+      {
+        id: subResult.rootCidList.id,
+        jsonrpc: '2.0',
+        method: 'chunkInfo_unsubscribe',
+        params: [subResult.rootCidList.result],
+      },
+      (err, res) => {
+        if (err || res?.error) {
+          unSubDownloadProgress();
+        } else {
+          subResult.rootCidList.result = '';
         }
-      )
-    })
-  }
+      },
+    );
+  };
 
-  const observeProgress = async () => {
-    if (subResult.rootCidList.result !== '') {
-      const unSubRes = await unSubDownloadProgress();
-      if (unSubRes?.result) {
-        subResult.rootCidList.result = '';
-      }
+  const observeProgress = () => {
+    if (subResult.rootCidList.result) {
+      unSubDownloadProgress();
     }
     if (filesList.length) {
-      let newArr = filesList.filter(item => {
-        return /0/.test(stringToBinary(item.bitVector.b, item.bitVector.len, item.size))
-      });
-      let rootCidList = newArr.map(item => {
-        return item.rootCid;
-      })
+      let rootCidList = filesList
+        .filter((item) =>
+          /0/.test(
+            stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
+          ),
+        )
+        .map((item) => item.rootCid);
+
       if (rootCidList.length) {
-        const {err, res} = await subDownloadProgress(rootCidList);
-        if (err || res?.error) {
-          message.error(err || res?.error);
-        }
-        subResult.rootCidList.result = res?.result;
-        ws?.on(res?.result, (res) => {
-          let newList = res;
-          let oldList = JSON.parse(JSON.stringify(filesList));
-          for (let i = 0; i < newList.length; i++) {
-            for (let j = 0; j < oldList.length; j++) {
-              if (oldList[j].rootCid === newList[i].RootCid) {
-                oldList[j].bitVector = newList[i].Bitvector;
-              }
-            }
-          }
-          dispatch({
-            type: 'files/setFilesList',
-            payload: {
-              filesList: oldList
-            }
-          })
-        })
+        subDownloadProgress(rootCidList);
       }
     }
-  }
+  };
 
   useEffect(() => {
-    filesList.forEach((item, index) => {
-      const i = downloadList.indexOf(item.rootCid);
-      const status = !/0/.test(
-        stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
-      );
-      if (i !== -1) {
-        if (status) {
-          setTimeout(() => {
-            dispatch({
-              type: 'files/deleteDLHash',
-              payload: { hash: item.rootCid },
-            });
-          }, 2000);
-        }
-      } else if (!status) {
-        dispatch({
-          type: 'files/addDLHash',
-          payload: {
-            hash: item.rootCid,
-          },
-        });
-      }
-    });
+    // filesList.forEach((item, index) => {
+    //   const i = downloadList.indexOf(item.rootCid);
+    //   const status = !/0/.test(
+    //     stringToBinary(item.bitVector.b, item.bitVector.len, item.size),
+    //   );
+    //   if (i !== -1) {
+    //     if (status) {
+    //       setTimeout(() => {
+    //         dispatch({
+    //           type: 'files/deleteDLHash',
+    //           payload: { hash: item.rootCid },
+    //         });
+    //       }, 2000);
+    //     }
+    //   } else if (!status) {
+    //     dispatch({
+    //       type: 'files/addDLHash',
+    //       payload: {
+    //         hash: item.rootCid,
+    //       },
+    //     });
+    //   }
+    // });
     observeProgress();
   }, [filesList]);
 
@@ -180,27 +184,14 @@ const Main: React.FC = (props) => {
     getFilesList();
     subStatus();
     return () => {
-      dispatch({
-        type: 'files/setDownloadList',
-        payload: {
-          downloadList: [],
-        },
-      });
+      // dispatch({
+      //   type: 'files/setDownloadList',
+      //   payload: {
+      //     downloadList: [],
+      //   },
+      // });
       dispatch({
         type: 'files/initQueryData',
-        payload: {
-          queryData: {
-            page: {
-              pageNum: 1,
-              pageSize: 10,
-            },
-            sort: {
-              key: '',
-              order: ''
-            },
-            filter: []
-          },
-        },
       });
       unSub();
     };
@@ -214,7 +205,7 @@ const Main: React.FC = (props) => {
         <div style={{ marginTop: 30 }}>
           <FileUpload />
         </div>
-        <div style={{ marginTop: 40 }}>
+        <div style={{ marginTop: 30 }}>
           <FilesList />
         </div>
         {uploadStatus && (

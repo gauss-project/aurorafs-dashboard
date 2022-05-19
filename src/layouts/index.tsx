@@ -89,7 +89,7 @@ const Layouts: React.FC = (props) => {
   let timer = useRef<null | NodeJS.Timer>(null);
 
   const getMetrics = async (url: string, init: boolean = false) => {
-    await dispatch({
+    dispatch({
       type: 'global/getMetrics',
       payload: { url, init },
     });
@@ -165,7 +165,6 @@ const Layouts: React.FC = (props) => {
       timer.current = setInterval(() => {
         dispatch({
           type: 'global/updateChart',
-          payload: {},
         });
       }, speedTime);
       let ws: any = new Web3.providers.WebsocketProvider(wsApi, {
@@ -193,6 +192,7 @@ const Layouts: React.FC = (props) => {
           params: ['metrics'],
         },
         (err: Error, res: any) => {
+          console.log('chunkInfo', res);
           if (err || res?.error) {
             message.error(err || res?.error);
           }
@@ -300,10 +300,8 @@ const Layouts: React.FC = (props) => {
               <div className={status ? styles.connected : styles.disconnected}>
                 {status ? 'Connected' : 'Disconnected'}
               </div>
-              <div>
-                Version:{version}
-                {status && `(${health?.version})`}
-              </div>
+              <div>Version:{version}</div>
+              <div>{status && `(${health?.version})`}</div>
             </div>
           </div>
         </div>

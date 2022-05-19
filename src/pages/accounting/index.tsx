@@ -5,19 +5,21 @@ import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import CopyText from '@/components/copyText';
 import CashOut from '@/components/cashoOut';
-import { trafficToBalance, attributeCount } from '@/utils/util';
+import { trafficToBalance } from '@/utils/util';
 import { ethers } from 'ethers';
 import { message } from 'antd';
 import Api from '@/api/api';
 
+import { Cheque } from '@/declare/api';
+
 import Keystore from '@/components/keystore';
-import _, { over, reject, values } from 'lodash';
+import _ from 'lodash';
 
 const Main: React.FC = () => {
   const dispatch = useDispatch();
   const [balance, setBalance] = useState('');
-  let [trafficChequesObj] = useState({});
-  const { api, ws, refresh } = useSelector((state: Models) => state.global);
+  let [trafficChequesObj] = useState<Record<string, Cheque>>({});
+  const { api, ws } = useSelector((state: Models) => state.global);
   const { account, trafficInfo, trafficCheques } = useSelector(
     (state: Models) => state.accounting,
   );
@@ -47,18 +49,16 @@ const Main: React.FC = () => {
     const bnb = ethers.utils.formatEther(balance);
     setBalance(bnb);
   };
+
   const getTrafficCheques = async (status: boolean = false) => {
     let { data } = await Api.getTrafficCheques(api);
-    // console.log('data', data);
     if (_.isArray(data)) {
       data = data.splice(0, 500);
-      // console.log('data', data, trafficChequesObj);
       data.forEach((item, index) => {
-        item.cashLoad = false;
+        item.cashLoad = item.status === 1;
         item.index = index;
       });
-      data.map((item, index) => (trafficChequesObj[item.peer] = item));
-      // console.log('obj',trafficChequesObj);
+      data.forEach((item, index) => (trafficChequesObj[item.peer] = item));
     }
     dispatch({
       type: 'accounting/setTrafficCheques',
@@ -130,7 +130,7 @@ const Main: React.FC = () => {
               //   trafficCheques,
               //   (a, b) => a.peer === b.peer,
               // ),
-              trafficCheques: mergetrafficData(res, trafficChequesObj),
+              trafficCheques: mergeTrafficData(res, trafficChequesObj),
             },
           });
         });
@@ -138,22 +138,14 @@ const Main: React.FC = () => {
     );
   };
 
-  const mergetrafficData = (res, initObj) => {
+  const mergeTrafficData = (res: [], initObj: Record<string, Cheque>) => {
     let tem = [];
-    let initObjSize = attributeCount(initObj);
     res.forEach((item: any, index: number) => {
       if (initObj[item.peer]) {
         console.log('item', { ...item });
         let option = initObj[item.peer];
         initObj[item.peer] = { ...option, ...item };
       }
-      // else {
-      //   initObj[item.peer] = {
-      //     ...item,
-      //     cashLoad: false,
-      //     index: initObjSize + index
-      //   }
-      // }
     });
     for (let key in initObj) {
       tem.push(initObj[key]);

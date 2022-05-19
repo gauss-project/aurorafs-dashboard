@@ -70,7 +70,7 @@ const CashOut: React.FC<Props> = (props) => {
 
   const cashOut = async (overlay: Cheque) => {
     setCashOutStatus(true);
-    await dispatch({
+    dispatch({
       type: 'accounting/setCashOutList',
       payload: {
         cashOutList: [overlay],
@@ -80,17 +80,17 @@ const CashOut: React.FC<Props> = (props) => {
 
   const cashOutAll = async (overlayArr: Cheque[]) => {
     setCashOutStatus(true);
-    await dispatch({
+    dispatch({
       type: 'accounting/setCashOutList',
       payload: {
         cashOutList: overlayArr,
       },
     });
+    console.log(cashOutList);
   };
 
   const listenCashOutList = async () => {
     if (!cashOutStatus) {
-      // console.log('return');
       restoreCashOutState();
       return;
     }
@@ -105,11 +105,7 @@ const CashOut: React.FC<Props> = (props) => {
       let overlay = option?.peer;
       let index = option?.index;
       try {
-        // let option = cashOutList[0];
-        // let overlay = option?.peer;
-        // let index = option?.index;
-
-        await dispatch({
+        dispatch({
           type: 'accounting/setSingleCashLoad',
           payload: {
             index,
@@ -119,9 +115,7 @@ const CashOut: React.FC<Props> = (props) => {
         await subCashOut(overlay, index);
         await Api.cashOut(api, overlay);
       } catch (e: any) {
-        // console.log('catch cashOutStatus', cashOutStatus);
         let err = e?.message ? JSON.parse(e.message).message : e;
-        // restoreCashOutState();
         message.error({
           content: JSON.stringify(err),
           duration: 4,
@@ -133,7 +127,7 @@ const CashOut: React.FC<Props> = (props) => {
             status: false,
           },
         });
-        ws.removeAllListeners(subResult.cashOut.result);
+        ws?.removeAllListeners(subResult.cashOut.result);
         setTimeout(() => {
           // console.log('catch setTimeout');
           let deepCloneTem = JSON.parse(JSON.stringify(cashOutList));
@@ -191,7 +185,7 @@ const CashOut: React.FC<Props> = (props) => {
               console.log(res);
               // clearTimeout(setT);
               // unSubCashOut(subResult.cashOut.id+overlay);
-              res.forEach(async (item) => {
+              res.forEach((item) => {
                 if (item.status) {
                   message.success({
                     content: item.overlay + ' ' + 'cashout success',
@@ -249,7 +243,7 @@ const CashOut: React.FC<Props> = (props) => {
     });
   };
 
-  const unSubCashOut = (id) => {
+  const unSubCashOut = (id: number) => {
     return new Promise((resolve, reject) => {
       ws?.send(
         {
@@ -270,7 +264,7 @@ const CashOut: React.FC<Props> = (props) => {
     });
   };
 
-  const restoreCashOutState = async () => {
+  const restoreCashOutState = () => {
     setCashOutStatus(false);
     setIsAll(false);
     setIsCancel(false);
@@ -359,7 +353,7 @@ const CashOut: React.FC<Props> = (props) => {
       render: (value, record, index) => {
         return (
           <div>
-            {record.unCashed && record.status === 0 ? (
+            {record.unCashed ? (
               <>
                 <Button
                   onClick={() => {
