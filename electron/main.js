@@ -56,6 +56,10 @@ async function createWindow() {
     }
   });
 
+  win.on('closed', (e) => {
+    win = null;
+  });
+
   start();
 
   // Create the menu
@@ -152,5 +156,7 @@ ipcMain.on('reset', (event) => {
 });
 
 ipcMain.on('logs', (event) => {
-  event.reply('logs', logs);
+  if (!win.isDestroyed()) {
+    event.reply('logs', logs);
+  }
 });
