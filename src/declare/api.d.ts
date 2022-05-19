@@ -1,5 +1,15 @@
 import { getChunkSource } from '@/api/debugApi';
 
+type PascalCase<T> = T extends string
+  ? T extends `${infer A}${infer B}`
+    ? `${Uppercase<A>}${B}`
+    : T
+  : T;
+
+export type PascalCasedProps<T extends Record<string, any>> = {
+  [K in keyof T as PascalCase<K>]: PascalCasedProps<T[K]>;
+};
+
 export declare type Topology = {
   baseAddr?: string;
   population?: number;
@@ -29,7 +39,11 @@ export declare type Topology = {
     population: number;
   };
 };
-export declare type Peer = { address: string; fullNode: boolean; direction: string };
+export declare type Peer = {
+  address: string;
+  fullNode: boolean;
+  direction: string;
+};
 export declare type Peers = Peer[];
 
 export declare type Addresses = {

@@ -1,8 +1,23 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Table, Tooltip, Popconfirm, Progress, Modal, message, Input, Button } from 'antd';
+import React, {
+  ChangeEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Table,
+  Tooltip,
+  Popconfirm,
+  Progress,
+  Modal,
+  message,
+  Input,
+  Button,
+} from 'antd';
 
 const { confirm } = Modal;
-import { ColumnsType } from 'antd/es/table';
+import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { AllFileInfo } from '@/declare/api';
 import styles from './index.less';
 import {
@@ -14,7 +29,6 @@ import CopyText from '@/components/copyText';
 import { useDispatch, useSelector } from 'umi';
 import { Models } from '@/declare/modelType';
 import { getSize, stringToBinary, getProgress } from '@/utils/util';
-
 import pinSvg from '@/assets/icon/pin.svg';
 import unPinSvg from '@/assets/icon/unPin.svg';
 import regSvg from '@/assets/icon/reg.svg';
@@ -25,13 +39,26 @@ import { updateFileRegister } from '@/api/api';
 import { mapQueryM3u8 } from '@/utils/util';
 import Loading from '@/components/loading';
 import { ethers } from 'ethers';
+import { filterType } from '@/models/files';
+import {
+  FilterValue,
+  SorterResult,
+  TableCurrentDataSource,
+} from 'antd/lib/table/interface';
+
+type OnChange = (
+  pagination: TablePaginationConfig,
+  filters: Record<string, FilterValue | null>,
+  sorter: SorterResult<AllFileInfo> | SorterResult<AllFileInfo>[],
+  extra: TableCurrentDataSource<AllFileInfo>,
+) => void;
 
 const FilesList: React.FC = () => {
   const dispatch = useDispatch();
   const ref = useRef<HTMLDivElement | null>(null);
 
-  const { api, ws } = useSelector((state: Models) => state.global);
-  const { filesList, oldFilesList, downloadList, filesTotal, queryData } = useSelector(
+  const { api } = useSelector((state: Models) => state.global);
+  const { filesList, filesTotal, queryData } = useSelector(
     (state: Models) => state.files,
   );
 
@@ -40,23 +67,23 @@ const FilesList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [top, setTop] = useState(0);
 
-  const pageSizeOption = [10,20,50,100];
+  const pageSizeOption = ['5', '10', '20', '50'];
 
-  let [fileNameValue,setFileNameValue] = useState('');
+  let [fileNameValue, setFileNameValue] = useState('');
   let [fileHashValue, setFileHashValue] = useState('');
 
-  const tableChange = (pagination, filters, sorter, extra) => {
+  const tableChange: OnChange = (pagination, filters, sorter, extra) => {
     console.log('onchange', extra);
     if (extra.action === 'paginate') {
       paginationChange(pagination);
     } else if (extra.action === 'sort') {
-      sortChange(sorter);
+      sortChange(sorter as SorterResult<AllFileInfo>);
     } else {
       // filters
     }
-  }
+  };
 
-  const paginationChange = (p) => {
+  const paginationChange = (p: TablePaginationConfig) => {
     dispatch({
       type: 'files/changeQuery',
       payload: {
@@ -67,11 +94,11 @@ const FilesList: React.FC = () => {
             pageSize: p.pageSize,
           },
         },
-      }
-    })
-  }
+      },
+    });
+  };
 
-  const sortChange = (s) => {
+  const sortChange = (s: SorterResult<AllFileInfo>) => {
     console.log('s', s);
     let keyStr = 'rootCid';
     if (s.order === undefined) {
@@ -92,49 +119,57 @@ const FilesList: React.FC = () => {
         options: {
           sort: {
             key: keyStr,
-            order: s.order === undefined ? 'asc' : (s.order === 'ascend' ? 'asc' : 'desc')
-          }
-        }
-      }
-    })
-  }
+            order:
+              s.order === undefined
+                ? 'asc'
+                : s.order === 'ascend'
+                ? 'asc'
+                : 'desc',
+          },
+        },
+      },
+    });
+  };
 
-  const fileNameChange = (e) => {
+  const fileNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFileNameValue(e.target.value);
-  }
+  };
 
-  const fileHashChange = (e) => {
+  const fileHashChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFileHashValue(e.target.value);
-  }
+  };
 
   const searchHandel = () => {
-    let temArr = [{
-      key: 'manifest.name', 
-      value: fileNameValue
-    }, {
-      key: 'rootCid', 
-      value: fileHashValue
-    }];
-    let filterArr = [];
-    temArr.forEach(item => {
+    let temArr = [
+      {
+        key: 'manifest.name',
+        value: fileNameValue,
+      },
+      {
+        key: 'rootCid',
+        value: fileHashValue,
+      },
+    ];
+    let filterArr: filterType[] = [];
+    temArr.forEach((item) => {
       if (item.value) {
         filterArr.push({
           key: item.key,
           value: item.value,
           term: 'cn',
-        })
+        });
       }
-    })
+    });
     dispatch({
       type: 'files/changeQuery',
       payload: {
         url: api,
         options: {
-          filter: filterArr
-        }
-      }
-    })
-  }
+          filter: filterArr,
+        },
+      },
+    });
+  };
 
   const pinOrUnPin = (hash: string, pinState: boolean): void => {
     dispatch({
@@ -213,7 +248,7 @@ const FilesList: React.FC = () => {
             }}
             className={'mainColor'}
           />
-          {downloadList.indexOf(record.rootCid) !== -1 && (
+          {/0/.test(record.bitVector.b) && (
             <div style={{ width: '70%', display: 'flex' }}>
               <Progress
                 percent={getProgress(record.bitVector.b)}
@@ -224,7 +259,7 @@ const FilesList: React.FC = () => {
         </>
       ),
       width: 600,
-      sorter: true
+      sorter: true,
     },
     {
       title: <div className={styles.head}>Size</div>,
@@ -361,7 +396,7 @@ const FilesList: React.FC = () => {
   }, []);
 
   const scrollY = useMemo(() => {
-    let h = document.body.clientHeight - top - 30;
+    let h = document.body.clientHeight - top - 30 - 60;
     if (h < 200) return 200;
     return h;
   }, [document.body.clientHeight, top]);
@@ -387,23 +422,27 @@ const FilesList: React.FC = () => {
   return (
     <div ref={ref}>
       <div className={styles.searchBox}>
-        <div style={{width: '40vw'}}>
-          <Input 
-            placeholder="input search filename" 
+        <div style={{ width: '40vw' }}>
+          <Input
+            placeholder="input search filename"
             allowClear
             onChange={fileNameChange}
             onPressEnter={searchHandel}
           />
         </div>
-        <div style={{width: '40vw',marginLeft: '50px'}}>
-          <Input 
-            placeholder="input search filehash" 
+        <div style={{ width: '40vw', marginLeft: '50px' }}>
+          <Input
+            placeholder="input search filehash"
             allowClear
             onChange={fileHashChange}
             onPressEnter={searchHandel}
           />
         </div>
-        <Button style={{marginLeft: '20px'}} type="primary" onClick={searchHandel}>
+        <Button
+          style={{ marginLeft: '20px' }}
+          type="primary"
+          onClick={searchHandel}
+        >
           Search
         </Button>
       </div>
@@ -413,7 +452,7 @@ const FilesList: React.FC = () => {
         columns={columns}
         rowKey={(item) => item.rootCid}
         pagination={{
-          position: ['bottomRight'],
+          position: ['topRight'],
           responsive: true,
           showTitle: false,
           showSizeChanger: true,
@@ -424,7 +463,7 @@ const FilesList: React.FC = () => {
         }}
         onChange={tableChange}
         locale={{ emptyText: 'No Data' }}
-        scroll={data.length > scrollY / 80 ? { y: scrollY } : {}}
+        // scroll={data.length > scrollY / 80 ? { y: scrollY } : {}}
       />
       <Popup
         visible={!!hashInfo}
