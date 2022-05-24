@@ -78,11 +78,11 @@ const Layouts: React.FC = (props) => {
   ];
   const subResult = useRef({
     chunkInfo: {
-      id: 12,
+      id: 1,
       result: '',
     },
     retrieval: {
-      id: 13,
+      id: 2,
       result: '',
     },
   }).current;
@@ -221,6 +221,7 @@ const Layouts: React.FC = (props) => {
           }
           subResult.retrieval.result = res?.result;
           ws?.on(res?.result, (res: any) => {
+            console.log(res);
             dispatch({
               type: 'global/updateChunkOrRetrieval',
               payload: {

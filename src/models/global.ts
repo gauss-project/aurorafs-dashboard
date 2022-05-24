@@ -233,26 +233,26 @@ export default {
       const { url } = payload;
       try {
         const { data } = yield call(DebugApi.getMetrics, url);
-        const { metrics } = yield select((state: Models) => state.global);
+        // const { metrics } = yield select((state: Models) => state.global);
         const retrievalDownload =
           Number(
-            data.match(/\baurora_retrieval_total_retrieved\b\s(\d+)/)?.[1],
-          ) ?? metrics.downloadNumber;
+            data.match(/\naurora_retrieval_total_retrieved\s(\S*)/)?.[1],
+          ) || 0;
         const retrievalUpload =
           Number(
-            data.match(/\baurora_retrieval_total_transferred\b\s(\d+)/)?.[1],
-          ) ?? metrics.uploadNumber;
+            data.match(/\naurora_retrieval_total_transferred\s(\S*)/)?.[1],
+          ) || 0;
         const chunkInfoDownload =
           Number(
-            data.match(/\baurora_chunkinfo_total_retrieved\b\s(\d+)/)?.[1],
-          ) ?? 0;
+            data.match(/\naurora_chunkinfo_total_retrieved\s(\S*)/)?.[1],
+          ) || 0;
         const chunkInfoUpload =
           Number(
-            data.match(/\baurora_chunkinfo_total_transferred\b\s(\d+)/)?.[1],
-          ) ?? 0;
+            data.match(/\naurora_chunkinfo_total_transferred\s(\S*)/)?.[1],
+          ) || 0;
+
         const retrievedTotal = retrievalDownload + chunkInfoDownload;
         const transferredTotal = retrievalUpload + chunkInfoUpload;
-        // console.log('--------', retrievedTotal, transferredTotal);
 
         yield put({
           type: 'setMetrics',
@@ -281,6 +281,7 @@ export default {
     },
     *updateChunkOrRetrieval({ payload }, { call, put, select }) {
       const { metrics } = yield select((state: Models) => state.global);
+      console.log(payload);
       yield put({
         type: 'setMetrics',
         payload: {
@@ -290,42 +291,6 @@ export default {
           },
         },
       });
-      // console.log('ws info');
-      // const {
-      //   chunkInfoUpload,
-      //   chunkInfoDownload,
-      //   retrievalUpload,
-      //   retrievalDownload,
-      // } = payload;
-
-      // let obj = {...metrics,...payload};
-      // console.log(obj);
-
-      // if (chunkInfoUpload !== undefined && chunkInfoDownload !== undefined) {
-      //   yield put({
-      //     type: 'setMetrics',
-      //     payload: {
-      //       metrics: {
-      //         ...metrics,
-      //         newUpChunk: chunkInfoUpload,
-      //         newDownChunk: chunkInfoDownload,
-      //       },
-      //     },
-      //   });
-      // }
-      //
-      // if (retrievalUpload !== undefined && retrievalDownload !== undefined) {
-      //   yield put({
-      //     type: 'setMetrics',
-      //     payload: {
-      //       metrics: {
-      //         ...metrics,
-      //         newUpRetrval: retrievalUpload,
-      //         newDownRetrval: retrievalDownload,
-      //       },
-      //     },
-      //   });
-      // }
     },
     *updateChart({ payload }, { call, put, select }) {
       const { metrics, chartData } = yield select(

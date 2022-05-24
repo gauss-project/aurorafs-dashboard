@@ -102,11 +102,13 @@ export default {
     *getFilesList({ payload }, { call, put, select }) {
       const { url } = payload;
       const { queryData } = yield select((state: Models) => state.files);
-      // let temData = JSON.parse(JSON.stringify(queryData));
-      // if (temData.sort.key === '') delete temData.sort;
-      // if (temData.filter.length === 0) delete temData.filter;
+
+      let newQData: queryType = {
+        ...queryData,
+        filter: JSON.stringify(queryData.filter),
+      };
       try {
-        const { data } = yield call(Api.getFilesList, url, queryData);
+        const { data } = yield call(Api.getFilesList, url, newQData);
         yield put({
           type: 'setFilesList',
           payload: {
