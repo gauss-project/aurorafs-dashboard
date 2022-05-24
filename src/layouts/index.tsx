@@ -134,8 +134,10 @@ const Layouts: React.FC = (props) => {
             refresh: false,
           },
         });
-        history.push('/log');
         message.info('The node is being started');
+      });
+      ipcRenderer.on('toPath', (event: any, message: string) => {
+        history.push(message);
       });
     } else {
       dispatch({
