@@ -32,7 +32,7 @@ const Log: React.FC = () => {
     ipcRenderer.send('logs');
     let timer = setInterval(() => {
       ipcRenderer.send('logs');
-    }, 5000);
+    }, 3000);
     return () => {
       clearInterval(timer);
       ipcRenderer.removeAllListeners('logs');

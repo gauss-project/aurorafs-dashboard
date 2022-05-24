@@ -9,6 +9,8 @@ let workerProcess;
 
 let winStart = false;
 
+let timer = null;
+
 function run({ win, logs }) {
   let startCmd = os.platform() === 'win32' ? 'aurora.exe' : './aurora';
   let config = fs.readFileSync('./aurora/aurora.yaml', { encoding: 'utf-8' });
@@ -16,6 +18,7 @@ function run({ win, logs }) {
   let api = url + config.match(/api-addr: :(\d*)/)[1];
 
   win.once('kill', () => {
+    clearTimeout(timer);
     workerProcess.kill();
   });
 
@@ -26,12 +29,14 @@ function run({ win, logs }) {
       cwd: cmdPath,
     });
 
-    win.webContents.once('did-finish-load', () => {
-      winStart = true;
-      win.webContents.send('stopLoading');
-    });
     if (winStart) {
       win.webContents.send('stopLoading');
+    } else {
+      win.webContents.once('did-finish-load', () => {
+        winStart = true;
+        win.webContents.send('toPath', '/log');
+        win.webContents.send('stopLoading');
+      });
     }
 
     let notStart = true;
@@ -66,7 +71,8 @@ function run({ win, logs }) {
 
     workerProcess.on('close', function (code) {
       if (code) {
-        setTimeout(() => {
+        logs.push('-'.repeat(100));
+        timer = setTimeout(() => {
           runExec();
         }, 3000);
       }

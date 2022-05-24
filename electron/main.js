@@ -56,10 +56,6 @@ async function createWindow() {
     }
   });
 
-  win.on('closed', (e) => {
-    win = null;
-  });
-
   start();
 
   // Create the menu
