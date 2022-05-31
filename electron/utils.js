@@ -51,7 +51,8 @@ function run({ win, logs }) {
     workerProcess.stdout.on('data', (data) => {
       let log = data.toString();
       console.log('stdout:' + log);
-      let re = /\Sapi address: http(s?):\/\/\[::]:(\d*)/;
+      // let re = /\Sapi address: http(s?):\/\/\[::]:(\d*)/;
+      let re = /\Srpc websocket address:\s\[::]:(\d*)/;
       if (notStart && re.test(log)) {
         console.log(api);
         notStart = false;
